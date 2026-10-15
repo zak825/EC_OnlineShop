@@ -30,12 +30,8 @@ CSE_EC/
 │       └─ view.php           テンプレート表示 view()・エスケープ h()
 │
 ├─ templates/               画面のHTML
-│   ├─ layout/
-│   │   ├─ header.html        全画面共通のヘッダー
-│   │   └─ footer.html        全画面共通のフッター
-│   └─ purchase/              機能ごとにフォルダを分ける
-│       ├─ purchase.html
-│       └─ purchase_confirm.html
+│    ├─ purchase.html
+│    └─ purchase_confirm.html
 │
 ├─ sql/
 │   ├─ 01_schema.sql          テーブル作成
