@@ -1,7 +1,7 @@
 <?php
 $title   = '購入画面';
 $styles  = ['purchase.css'];
-$scripts = ['purchase.js'];
+$scripts = [];
 include TEMPLATE_DIR . '/layout/header.html';
 ?>
 
@@ -22,8 +22,8 @@ include TEMPLATE_DIR . '/layout/header.html';
     <dt>出品者</dt>
     <dd><?= h($product['SellerName']) ?></dd>
 
-    <dt>在庫数</dt>
-    <dd><?= (int)$product['Stock'] ?></dd>
+    <dt>販売状況</dt>
+    <dd>購入可能</dd>
   </dl>
 </section>
 
@@ -38,14 +38,8 @@ include TEMPLATE_DIR . '/layout/header.html';
     <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
     <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
-    <label for="quantity" class="form-label">数量</label>
-    <div class="quantity">
-      <input type="number" id="quantity" name="quantity" class="form-input"
-             value="<?= h($quantity) ?>"
-             min="1" max="<?= (int)$product['Stock'] ?>" step="1" required
-             data-price="<?= (int)$product['Price'] ?>">
-      <p class="quantity__subtotal">小計 <span id="subtotal">¥<?= number_format((int)$product['Price'] * max(1, (int)$quantity)) ?></span></p>
-    </div>
+    <p class="product-price">購入数量: 1</p>
+    <p class="product-price">合計金額: ¥<?= number_format((int)$product['Price']) ?></p>
 
     <div class="actions">
       <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>

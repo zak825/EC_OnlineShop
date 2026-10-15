@@ -38,64 +38,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 二重送信・不正送信の対策
     if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
-        set_flash('不正な操作、または二重送信です。購入履歴を確認してください。', 'error');
+        set_flash('不正な操作、または二重送信です。販売状況を確認してください。', 'error');
         redirect(URL_MAIN);
     }
 
     $userId    = login_user_id();
     $productId = (int)$purchase['product_id'];
-    $quantity  = (int)$purchase['quantity'];
     $now       = date('Y-m-d H:i:s');
 
     $pdo = db();
     try {
+        $stmt = $pdo->prepare('SELECT UserName FROM UserData WHERE Userid = :userId');
+        $stmt->execute([':userId' => $userId]);
+        $buyer = $stmt->fetch();
+        if (!$buyer) {
+            throw new RuntimeException('購入者が見つかりません。');
+        }
+
         // 3. トランザクション開始
         $pdo->beginTransaction();
 
-        // 4. 在庫を引き当てる（在庫 >= 購入数量 かつ 自分の出品でない）
+        // 4. 未購入の商品を購入済みにする（自分の出品は購入不可）
         $sql = 'UPDATE Sales
-                SET Stock           = Stock - :quantity,
-                    UpdateUserId    = :updateUser,
-                    UpdatedDateTime = :now
+                SET BuyerName    = :buyerName,
+                    ShippingFlag = 0,
+                    SoldDate     = :soldDate
                 WHERE ProductID = :productId
-                  AND Stock    >= :quantityCheck
-                  AND Userid   <> :loginUser';
+                  AND BuyerName IS NULL
+                  AND SoldDate IS NULL
+                  AND Userid <> :loginUser';
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            ':quantity'      => $quantity,
-            ':updateUser'    => $userId,
-            ':now'           => $now,
-            ':productId'     => $productId,
-            ':quantityCheck' => $quantity,
-            ':loginUser'     => $userId,
+            ':buyerName' => $buyer['UserName'],
+            ':soldDate'  => $now,
+            ':productId' => $productId,
+            ':loginUser' => $userId,
         ]);
 
         if ($stmt->rowCount() !== 1) {
-            // 引き当て失敗（在庫不足・自分の出品など）
+            // 購入失敗（すでに購入済み・自分の出品など）
             $pdo->rollBack();
-            set_flash('在庫が不足しているため購入できません。', 'error');
+            set_flash('この商品は購入できません。', 'error');
             redirect('purchase.php?productId=' . $productId);
         }
 
-        // 5. 購入履歴を登録する（単価は購入時点の値段）
-        $sql = 'INSERT INTO Purchase
-                    (ProductID, BuyerUserid, Quantity, UnitPrice,
-                     SoldDate, ShippingFlag, InsertUserId, InsertDateTime)
-                SELECT ProductID, :buyer, :quantity, Price,
-                       :soldDate, 0, :insertUser, :insertDate
-                FROM Sales
-                WHERE ProductID = :productId';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':buyer'      => $userId,
-            ':quantity'   => $quantity,
-            ':soldDate'   => $now,
-            ':insertUser' => $userId,
-            ':insertDate' => $now,
-            ':productId'  => $productId,
-        ]);
-
-        // 6. コミット
+        // 5. コミット
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
@@ -106,10 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect(URL_MAIN);
     }
 
-    // 7. セッションの購入情報を削除
+    // 6. セッションの購入情報を削除
     unset($_SESSION['purchase']);
 
-    // 8. メイン画面へ
+    // 7. メイン画面へ
     set_flash('購入が完了しました。', 'success');
     redirect(URL_MAIN);
 }
@@ -131,7 +118,8 @@ if ($purchase === null) {
 
 // 3. 購入情報を表示する
 $stmt = db()->prepare(
-    'SELECT ProductID, ProductName, Price, Stock FROM Sales WHERE ProductID = :productId'
+    'SELECT ProductID, ProductName, Price, BuyerName, SoldDate
+     FROM Sales WHERE ProductID = :productId'
 );
 $stmt->execute([':productId' => $purchase['product_id']]);
 $product = $stmt->fetch();
@@ -142,19 +130,22 @@ if (!$product) {
     redirect(URL_MAIN);
 }
 
+if ($product['BuyerName'] !== null || $product['SoldDate'] !== null) {
+    unset($_SESSION['purchase']);
+    set_flash('この商品は売り切れです。', 'error');
+    redirect('purchase.php?productId=' . (int)$product['ProductID']);
+}
+
 $stmt = db()->prepare(
     'SELECT UserName, ZipCode, Address, TEL FROM UserData WHERE Userid = :userId'
 );
 $stmt->execute([':userId' => login_user_id()]);
 $user = $stmt->fetch();
 
-$quantity = (int)$purchase['quantity'];
-
 view('purchase/purchase_confirm', [
     'flash'    => get_flash(),
     'token'    => csrf_token(),
     'product'  => $product,
     'user'     => $user,
-    'quantity' => $quantity,
-    'total'    => (int)$product['Price'] * $quantity,
+    'total'    => (int)$product['Price'],
 ]);
