@@ -3,9 +3,9 @@
 // 購入画面
 //   GET  purchase.php?productId=123   … 商品情報を表示
 //   POST purchase.php                 … 数量チェック → 購入確認画面へ
+// 設計書: docs/design/購入画面_設計処理.md
 // ============================================================
-require_once __DIR__ . '/common/auth.php';
-require_once __DIR__ . '/common/db.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 // 商品ID（GET でも POST でも受け取る）
 $productId = filter_var($_REQUEST['productId'] ?? null, FILTER_VALIDATE_INT);
@@ -78,6 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // ---- 5. 商品情報を表示 ------------------------------------------
-$flash = get_flash();
-$token = csrf_token();
-include __DIR__ . '/templates/purchase.html';
+view('purchase/purchase', [
+    'flash'        => get_flash(),
+    'token'        => csrf_token(),
+    'product'      => $product,
+    'canBuy'       => $canBuy,
+    'blockMessage' => $blockMessage,
+    'error'        => $error,
+    'quantity'     => $quantity,
+]);

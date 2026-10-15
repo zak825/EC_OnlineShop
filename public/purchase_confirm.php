@@ -4,9 +4,9 @@
 //   GET  purchase_confirm.php                   … 購入内容を表示
 //   POST purchase_confirm.php (action=confirm)  … 購入を確定
 //   POST purchase_confirm.php (action=cancel)   … 購入画面へ戻る
+// 設計書: docs/design/購入確認画面_設計処理.md
 // ============================================================
-require_once __DIR__ . '/common/auth.php';
-require_once __DIR__ . '/common/db.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $purchase = $_SESSION['purchase'] ?? null;
 
@@ -149,8 +149,12 @@ $stmt->execute([':userId' => login_user_id()]);
 $user = $stmt->fetch();
 
 $quantity = (int)$purchase['quantity'];
-$total    = (int)$product['Price'] * $quantity;
 
-$flash = get_flash();
-$token = csrf_token();
-include __DIR__ . '/templates/purchase_confirm.html';
+view('purchase/purchase_confirm', [
+    'flash'    => get_flash(),
+    'token'    => csrf_token(),
+    'product'  => $product,
+    'user'     => $user,
+    'quantity' => $quantity,
+    'total'    => (int)$product['Price'] * $quantity,
+]);
