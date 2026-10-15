@@ -1,0 +1,12 @@
+# 個人の環境設定（DBパスワード等）
+src/config/config.php
+
+# アップロードされた商品画像
+public/uploads/*
+!public/uploads/.gitkeep
+
+# エディタ・OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
