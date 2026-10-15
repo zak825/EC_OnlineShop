@@ -1,60 +1,68 @@
-<?php
-$title   = '購入確認';
-$styles  = ['purchase.css'];
-$scripts = ['purchase_confirm.js'];
-include TEMPLATE_DIR . '/layout/header.html';
-?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購入確認 | CSE_EC</title>
+  <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/purchase.css">
+</head>
+<body>
+  <header class="site-header">
+    <a href="<?= h(URL_MAIN) ?>" class="site-logo">CSE_EC</a>
+  </header>
 
-<h1 class="page-title">購入内容の確認</h1>
+  <main class="container">
+    <h1 class="page-title">購入内容の確認</h1>
 
-<section class="card">
-  <h2 class="section-title">商品</h2>
-  <table class="summary-table">
-    <tr>
-      <th>商品名</th>
-      <td><?= h($product['ProductName']) ?></td>
-    </tr>
-    <tr>
-      <th>単価</th>
-      <td>¥<?= number_format((int)$product['Price']) ?></td>
-    </tr>
-    <tr>
-      <th>数量</th>
-      <td>1</td>
-    </tr>
-    <tr class="summary-table__total">
-      <th>合計金額</th>
-      <td>¥<?= number_format($total) ?></td>
-    </tr>
-  </table>
-</section>
+    <?php if (!empty($flash)): ?>
+      <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
+    <?php endif; ?>
 
-<section class="card">
-  <h2 class="section-title">配送先</h2>
-  <dl class="info-list">
-    <dt>お名前</dt>
-    <dd><?= h($user['UserName']) ?></dd>
+    <section class="card">
+      <h2 class="section-title">商品</h2>
+      <table class="summary-table">
+        <tr>
+          <th>商品名</th>
+          <td><?= h($product['ProductName']) ?></td>
+        </tr>
+        <tr class="summary-table__total">
+          <th>お支払い金額</th>
+          <td>¥<?= number_format((int)$product['Price']) ?></td>
+        </tr>
+      </table>
+    </section>
 
-    <dt>郵便番号</dt>
-    <dd>〒<?= h($user['ZipCode']) ?></dd>
+    <section class="card">
+      <h2 class="section-title">配送先</h2>
+      <dl class="info-list">
+        <dt>お名前</dt>
+        <dd><?= h($user['UserName']) ?></dd>
 
-    <dt>住所</dt>
-    <dd><?= h($user['Address']) ?></dd>
+        <dt>郵便番号</dt>
+        <dd>〒<?= h($user['ZipCode']) ?></dd>
 
-    <dt>電話番号</dt>
-    <dd><?= h($user['TEL']) ?></dd>
-  </dl>
-</section>
+        <dt>住所</dt>
+        <dd><?= h($user['Address']) ?></dd>
 
-<form method="post" action="purchase_confirm.php" id="confirm-form">
-  <!-- セッション切れ時の戻り先に使う -->
-  <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
-  <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+        <dt>電話番号</dt>
+        <dd><?= h($user['TEL']) ?></dd>
+      </dl>
+    </section>
 
-  <div class="actions">
-    <button type="submit" name="action" value="cancel" class="btn btn--secondary">キャンセル</button>
-    <button type="submit" name="action" value="confirm" class="btn btn--primary">購入を確定する</button>
-  </div>
-</form>
+    <form method="post" action="purchase_confirm.php" id="confirm-form">
+      <!-- セッション切れ時の戻り先に使う -->
+      <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
+      <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
-<?php include TEMPLATE_DIR . '/layout/footer.html'; ?>
+      <div class="actions">
+        <button type="submit" name="action" value="cancel" class="btn btn--secondary">キャンセル</button>
+        <button type="submit" name="action" value="confirm" class="btn btn--primary">購入を確定する</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/purchase_confirm.js"></script>
+</body>
+</html>

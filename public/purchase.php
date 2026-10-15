@@ -2,8 +2,12 @@
 // ============================================================
 // 購入画面
 //   GET  purchase.php?productId=123   … 商品情報を表示
-//   POST purchase.php                 … 購入可能か確認 → 購入確認画面へ
+//   POST purchase.php                 … 購入確認画面へ
 // 設計書: docs/design/購入画面_設計処理.md
+//
+// Sales テーブルは「1行 = 1商品（1点もの）」
+//   BuyerName が NULL … 販売中
+//   BuyerName が入っている … 売り切れ
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
@@ -20,8 +24,7 @@ $userId = login_user_id();
 // ---- 2. 商品の存在チェック --------------------------------------
 $product = false;
 if ($productId) {
-    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid,
-                   s.BuyerName, s.SoldDate,
+    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid, s.BuyerName,
                    g.GenreName, u.UserName AS SellerName
             FROM Sales s
             JOIN Genre    g ON s.GenreCode = g.GenreCode
@@ -37,11 +40,11 @@ if (!$product) {
     redirect(URL_MAIN);
 }
 
-// ---- 3. 販売状況チェック / 4. 出品者チェック ---------------------
+// ---- 3. 売り切れチェック / 4. 出品者チェック ---------------------
 $canBuy       = true;
 $blockMessage = '';
 
-if ($product['BuyerName'] !== null || $product['SoldDate'] !== null) {
+if ($product['BuyerName'] !== null) {
     $canBuy       = false;
     $blockMessage = 'この商品は売り切れです。';
 } elseif ((int)$product['Userid'] === $userId) {
@@ -50,7 +53,7 @@ if ($product['BuyerName'] !== null || $product['SoldDate'] !== null) {
 }
 
 // ---- 購入ボタン押下 ---------------------------------------------
-$error    = '';
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
@@ -59,15 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 画面を開いた後に売り切れた場合など
         $error = $blockMessage;
     } else {
-        $_SESSION['purchase'] = [
-            'product_id' => (int)$product['ProductID'],
-        ];
+        // 購入する商品IDをセッションに書き込んで購入確認画面へ
+        $_SESSION['purchase'] = ['product_id' => (int)$product['ProductID']];
         redirect('purchase_confirm.php');
     }
 }
 
 // ---- 5. 商品情報を表示 ------------------------------------------
-view('purchase/purchase', [
+view('purchase', [
     'flash'        => get_flash(),
     'token'        => csrf_token(),
     'product'      => $product,

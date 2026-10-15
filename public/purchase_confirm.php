@@ -5,6 +5,8 @@
 //   POST purchase_confirm.php (action=confirm)  … 購入を確定
 //   POST purchase_confirm.php (action=cancel)   … 購入画面へ戻る
 // 設計書: docs/design/購入確認画面_設計処理.md
+//
+// 購入確定 = Sales の BuyerName / ShippingFlag / SoldDate を埋める
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
@@ -38,65 +40,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 二重送信・不正送信の対策
     if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
-        set_flash('不正な操作、または二重送信です。販売状況を確認してください。', 'error');
+        set_flash('不正な操作、または二重送信です。購入履歴を確認してください。', 'error');
         redirect(URL_MAIN);
     }
 
     $userId    = login_user_id();
     $productId = (int)$purchase['product_id'];
-    $now       = date('Y-m-d H:i:s');
 
-    $pdo = db();
     try {
-        $stmt = $pdo->prepare('SELECT UserName FROM UserData WHERE Userid = :userId');
-        $stmt->execute([':userId' => $userId]);
-        $buyer = $stmt->fetch();
-        if (!$buyer) {
-            throw new RuntimeException('購入者が見つかりません。');
-        }
-
-        // 3. トランザクション開始
-        $pdo->beginTransaction();
-
-        // 4. 未購入の商品を購入済みにする（自分の出品は購入不可）
+        // 2. 購入情報を登録する
+        //    BuyerName IS NULL … まだ誰も買っていない（同時購入対策）
+        //    Userid <> 自分   … 自分の出品は買えない
         $sql = 'UPDATE Sales
-                SET BuyerName    = :buyerName,
+                SET BuyerName    = :buyer,
                     ShippingFlag = 0,
-                    SoldDate     = :soldDate
+                    SoldDate     = GETDATE()
                 WHERE ProductID = :productId
                   AND BuyerName IS NULL
-                  AND SoldDate IS NULL
-                  AND Userid <> :loginUser';
-        $stmt = $pdo->prepare($sql);
+                  AND Userid   <> :loginUser';
+        $stmt = db()->prepare($sql);
         $stmt->execute([
-            ':buyerName' => $buyer['UserName'],
-            ':soldDate'  => $now,
+            ':buyer'     => buyer_value($userId),
             ':productId' => $productId,
             ':loginUser' => $userId,
         ]);
 
         if ($stmt->rowCount() !== 1) {
-            // 購入失敗（すでに購入済み・自分の出品など）
-            $pdo->rollBack();
-            set_flash('この商品は購入できません。', 'error');
+            // 他の人に先に買われた・自分の出品など
+            unset($_SESSION['purchase']);
+            set_flash('この商品は購入できません。（売り切れの可能性があります）', 'error');
             redirect('purchase.php?productId=' . $productId);
         }
-
-        // 5. コミット
-        $pdo->commit();
-    } catch (Throwable $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
+    } catch (PDOException $e) {
         error_log('[purchase_confirm] ' . $e->getMessage());
         set_flash('購入に失敗しました。', 'error');
         redirect(URL_MAIN);
     }
 
-    // 6. セッションの購入情報を削除
+    // 3. セッションの購入情報を削除
     unset($_SESSION['purchase']);
 
-    // 7. メイン画面へ
+    // 4. メイン画面へ
     set_flash('購入が完了しました。', 'success');
     redirect(URL_MAIN);
 }
@@ -118,8 +102,7 @@ if ($purchase === null) {
 
 // 3. 購入情報を表示する
 $stmt = db()->prepare(
-    'SELECT ProductID, ProductName, Price, BuyerName, SoldDate
-     FROM Sales WHERE ProductID = :productId'
+    'SELECT ProductID, ProductName, Price FROM Sales WHERE ProductID = :productId'
 );
 $stmt->execute([':productId' => $purchase['product_id']]);
 $product = $stmt->fetch();
@@ -130,22 +113,15 @@ if (!$product) {
     redirect(URL_MAIN);
 }
 
-if ($product['BuyerName'] !== null || $product['SoldDate'] !== null) {
-    unset($_SESSION['purchase']);
-    set_flash('この商品は売り切れです。', 'error');
-    redirect('purchase.php?productId=' . (int)$product['ProductID']);
-}
-
 $stmt = db()->prepare(
     'SELECT UserName, ZipCode, Address, TEL FROM UserData WHERE Userid = :userId'
 );
 $stmt->execute([':userId' => login_user_id()]);
 $user = $stmt->fetch();
 
-view('purchase/purchase_confirm', [
-    'flash'    => get_flash(),
-    'token'    => csrf_token(),
-    'product'  => $product,
-    'user'     => $user,
-    'total'    => (int)$product['Price'],
+view('purchase_confirm', [
+    'flash'   => get_flash(),
+    'token'   => csrf_token(),
+    'product' => $product,
+    'user'    => $user,
 ]);

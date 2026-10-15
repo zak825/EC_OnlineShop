@@ -1,51 +1,63 @@
-<?php
-$title   = '購入画面';
-$styles  = ['purchase.css'];
-$scripts = [];
-include TEMPLATE_DIR . '/layout/header.html';
-?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購入画面 | CSE_EC</title>
+  <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/purchase.css">
+</head>
+<body>
+  <header class="site-header">
+    <a href="<?= h(URL_MAIN) ?>" class="site-logo">CSE_EC</a>
+  </header>
 
-<h1 class="page-title">商品の購入</h1>
+  <main class="container">
+    <h1 class="page-title">商品の購入</h1>
 
-<?php if ($error !== ''): ?>
-  <p class="message message--error"><?= h($error) ?></p>
-<?php endif; ?>
+    <?php if (!empty($flash)): ?>
+      <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
+    <?php endif; ?>
 
-<section class="card">
-  <h2 class="product-name"><?= h($product['ProductName']) ?></h2>
-  <p class="product-price">¥<?= number_format((int)$product['Price']) ?></p>
+    <?php if ($error !== ''): ?>
+      <p class="message message--error"><?= h($error) ?></p>
+    <?php endif; ?>
 
-  <dl class="info-list">
-    <dt>ジャンル</dt>
-    <dd><?= h($product['GenreName']) ?></dd>
+    <section class="card">
+      <h2 class="product-name"><?= h($product['ProductName']) ?></h2>
+      <p class="product-price">¥<?= number_format((int)$product['Price']) ?></p>
 
-    <dt>出品者</dt>
-    <dd><?= h($product['SellerName']) ?></dd>
+      <dl class="info-list">
+        <dt>ジャンル</dt>
+        <dd><?= h($product['GenreName']) ?></dd>
 
-    <dt>販売状況</dt>
-    <dd>購入可能</dd>
-  </dl>
-</section>
+        <dt>出品者</dt>
+        <dd><?= h($product['SellerName']) ?></dd>
 
-<?php if (!$canBuy): ?>
-  <p class="message message--warning"><?= h($blockMessage) ?></p>
+        <dt>状態</dt>
+        <dd><?= $product['BuyerName'] === null ? '販売中' : '売り切れ' ?></dd>
+      </dl>
+    </section>
 
-  <div class="actions">
-    <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
-  </div>
-<?php else: ?>
-  <form method="post" action="purchase.php" class="card" id="purchase-form">
-    <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
-    <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+    <?php if (!$canBuy): ?>
+      <p class="message message--warning"><?= h($blockMessage) ?></p>
 
-    <p class="product-price">購入数量: 1</p>
-    <p class="product-price">合計金額: ¥<?= number_format((int)$product['Price']) ?></p>
+      <div class="actions">
+        <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
+      </div>
+    <?php else: ?>
+      <form method="post" action="purchase.php">
+        <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
+        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
-    <div class="actions">
-      <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
-      <button type="submit" class="btn btn--primary">購入</button>
-    </div>
-  </form>
-<?php endif; ?>
+        <div class="actions">
+          <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
+          <button type="submit" class="btn btn--primary">購入</button>
+        </div>
+      </form>
+    <?php endif; ?>
+  </main>
 
-<?php include TEMPLATE_DIR . '/layout/footer.html'; ?>
+  <script src="assets/js/common.js"></script>
+</body>
+</html>

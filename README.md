@@ -29,7 +29,7 @@ CSE_EC/
 │       ├─ auth.php           ログイン確認・セッション・CSRF
 │       └─ view.php           テンプレート表示 view()・エスケープ h()
 │
-├─ templates/               画面のHTML
+├─ templates/               画面のHTML（PHPから読み込む）
 │    ├─ purchase.html
 │    └─ purchase_confirm.html
 │
@@ -61,6 +61,24 @@ CSE_EC/
 4. **DBを作成**：XAMPP で Apache と MySQL を Start し、`http://localhost/phpmyadmin` の「SQL」タブで `sql/01_schema.sql` → `sql/02_seed.sql` の順に実行
 
 5. **動作確認**：`http://localhost/CSE_EC/purchase.php?productId=1`
+
+### テンプレート画面・JS・PHPをブラウザで開く
+
+テンプレートはPHP変数を使うため、ファイル自体を静的HTMLとして開くのではなく、対応するPHP画面から表示します。次のテンプレートURLを開くと、対応する画面へ転送されます。
+
+- 購入テンプレート：`http://localhost/CSE_EC/templates/purchase.html?productId=1`
+- 購入確認テンプレート：`http://localhost/CSE_EC/templates/purchase_confirm.html`（購入画面から進んだ後に開く）
+
+画面で使用しているリソースは公開フォルダから直接確認できます。
+
+- JavaScript：`http://localhost/CSE_EC/assets/js/common.js`、`http://localhost/CSE_EC/assets/js/purchase_confirm.js`
+- PHP画面：`http://localhost/CSE_EC/purchase.php?productId=1`、`http://localhost/CSE_EC/purchase_confirm.php`
+
+リポジトリ直下を `htdocs` から公開している場合も、ルートの `.htaccess` が画面・JSのURLを `public/` 配下へ転送し、`src/`・`sql/`・`docs/` は公開しません。`public/` 自体を公開ルートにしている場合は `public/.htaccess` がテンプレートURLを処理します。どちらの構成でも Apache の `mod_rewrite` と `.htaccess` を有効にしてください（XAMPP 標準設定では通常 `AllowOverride All` です）。
+
+### ログイン処理を省略した購入画面の動作確認
+
+`src/config/config.php` の `DEV_LOGIN_USER_ID` に `UserData` に登録済みのユーザーIDを設定すると、`APP_DEBUG` が `true` かつ `localhost` からのアクセスに限り、そのユーザーとして画面を試せます。現在は `1` を設定しています。ログイン画面は経由しませんが、商品・配送先の表示と購入確定には通常どおりDB接続が必要です。確定操作はSalesの購入状態を書き換えるため、テスト用DBと未購入の商品を使ってください。無効にする場合は `DEV_LOGIN_USER_ID` を `0` にするか、`APP_DEBUG` を `false` にしてください。
 
 ## 新しい画面を作るとき
 

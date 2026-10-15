@@ -16,23 +16,6 @@
   margin: 0 0 16px;
 }
 
-/* ---------- 数量・小計 ---------- */
-.quantity {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.quantity__subtotal {
-  margin: 0;
-  color: var(--color-sub);
-}
-
-.quantity__subtotal span {
-  font-weight: bold;
-  color: var(--color-text);
-}
-
 /* ---------- 購入内容テーブル ---------- */
 .summary-table {
   width: 100%;
