@@ -1,0 +1,36 @@
+.login-container {
+    width: 300px;
+    margin: 24px;
+}
+
+.error-msg {
+    color: #d00;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+.btn-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 16px;
+}
+
+.register-section .section-label {
+    margin: 0 0 6px 0;
+}
