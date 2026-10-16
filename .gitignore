@@ -10,3 +10,6 @@ public/uploads/*
 .idea/
 Thumbs.db
 .DS_Store
+
+# gitに.vsフォルダを鑑賞させない
+.vs
