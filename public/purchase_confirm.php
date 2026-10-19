@@ -51,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 2. 購入情報を登録する
         //    BuyerUserid IS NULL … まだ誰も買っていない（同時購入対策）
         //    Userid <> 自分     … 自分の出品は買えない
-        
         $sql = 'UPDATE Sales
                 SET BuyerUserid  = :buyerId,
                     BuyerName    = (SELECT UserName FROM UserData WHERE Userid = :buyerId2),
