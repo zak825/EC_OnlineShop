@@ -54,11 +54,23 @@ $done = false;   // 登録が完了したら true
 // （$_POST ではなく $_SESSION['sell'] の値を使う）
 // ------------------------------------------------------------
 if ($action === 'sell') {
+  $pdo = null;
   try {
-    $sql = 'INSERT INTO Sales (GenreCode, ProductName, Price, Userid, ShippingFlag, InsertUserId, InsertDateTime) '
-      . 'VALUES (:genre_code, :product_name, :price, :userid, 0, :insert_userid, GETDATE())';
-    $stmt = db()->prepare($sql);
+    $pdo = db();
+
+    // ProductID は自動採番ではないので「今ある最大値 + 1」を使う
+    // 同時に販売されても同じ番号にならないよう、トランザクション内でロックしてから取る
+    $pdo->beginTransaction();
+
+    $stmt = $pdo->prepare('SELECT ISNULL(MAX(ProductID), 0) + 1 FROM Sales WITH (UPDLOCK, HOLDLOCK)');
+    $stmt->execute();
+    $product_id = (int)$stmt->fetchColumn();
+
+    $sql = 'INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, ShippingFlag, InsertUserId, InsertDateTime) '
+      . 'VALUES (:product_id, :genre_code, :product_name, :price, :userid, 0, :insert_userid, GETDATE())';
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([
+      ':product_id'    => $product_id,
       ':genre_code'    => $sell['genre_code'],
       ':product_name'  => $sell['product_name'],
       ':price'         => $sell['price'],
@@ -66,11 +78,16 @@ if ($action === 'sell') {
       ':insert_userid' => $user_id,
     ]);
 
+    $pdo->commit();
+
     // 登録できたら入力値を消す（リロードしても二重登録されない）
     unset($_SESSION['sell']);
     $done = true;
   } catch (PDOException $e) {
     // 失敗したら入力値は残したまま、この画面にとどまる
+    if ($pdo !== null && $pdo->inTransaction()) {
+      $pdo->rollBack();
+    }
     error_log($e->getMessage());
     $error = MSG_DB_ERROR;
   }

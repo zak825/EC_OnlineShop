@@ -17,9 +17,14 @@ const MSG_DB_ERROR   = '処理に失敗しました。時間をおいて再度�
 const MSG_CSRF_ERROR = '不正な操作です。もう一度やり直してください。';
 
 // 前後の空白（全角スペースを含む）を取り除く
+// UTF-8 として正しくない文字列は preg_replace が NULL を返すので、未入力扱い（''）にする
 function trim_all($value)
 {
-  return preg_replace('/\A[\s\x{3000}]+|[\s\x{3000}]+\z/u', '', (string)$value);
+  $result = preg_replace('/\A[\s\x{3000}]+|[\s\x{3000}]+\z/u', '', (string)$value);
+  if ($result === null) {
+    return '';
+  }
+  return $result;
 }
 
 // ------------------------------------------------------------
