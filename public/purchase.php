@@ -5,17 +5,21 @@
 //   POST purchase.php                 … 購入確認画面へ
 // 設計書: docs/design/購入画面_設計処理.md
 //
-// 接続テストURL
-// http://localhost/CSE_EC/public/purchase.php?productId=1
-// 
-//
 // Sales テーブルは「1行 = 1商品（1点もの）」
-//   BuyerName が NULL … 販売中
-//   BuyerName が入っている … 売り切れ
+//   BuyerUserid が NULL … 販売中
+//   BuyerUserid が入っている … 売り切れ
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
+// ===== 開発用：ログインをスキップする =====
+// 0 以外の Userid を入れると、その人としてログインした扱いになる
+//   2 … 購入 花子（購入テスト用）
+// ログイン画面ができたら、または提出前には必ず 0 に戻す
+$DEV_SKIP_LOGIN_USER_ID = 2;
 
+if ($DEV_SKIP_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = $DEV_SKIP_LOGIN_USER_ID;
+}
 // ===== ここまで =====
 
 // 商品ID（GET でも POST でも受け取る）
@@ -31,7 +35,7 @@ $userId = login_user_id();
 // ---- 2. 商品の存在チェック --------------------------------------
 $product = false;
 if ($productId) {
-    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid, s.BuyerName,
+    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid, s.BuyerUserid,
                    g.GenreName, u.UserName AS SellerName
             FROM Sales s
             JOIN Genre    g ON s.GenreCode = g.GenreCode
@@ -51,7 +55,7 @@ if (!$product) {
 $canBuy       = true;
 $blockMessage = '';
 
-if ($product['BuyerName'] !== null) {
+if ($product['BuyerUserid'] !== null) {
     $canBuy       = false;
     $blockMessage = 'この商品は売り切れです。';
 } elseif ((int)$product['Userid'] === $userId) {
@@ -63,7 +67,7 @@ if ($product['BuyerName'] !== null) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!check_csrf_token()) {
+    if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
         $error = '不正な操作です。もう一度やり直してください。';
     } elseif (!$canBuy) {
         // 画面を開いた後に売り切れた場合など

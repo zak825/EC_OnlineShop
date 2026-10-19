@@ -12,10 +12,6 @@
 //
 // 設計書: docs/design/レビュー画面_設計処理.md
 //
-// 接続テストURL
-// http://localhost/CSE_EC/public/review.php?productId=1
-// 
-//
 // DBに「受け取り完了」の列がないので、
 // レビュー（sucre）が入っている = 受け取り完了 として扱う
 // ============================================================
@@ -33,31 +29,29 @@ if (!is_logged_in()) {
 $userId = login_user_id();
 
 // ---- 2. 商品の存在チェック --------------------------------------
-// BuyerName には購入者の Userid を文字列で入れている（buyer_value() 参照）ので、
-// UserData.Userid を文字列にして結合し、購入者名を取る
 $product = false;
 if ($productId) {
-    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid, s.BuyerName,
+    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid, s.BuyerUserid,
                    s.ShippingFlag, s.SoldDate, s.sucre, s.revwe,
                    seller.UserName AS SellerName,
                    buyer.UserName  AS BuyerUserName
             FROM Sales s
             JOIN UserData seller     ON s.Userid    = seller.Userid
-            LEFT JOIN UserData buyer ON s.BuyerName = CAST(buyer.Userid AS VARCHAR(50))
+            LEFT JOIN UserData buyer ON s.BuyerUserid = buyer.Userid
             WHERE s.ProductID = :productId';
     $stmt = db()->prepare($sql);
     $stmt->execute([':productId' => $productId]);
     $product = $stmt->fetch();
 }
 
-if (!$product || $product['BuyerName'] === null) {
+if (!$product || $product['BuyerUserid'] === null) {
     // 存在しない、またはまだ売れていない商品
     set_flash('商品が見つかりません。', 'error');
     redirect(URL_STATUS);
 }
 
 // ---- 3. 購入者か出品者かを判定する -------------------------------
-$isBuyer  = $product['BuyerName'] === buyer_value($userId);
+$isBuyer  = (int)$product['BuyerUserid'] === $userId;
 $isSeller = (int)$product['Userid'] === $userId;
 
 if (!$isBuyer && !$isSeller) {
@@ -96,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $score  = $_POST['score'] ?? '';
     $review = trim($_POST['review'] ?? '');
 
-    if (!check_csrf_token()) {
+    if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
         $errors[] = '不正な操作です。もう一度やり直してください。';
     } else {
         // 入力チェック
@@ -116,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     SET sucre = :score,
                         revwe = :review
                     WHERE ProductID    = :productId
-                      AND BuyerName    = :buyer
+                      AND BuyerUserid  = :buyer
                       AND ShippingFlag = 1
                       AND sucre IS NULL';
             $stmt = db()->prepare($sql);
@@ -124,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':score'     => $scoreInt,
                 ':review'    => $review === '' ? null : $review,
                 ':productId' => (int)$product['ProductID'],
-                ':buyer'     => buyer_value($userId),
+                ':buyer'     => $userId,
             ]);
 
             if ($stmt->rowCount() !== 1) {
