@@ -65,46 +65,9 @@
         }
     }
 
-?>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ログイン画面</title>
-    <link rel="stylesheet" href="assets/css/login.css">
-</head>
-<body>
-    <div class="container">
-        <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-        <p id="error-message" class="error-msg" style="<?= $errorMessage === '' ? 'display:none;' : '' ?>">
-            <?= h($errorMessage) ?>
-        </p>
-
-        <form id="login-form" action="login.php" method="post" novalidate>
-            <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
-
-            <div class="form-group">
-                <label for="user_id">userID</label>
-                <input type="text" id="user_id" name="user_id" maxlength="8" value="<?= h($userIdInput) ?>">
-            </div>
-
-            <div class="form-group">
-                <label for="password">パスワード</label>
-                <input type="password" id="password" name="password" maxlength="50">
-            </div>
-
-            <div class="btn-row">
-                <button type="submit" id="login-btn">ログイン</button>
-                <button type="button" id="clear-btn">クリア</button>
-            </div>
-        </form>
-
-        <div class="register-section">
-            <p class="section-label">ユーザー登録</p>
-            <button type="button" onclick="location.href='register.php'">登録</button>
-        </div>
-    </div>
-
-    <script src="assets/js/login.js"></script>
-</body>
-</html>
+    view('login', [
+        'flash'        => get_flash(),
+        'token'        => csrf_token(),
+        'errorMessage' => $errorMessage,
+        'userIdInput'  => $userIdInput,
+    ]);
