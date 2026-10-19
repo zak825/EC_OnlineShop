@@ -65,19 +65,13 @@
         }
     }
 
-    view('login/login', [
-        'flash'        => get_flash(),
-        'token'        => csrf_token(),
-        'errorMessage' => $errorMessage,
-        'userIdInput'  => $userIdInput,
-    ]);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>ログイン画面</title>
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="assets/css/login.css">
 </head>
 <body>
     <div class="container">
@@ -87,9 +81,11 @@
         </p>
 
         <form id="login-form" action="login.php" method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
+
             <div class="form-group">
                 <label for="user_id">userID</label>
-                <input type="text" id="user_id" name="user_id" maxlength="8" value="<?= h($_POST['user_id'] ?? '') ?>">
+                <input type="text" id="user_id" name="user_id" maxlength="8" value="<?= h($userIdInput) ?>">
             </div>
 
             <div class="form-group">
@@ -109,6 +105,6 @@
         </div>
     </div>
 
-    <script src="login.js"></script>
+    <script src="assets/js/login.js"></script>
 </body>
 </html>
