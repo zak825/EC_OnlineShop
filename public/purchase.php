@@ -5,6 +5,10 @@
 //   POST purchase.php                 … 購入確認画面へ
 // 設計書: docs/design/購入画面_設計処理.md
 //
+// 接続テストURL
+// http://localhost/CSE_EC/public/purchase.php?productId=1
+// 
+//
 // Sales テーブルは「1行 = 1商品（1点もの）」
 //   BuyerName が NULL … 販売中
 //   BuyerName が入っている … 売り切れ
@@ -12,9 +16,6 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 
 
-if ($DEV_SKIP_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = $DEV_SKIP_LOGIN_USER_ID;
-}
 // ===== ここまで =====
 
 // 商品ID（GET でも POST でも受け取る）
