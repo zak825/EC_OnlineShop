@@ -63,7 +63,7 @@ if ($product['BuyerName'] !== null) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
+    if (!check_csrf_token()) {
         $error = '不正な操作です。もう一度やり直してください。';
     } elseif (!$canBuy) {
         // 画面を開いた後に売り切れた場合など

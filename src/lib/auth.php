@@ -1,41 +1,128 @@
 <?php
 // ============================================================
 // セッション・ログイン関連の共通処理
-//
-// ログイン担当と合わせる前提:
-//   ログイン成功時に $_SESSION['user_id'] / $_SESSION['user_name'] を入れる
-//   セッションの有効期限切れ（タイムアウト）はログイン担当の処理で判定し、
-//   切れていたら $_SESSION['user_id'] が無い状態になる
-//   login.php は ?return=xxx を受け取り、ログイン成功後そこへ遷移する
-//   （return は自サイト内のパスだけ許可すること）
 // ============================================================
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-}   // 開発用の自動ログイン（APP_DEBUG が true のときだけ）
-if (APP_DEBUG && defined('DEV_LOGIN_USER_ID') && DEV_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = DEV_LOGIN_USER_ID;
 }
 
-/** ログイン済みか */
+/** ログイン済みか。セッションの有効期限もここで確認する */
 function is_logged_in(): bool
 {
-    return isset($_SESSION['user_id']) || development_login_user_id() !== null;
+    $userId = $_SESSION['user_id'] ?? $_SESSION['UserId'] ?? null;
+    if ($userId === null && !isset($_SESSION['logged_in'])) {
+        $userId = development_login_user_id();
+        if ($userId !== null) {
+            $_SESSION['logged_in'] = true;
+            $_SESSION['user_id'] = $userId;
+            $_SESSION['last_activity'] = time();
+        }
+    }
+
+    if (
+        (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] !== true)
+        || filter_var($userId, FILTER_VALIDATE_INT) === false
+        || (int)$userId <= 0
+    ) {
+        return false;
+    }
+
+    $lastActivity = $_SESSION['last_activity'] ?? null;
+    if (!is_numeric($lastActivity)) {
+        clear_login_session();
+        return false;
+    }
+
+    $now = time();
+    if ($now - (int)$lastActivity >= session_timeout_seconds()) {
+        clear_login_session();
+        return false;
+    }
+
+    $_SESSION['logged_in'] = true;
+    $_SESSION['user_id'] = (int)$userId;
+    $_SESSION['user_name'] = (string)($_SESSION['user_name'] ?? $_SESSION['UserName'] ?? '');
+    $_SESSION['last_activity'] = $now;
+
+    return true;
 }
 
 /** ログイン中のユーザーID */
-function login_user_id(): int
+function current_user_id(): int
 {
-    if (isset($_SESSION['user_id'])) {
-        return (int)$_SESSION['user_id'];
-    }
-
-    $userId = development_login_user_id();
-    if ($userId === null) {
+    if (!is_logged_in()) {
         throw new LogicException('ログイン中のユーザーがありません。');
     }
 
-    return $userId;
+    $userId = $_SESSION['user_id'] ?? $_SESSION['UserId'] ?? null;
+    if (filter_var($userId, FILTER_VALIDATE_INT) === false || (int)$userId <= 0) {
+        throw new LogicException('ログイン中のユーザーがありません。');
+    }
+
+    return (int)$userId;
+}
+
+/** 既存コード向けのユーザーID取得名 */
+function login_user_id(): int
+{
+    return current_user_id();
+}
+
+/** ログイン中のユーザー名 */
+function current_user_name(): string
+{
+    $userId = current_user_id();
+    $userName = $_SESSION['user_name'] ?? $_SESSION['UserName'] ?? '';
+    if ($userName !== '') {
+        return (string)$userName;
+    }
+
+    $stmt = db()->prepare('SELECT UserName FROM UserData WHERE Userid = :userId');
+    $stmt->execute([':userId' => $userId]);
+    $user = $stmt->fetch();
+    if (!$user || !isset($user['UserName'])) {
+        throw new LogicException('ログイン中のユーザー名を取得できません。');
+    }
+
+    $_SESSION['user_name'] = (string)$user['UserName'];
+    return $_SESSION['user_name'];
+}
+
+/** セッション設定から有効時間（秒）を取得する */
+function session_timeout_seconds(): int
+{
+    static $timeoutSeconds = null;
+    if ($timeoutSeconds !== null) {
+        return $timeoutSeconds;
+    }
+
+    $stmt = db()->prepare(
+        "SELECT Value
+         FROM SystemConfiguration
+         WHERE Category = :category AND [Key] = :settingKey"
+    );
+    $stmt->execute([
+        ':category' => 'Session',
+        ':settingKey' => 'SessionTimeout',
+    ]);
+    $value = $stmt->fetchColumn();
+    $minutes = filter_var($value, FILTER_VALIDATE_INT);
+    if ($minutes === false || $minutes <= 0) {
+        throw new RuntimeException('SystemConfiguration.SessionTimeout に正の整数（分）を設定してください。');
+    }
+
+    $timeoutSeconds = $minutes * 60;
+    return $timeoutSeconds;
+}
+
+/** 認証状態を破棄する（次の画面でflashを設定できるようセッション自体は維持） */
+function clear_login_session(): void
+{
+    $_SESSION = [];
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
 }
 
 /** ローカル開発用の固定ユーザーID（本番環境では常に無効） */
@@ -100,14 +187,20 @@ function get_flash(): ?array
 /** CSRFトークン（二重送信対策も兼ねる）を発行する */
 function csrf_token(): string
 {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
     return $_SESSION['csrf_token'];
 }
 
 /** CSRFトークンを確認する（1回使ったら無効にする） */
-function check_csrf_token(?string $token): bool
+function check_csrf_token($token = null): bool
 {
+    if ($token === null) {
+        $token = $_POST['csrf_token'] ?? null;
+    }
+
     $saved = $_SESSION['csrf_token'] ?? '';
     unset($_SESSION['csrf_token']);
-    return $token !== null && $saved !== '' && hash_equals($saved, $token);
+    return is_string($token) && $saved !== '' && hash_equals($saved, $token);
 }

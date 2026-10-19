@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $score  = $_POST['score'] ?? '';
     $review = trim($_POST['review'] ?? '');
 
-    if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
+    if (!check_csrf_token()) {
         $errors[] = '不正な操作です。もう一度やり直してください。';
     } else {
         // 入力チェック

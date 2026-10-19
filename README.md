@@ -141,6 +141,12 @@ include TEMPLATE_DIR . '/layout/header.html';
 - **DBの変更は `sql/` のSQLを更新して共有する**
 - ブランチは `feature/画面名`（例：`feature/purchase`）で切り、main へはプルリクで入れる
 
+### ログインセッションとCSRF
+
+ログイン処理では `$_SESSION['logged_in'] = true`、`$_SESSION['user_id']`（または互換キー `UserId`）、`$_SESSION['user_name']`（または互換キー `UserName`）、`$_SESSION['last_activity'] = time()` を設定します。認証が必要な各画面では `is_logged_in()` を呼び、未ログインまたはタイムアウトの場合は `redirect_to_login()` でログイン画面へ遷移します。タイムアウト時間は `SystemConfiguration` の `Category = 'Session'`、`Key = 'SessionTimeout'` に設定された分数を参照します。
+
+ログイン中のユーザー情報は `current_user_id()`（互換関数 `login_user_id()`）と `current_user_name()` で取得できます。POSTフォームには `csrf_token()` の値を hidden 項目として含め、受信時は `check_csrf_token()` を呼びます。この関数は引数を省略すると `$_POST['csrf_token']` を検証します。
+
 ## 担当
 
 | 画面 | 担当 |
