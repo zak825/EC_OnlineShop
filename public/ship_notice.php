@@ -73,10 +73,10 @@ try {
     if ((int)$row['Userid'] !== $user_id) {
       redirect(URL_MYPAGE);
     }
-    // まだ売れていない
-    if ($row['BuyerName'] === null) {
-      redirect(URL_MYPAGE);
-    }
+    // 売れていなかったら、マイページにてボタンがないからいらない
+    // if ($row['BuyerName'] === null) {
+    //   redirect(URL_MYPAGE);
+    // }
     // 発送済み
     if ((int)$row['ShippingFlag'] === 1) {
       redirect(URL_MYPAGE);
