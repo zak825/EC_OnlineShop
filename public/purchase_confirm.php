@@ -6,33 +6,19 @@
 //   POST purchase_confirm.php (action=cancel)   … 購入画面へ戻る
 // 設計書: docs/design/購入確認画面_設計処理.md
 //
-// 購入確定 = Sales の BuyerName / ShippingFlag / SoldDate を埋める
+// 購入確定 = Sales の BuyerUserid / BuyerName / ShippingFlag / SoldDate を埋める
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
 $purchase = $_SESSION['purchase'] ?? null;
-$hiddenProductId = $_SERVER['REQUEST_METHOD'] === 'POST'
-    ? filter_var($_POST['productId'] ?? null, FILTER_VALIDATE_INT)
-    : null;
-
-if (!is_logged_in()) {
-    set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
-    $return = $hiddenProductId
-        ? 'purchase.php?productId=' . $hiddenProductId
-        : null;
-    redirect_to_login($return);
-}
 
 // ============================================================
 // ボタン押下時
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // セッションが切れていても使えるよう、商品IDは hidden でも受け取る
+    $hiddenProductId = filter_var($_POST['productId'] ?? null, FILTER_VALIDATE_INT);
     $action          = $_POST['action'] ?? '';
-
-    if (!check_csrf_token()) {
-        set_flash('不正な操作、または二重送信です。購入履歴を確認してください。', 'error');
-        redirect(URL_MAIN);
-    }
 
     // ---- キャンセル ---------------------------------------------
     if ($action === 'cancel') {
@@ -41,8 +27,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // ---- 確定 ---------------------------------------------------
+    // 1. セッションが有効か確認する
+    if (!is_logged_in()) {
+        // セッション無効時：購入は確定させず、ログイン後は購入画面からやり直し
+        set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
+        redirect_to_login($hiddenProductId ? 'purchase.php?productId=' . $hiddenProductId : null);
+    }
     if ($purchase === null) {
         // ログイン中だが購入情報がない（購入済みの画面で再送信した等）
+        redirect(URL_MAIN);
+    }
+
+    // 二重送信・不正送信の対策
+    if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
+        set_flash('不正な操作、または二重送信です。購入履歴を確認してください。', 'error');
         redirect(URL_MAIN);
     }
 
@@ -51,18 +49,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // 2. 購入情報を登録する
-        //    BuyerName IS NULL … まだ誰も買っていない（同時購入対策）
-        //    Userid <> 自分   … 自分の出品は買えない
+        //    BuyerUserid IS NULL … まだ誰も買っていない（同時購入対策）
+        //    Userid <> 自分     … 自分の出品は買えない
         $sql = 'UPDATE Sales
-                SET BuyerName    = :buyer,
+                SET BuyerUserid  = :buyerId,
+                    BuyerName    = (SELECT UserName FROM UserData WHERE Userid = :buyerId2),
                     ShippingFlag = 0,
                     SoldDate     = GETDATE()
                 WHERE ProductID = :productId
-                  AND BuyerName IS NULL
+                  AND BuyerUserid IS NULL
                   AND Userid   <> :loginUser';
         $stmt = db()->prepare($sql);
         $stmt->execute([
-            ':buyer'     => buyer_value($userId),
+            ':buyerId'   => $userId,
+            ':buyerId2'  => $userId,
             ':productId' => $productId,
             ':loginUser' => $userId,
         ]);
@@ -91,12 +91,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 画面を開いたとき
 // ============================================================
 
-// 1. 購入情報の有無を確認する
+// 1. ログイン済みか確認する
+if (!is_logged_in()) {
+    set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
+    redirect_to_login(); // ログイン後はメイン画面へ
+}
+
+// 2. 購入情報の有無を確認する
 if ($purchase === null) {
     redirect(URL_MAIN);
 }
 
-// 2. 購入情報を表示する
+// 3. 購入情報を表示する
 $stmt = db()->prepare(
     'SELECT ProductID, ProductName, Price FROM Sales WHERE ProductID = :productId'
 );
