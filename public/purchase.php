@@ -11,6 +11,12 @@
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
+
+if ($DEV_SKIP_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = $DEV_SKIP_LOGIN_USER_ID;
+}
+// ===== ここまで =====
+
 // 商品ID（GET でも POST でも受け取る）
 $productId = filter_var($_REQUEST['productId'] ?? null, FILTER_VALIDATE_INT);
 

@@ -79,6 +79,11 @@ CSE_EC/
 ### ログイン処理を省略した購入画面の動作確認
 
 `src/config/config.php` の `DEV_LOGIN_USER_ID` に `UserData` に登録済みのユーザーIDを設定すると、`APP_DEBUG` が `true` かつ `localhost` からのアクセスに限り、そのユーザーとして画面を試せます。現在は `1` を設定しています。ログイン画面は経由しませんが、商品・配送先の表示と購入確定には通常どおりDB接続が必要です。確定操作はSalesの購入状態を書き換えるため、テスト用DBと未購入の商品を使ってください。無効にする場合は `DEV_LOGIN_USER_ID` を `0` にするか、`APP_DEBUG` を `false` にしてください。
+## 文字コード
+
+- PHP・HTMLテンプレート・CSS・JavaScriptのファイルは **UTF-8** で保存する。
+- PHP画面はHTTPレスポンスに `Content-Type: text/html; charset=UTF-8` を指定し、HTMLには `<meta charset="UTF-8">` を設定する。
+- 日本語が化ける場合は、ファイルの保存文字コードに加えて、HTTPレスポンスの `Content-Type` とデータベース接続・保存データの文字コードも確認する。
 
 ## 新しい画面を作るとき
 

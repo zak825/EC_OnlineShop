@@ -13,7 +13,11 @@
 --
 -- テストユーザー（パスワードは全員 password）
 --   Userid 1 : 出品 太郎 … 商品を出品している人
+<<<<<<< Updated upstream
 --   Userid 2 : 購入 花子 … 購入テスト用
+=======
+--   Userid 2 : 購入 花子 … 購入テスト・レビューテスト用（商品8をレビューできる）
+>>>>>>> Stashed changes
 --   Userid 3 : 閲覧 次郎 … 同時購入テスト用
 -- ============================================================
 
@@ -128,7 +132,18 @@ INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, BuyerName, 
     -- 売り切れ・未発送（購入者=2）
     (6,  2, N'USBケーブル',              500, 1, '2',  0,    DATEADD(DAY, -1, GETDATE()), NULL, NULL),
     -- 売り切れ・発送済・レビュー済（購入者=3）
+<<<<<<< Updated upstream
     (7,  5, N'マグカップ',               800, 1, '3',  1,    DATEADD(DAY, -7, GETDATE()), 5, N'きれいな状態で届きました。');
+=======
+    (7,  5, N'マグカップ',               800, 1, '3',  1,    DATEADD(DAY, -7, GETDATE()), 5, N'きれいな状態で届きました。'),
+    -- レビュー確認用 ------------------------------------------------
+    -- 発送済・未レビュー（購入者=2）… 花子で「受け取り完了・レビューを書く」が出る
+    (8,  1, N'JavaScript入門',          1200, 1, '2',  1,    DATEADD(DAY, -3, GETDATE()), NULL, NULL),
+    -- 花子の出品が売れて、次郎(3)がレビュー済 … 花子の「出品した商品」タブに出る
+    (9,  4, N'トランプ',                 300, 2, '3',  1,    DATEADD(DAY, -5, GETDATE()), 4, N'少し箱に傷がありましたが、中身は問題なしです。'),
+    -- 花子の出品が売れて、まだ未発送（購入者=3）
+    (10, 3, N'マフラー',                1600, 2, '3',  0,    DATEADD(HOUR, -5, GETDATE()), NULL, NULL);
+>>>>>>> Stashed changes
 
 -- システム設定
 INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment) VALUES
