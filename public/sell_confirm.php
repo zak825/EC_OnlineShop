@@ -75,68 +75,13 @@ if ($action === 'sell') {
     $error = MSG_DB_ERROR;
   }
 }
-?>
-<!DOCTYPE html>
-<html lang="ja">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>販売確認画面</title>
-  <style>
-    .error {
-      color: #d00;
-      margin: 4px 0;
-    }
-  </style>
-</head>
-
-<body>
-  <main>
-    <h1>販売確認画面</h1>
-
-    <?php if ($error !== ''): ?>
-      <p class="error"><?= h($error) ?></p>
-    <?php endif; ?>
-
-    <p><?= h($sell['product_name']) ?> <?= h(number_format($sell['price'])) ?>円 で販売しますか？</p>
-    <p>ジャンル：<?= h($sell['genre_name']) ?></p>
-
-    <?php if ($done): ?>
-      <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する -->
-      <p>出品が完了しました</p>
-      <p><a href="<?= h(URL_MAIN) ?>">移動しない場合はこちら</a></p>
-      <script>
-        setTimeout(function() {
-          location.href = '<?= h(URL_MAIN) ?>';
-        }, 3000);
-      </script>
-    <?php else: ?>
-      <form action="sell_confirm.php" method="post" id="confirm_form">
-        <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
-        <button type="submit" name="action" value="sell" id="sell_button">販売する</button>
-        <button type="submit" name="action" value="cancel">キャンセル</button>
-      </form>
-      <script>
-        // 二重送信対策：販売するボタンを押したらボタンを押せなくする
-        // disabled にしたボタンの値は送信されないので、hidden で action=sell を追加してから送信する
-        var sellButton = document.getElementById('sell_button');
-        sellButton.addEventListener('click', function(event) {
-          event.preventDefault();
-
-          var form = document.getElementById('confirm_form');
-          var hidden = document.createElement('input');
-          hidden.type = 'hidden';
-          hidden.name = 'action';
-          hidden.value = 'sell';
-          form.appendChild(hidden);
-
-          sellButton.disabled = true;
-          form.submit();
-        });
-      </script>
-    <?php endif; ?>
-  </main>
-</body>
-
-</html>
+// ------------------------------------------------------------
+// 画面を表示する（templates/sell_confirm.html）
+// ------------------------------------------------------------
+view('sell_confirm', [
+  'token' => csrf_token(),
+  'sell'  => $sell,
+  'done'  => $done,
+  'error' => $error,
+]);

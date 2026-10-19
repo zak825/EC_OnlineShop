@@ -113,39 +113,12 @@ try {
   error_log($e->getMessage());
   $error = MSG_DB_ERROR;
 }
-?>
-<!DOCTYPE html>
-<html lang="ja">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>発送通知送信画面</title>
-  <style>
-    .error {
-      color: #d00;
-      margin: 4px 0;
-    }
-  </style>
-</head>
-
-<body>
-  <main>
-    <h1>発送通知送信画面</h1>
-
-    <?php if ($error !== ''): ?>
-      <p class="error"><?= h($error) ?></p>
-      <p><a href="<?= h(URL_MYPAGE) ?>">マイページへ戻る</a></p>
-    <?php else: ?>
-      <p>発送通知を送りますか？</p>
-      <form action="ship_notice.php" method="post">
-        <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
-        <input type="hidden" name="product_id" value="<?= h($product_id) ?>">
-        <button type="submit" name="action" value="ship">はい</button>
-        <button type="submit" name="action" value="cancel">キャンセル</button>
-      </form>
-    <?php endif; ?>
-  </main>
-</body>
-
-</html>
+// ------------------------------------------------------------
+// 画面を表示する（templates/ship_notice.html）
+// ------------------------------------------------------------
+view('ship_notice', [
+  'token'      => csrf_token(),
+  'product_id' => $product_id,
+  'error'      => $error,
+]);

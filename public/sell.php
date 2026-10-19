@@ -207,67 +207,18 @@ if ($action === 'sell' && $error_db === '') {
     redirect(URL_SELL_CONFIRM);
   }
 }
-?>
-<!DOCTYPE html>
-<html lang="ja">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>販売画面</title>
-  <style>
-    .error {
-      color: #d00;
-      margin: 4px 0;
-    }
-  </style>
-</head>
-
-<body>
-  <main>
-    <h1>販売画面</h1>
-
-    <?php if ($error_db !== ''): ?>
-      <p class="error"><?= h($error_db) ?></p>
-    <?php endif; ?>
-
-    <form action="sell.php" method="post">
-      <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
-
-      <p><label for="product_name">商品名</label></p>
-      <input type="text" id="product_name" name="product_name" maxlength="50" value="<?= h($form_product_name) ?>">
-      <?php if ($error_product_name !== ''): ?>
-        <p class="error"><?= h($error_product_name) ?></p>
-      <?php endif; ?>
-
-      <p><label for="genre_code">ジャンル</label></p>
-      <select id="genre_code" name="genre_code">
-        <option value="">選択してください</option>
-        <?php foreach ($genres as $genre_code => $genre_name): ?>
-          <?php if ((string)$genre_code === $form_genre_code): ?>
-            <option value="<?= h($genre_code) ?>" selected><?= h($genre_name) ?></option>
-          <?php else: ?>
-            <option value="<?= h($genre_code) ?>"><?= h($genre_name) ?></option>
-          <?php endif; ?>
-        <?php endforeach; ?>
-      </select>
-      <?php if ($error_genre_code !== ''): ?>
-        <p class="error"><?= h($error_genre_code) ?></p>
-      <?php endif; ?>
-
-      <p><label for="price">値段</label></p>
-      <input type="text" id="price" name="price" inputmode="numeric" value="<?= h($form_price) ?>"> 円
-      <?php if ($error_price !== ''): ?>
-        <p class="error"><?= h($error_price) ?></p>
-      <?php endif; ?>
-
-      <p>
-        <button type="submit" name="action" value="sell">販売</button>
-        <button type="submit" name="action" value="clear">クリア</button>
-        <button type="submit" name="action" value="back">戻る</button>
-      </p>
-    </form>
-  </main>
-</body>
-
-</html>
+// ------------------------------------------------------------
+// 画面を表示する（templates/sell.html）
+// ------------------------------------------------------------
+view('sell', [
+  'token'              => csrf_token(),
+  'genres'             => $genres,
+  'form_product_name'  => $form_product_name,
+  'form_genre_code'    => $form_genre_code,
+  'form_price'         => $form_price,
+  'error_db'           => $error_db,
+  'error_product_name' => $error_product_name,
+  'error_genre_code'   => $error_genre_code,
+  'error_price'        => $error_price,
+]);
