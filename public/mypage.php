@@ -31,11 +31,103 @@ if (!is_logged_in()) {
     exit;
 }
 $userId = login_user_id();
+// ---- プロフィール画像のアップロード（「アイコンを変更」ボタン） ----------
+const ICON_MAX_BYTES = 2 * 1024 * 1024;                  // 2MB まで
+const ICON_DIR       = __DIR__ . '/uploads/icons';        // 保存先フォルダ
+const ICON_TYPES     = [                                  // 受け付ける画像の種類 => 拡張子
+    IMAGETYPE_JPEG => 'jpg',
+    IMAGETYPE_PNG  => 'png',
+    IMAGETYPE_GIF  => 'gif',
+    IMAGETYPE_WEBP => 'webp',
+];
 
-// ログインユーザーの名前を取得（画面上部に表示する）
-$stmt = db()->prepare('SELECT UserName FROM UserData WHERE Userid = :userId');
-$stmt->execute([':userId' => $userId]);
-$userName = $stmt->fetchColumn() ?: '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ファイルが大きすぎると（php.ini の post_max_size 超え）$_POST が空になる
+    if (empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+        set_flash('画像のサイズは2MBまでです。', 'error');
+        redirect('mypage.php');
+    }
+
+    if (($_POST['action'] ?? '') === 'upload_icon') {
+        if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
+            set_flash('不正な操作です。もう一度やり直してください。', 'error');
+            redirect('mypage.php');
+        }
+
+        $file  = $_FILES['icon'] ?? null;
+        $error = '';
+        $info  = false;
+
+        // 入力チェック
+        if ($file === null || $file['error'] === UPLOAD_ERR_NO_FILE) {
+            $error = '画像を選択してください。';
+        } elseif (in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+                  || $file['size'] > ICON_MAX_BYTES) {
+            $error = '画像のサイズは2MBまでです。';
+        } elseif ($file['error'] !== UPLOAD_ERR_OK) {
+            $error = '画像のアップロードに失敗しました。';
+        } else {
+            // 拡張子ではなく中身で画像か判定する（画像に見せかけたファイル対策）
+            $info = @getimagesize($file['tmp_name']);
+            if ($info === false || !isset(ICON_TYPES[$info[2]])) {
+                $error = 'JPEG・PNG・GIF・WebP の画像を選択してください。';
+            }
+        }
+
+        if ($error !== '') {
+            set_flash($error, 'error');
+            redirect('mypage.php');
+        }
+
+        // ファイル名はランダムにする（元のファイル名は使わない）
+        if (!is_dir(ICON_DIR)) {
+            mkdir(ICON_DIR, 0777, true);
+        }
+        $fileName = 'user' . $userId . '_' . bin2hex(random_bytes(8)) . '.' . ICON_TYPES[$info[2]];
+        if (!move_uploaded_file($file['tmp_name'], ICON_DIR . '/' . $fileName)) {
+            set_flash('画像の保存に失敗しました。', 'error');
+            redirect('mypage.php');
+        }
+
+        // 古いアイコンのパスを取っておく（更新できたら削除する）
+        $stmt = db()->prepare('SELECT IconPath FROM UserData WHERE Userid = :userId');
+        $stmt->execute([':userId' => $userId]);
+        $oldPath = $stmt->fetchColumn();
+
+        // DB の IconPath を新しい画像に更新
+        $stmt = db()->prepare('UPDATE UserData SET IconPath = :path WHERE Userid = :userId');
+        $stmt->execute([':path' => 'uploads/icons/' . $fileName, ':userId' => $userId]);
+
+        // 古いアイコンを削除（uploads/icons の中のファイルだけ）
+        if ($oldPath) {
+            $oldFile = ICON_DIR . '/' . basename($oldPath);
+            if (is_file($oldFile)) {
+                unlink($oldFile);
+            }
+        }
+
+        set_flash('アイコンを変更しました。', 'success');
+        redirect('mypage.php');
+    }
+}
+
+
+// ---- プロフィール（名前・アイコン）を取得 ------------------------
+$stmt = db()->prepare('SELECT UserName, IconPath FROM UserData WHERE Userid = :userId');
+$profile  = $stmt->fetch() ?: [];
+$userName = $profile['UserName'] ?? '';
+$iconPath = $profile['IconPath'] ?? null;   // 未設定（NULL）のときは名前の頭文字を表示する
+
+// ---- 評価の平均（自分が出品して、購入者からレビューされた商品） ------
+$stmt = db()->prepare(
+    'SELECT AVG(CAST(sucre AS FLOAT)) AS AvgScore, COUNT(sucre) AS ReviewCount
+     FROM Sales
+     WHERE Userid = :seller AND sucre IS NOT NULL'
+);
+$stmt->execute([':seller' => $userId]);
+$rating      = $stmt->fetch();
+$reviewCount = (int)$rating['ReviewCount'];
+$avgScore    = $reviewCount > 0 ? round((float)$rating['AvgScore'], 1) : null;  // 小数第1位まで
 
 // ---- 2. 購入情報参照（購入者が自分の商品） ------------------------
 $stmt = db()->prepare(
@@ -68,9 +160,12 @@ $sold = $stmt->fetchAll();
 view('mypage', [
     'flash'    => get_flash(),
     'loggedIn' => true,
-    'userName' => $userName,
+    'userName'    => $userName,
+    'iconPath'    => $iconPath,
+    'avgScore'    => $avgScore,
+    'reviewCount' => $reviewCount,
     'tab'      => $tab,
     'bought'   => $bought,
     'sold'     => $sold,
-    'token'    => csrf_token(),
+    'token'    => csrf_token(),   // 発送ボタン用
 ]);

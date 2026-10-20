@@ -52,7 +52,8 @@ CREATE TABLE UserData (
     ZipCode       VARCHAR(8)    NOT NULL,
     Address       NVARCHAR(256) NOT NULL,
     TEL           VARCHAR(15)   NOT NULL,
-    LoginPassword VARCHAR(255)  NOT NULL
+    LoginPassword VARCHAR(255)  NOT NULL,
+    IconPath      NVARCHAR(256)            -- プロフィールアイコンの画像パス（NULL = 未設定）
 );
 
 -- 商品ジャンル

@@ -21,8 +21,8 @@ define('DB_PASS', 'password');   // 自分の sa のパスワードに変える
 // ---- 画面のURL（public/ からの相対パス） ----
 define('URL_LOGIN', 'login.php');  // ログイン画面（?return= で戻り先を受け取る）
 define('URL_MAIN',   'main.php');    // メイン画面
-define('URL_STATUS', 'main.php');    // レビュー画面の戻り先（マイページができたら 'mypage.php'）
-define('URL_MYPAGE', 'main.php');    // 同上（新しい版のコードはこちらを使う）
+define('URL_STATUS', 'mypage.php');    // レビュー画面の戻り先（マイページができたら 'mypage.php'）
+define('URL_SHIPPING', 'ship_notice.php'); // 発送通知送信画面（マイページの「発送」ボタンの送信先）
 
 // ---- 開発中はエラーを画面に出す（本番サーバでは false にする） ----
 define('APP_DEBUG', true);
