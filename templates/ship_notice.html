@@ -14,7 +14,7 @@
 
     <?php if ($error !== ''): ?>
       <p class="error"><?= h($error) ?></p>
-      <p><a href="<?= h(URL_MYPAGE) ?>">マイページへ戻る</a></p>
+      <p><a href="<?= h(URL_STATUS) ?>">マイページへ戻る</a></p>
     <?php else: ?>
       <p>発送通知を送りますか？</p>
       <form action="ship_notice.php" method="post">

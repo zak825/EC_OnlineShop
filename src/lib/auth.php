@@ -216,6 +216,25 @@ function get_flash(): ?array
 }
 
 /**
+ * 開発用の自動ログインに使うユーザーIDを返す（有効な場合のみ）
+ */
+function development_login_user_id(): ?int {
+    if (!defined('APP_DEBUG') || APP_DEBUG !== true) {
+        return null;
+    }
+    if (!defined('DEV_LOGIN_USER_ID') || !is_numeric(DEV_LOGIN_USER_ID) || (int)DEV_LOGIN_USER_ID <= 0) {
+        return null;
+    }
+
+    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+    if ($remoteAddr !== '127.0.0.1' && $remoteAddr !== '::1') {
+        return null;
+    }
+
+    return (int)DEV_LOGIN_USER_ID;
+}
+
+/**
  * CSRFトークンを生成・取得する（フォームのhidden項目用）
  * 1つの画面に複数のフォームがあっても同じトークンを使えるよう、使われるまでは作り直さない
  *
