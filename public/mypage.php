@@ -7,7 +7,7 @@
 //
 // Sales テーブルの使い方
 //   出品者 … Sales.Userid
-//   購入者 … Sales.BuyerName（購入者の Userid を文字列で入れている。buyer_value() 参照）
+//   購入者 … Sales.BuyerUserid（BuyerName は表示用の購入者名）
 //   発送   … Sales.ShippingFlag（0:未発送 1:発送済）
 //   取引完了 … Sales.sucre（レビューの評価値）が入っている
 // ============================================================
@@ -32,6 +32,11 @@ if (!is_logged_in()) {
 }
 $userId = login_user_id();
 
+// ログインユーザーの名前を取得（画面上部に表示する）
+$stmt = db()->prepare('SELECT UserName FROM UserData WHERE Userid = :userId');
+$stmt->execute([':userId' => $userId]);
+$userName = $stmt->fetchColumn() ?: '';
+
 // ---- 2. 購入情報参照（購入者が自分の商品） ------------------------
 $stmt = db()->prepare(
     'SELECT s.ProductID, s.ProductName, s.Price, s.SoldDate, s.ShippingFlag,
@@ -39,22 +44,22 @@ $stmt = db()->prepare(
             seller.UserName AS SellerName
      FROM Sales s
      JOIN UserData seller ON s.Userid = seller.Userid
-     WHERE s.BuyerName = :buyer
+     WHERE s.BuyerUserid = :buyer
      ORDER BY s.SoldDate DESC'
 );
-$stmt->execute([':buyer' => buyer_value($userId)]);
+$stmt->execute([':buyer' => $userId]);
 $bought = $stmt->fetchAll();
 
 // ---- 3. 出品情報参照（出品者が自分の商品） ------------------------
-// 購入者名・配送先は、BuyerName（購入者の Userid の文字列）で UserData と結合して取る
+// 購入者名・配送先は、BuyerUserid で UserData と結合して取る
 $stmt = db()->prepare(
-    'SELECT s.ProductID, s.ProductName, s.Price, s.BuyerName, s.SoldDate, s.ShippingFlag,
+    'SELECT s.ProductID, s.ProductName, s.Price, s.BuyerUserid, s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
             buyer.UserName AS BuyerUserName, buyer.ZipCode, buyer.Address, buyer.TEL
      FROM Sales s
-     LEFT JOIN UserData buyer ON s.BuyerName = CAST(buyer.Userid AS VARCHAR(50))
+     LEFT JOIN UserData buyer ON s.BuyerUserid = buyer.Userid
      WHERE s.Userid = :seller
-     ORDER BY CASE WHEN s.BuyerName IS NULL THEN 1 ELSE 0 END, s.SoldDate DESC, s.ProductID DESC'
+     ORDER BY CASE WHEN s.BuyerUserid IS NULL THEN 1 ELSE 0 END, s.SoldDate DESC, s.ProductID DESC'
 );
 $stmt->execute([':seller' => $userId]);
 $sold = $stmt->fetchAll();
@@ -63,7 +68,7 @@ $sold = $stmt->fetchAll();
 view('mypage', [
     'flash'    => get_flash(),
     'loggedIn' => true,
-    'userId'   => $userId,
+    'userName' => $userName,
     'tab'      => $tab,
     'bought'   => $bought,
     'sold'     => $sold,
