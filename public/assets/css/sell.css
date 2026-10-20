@@ -3,3 +3,20 @@
   color: #d00;
   margin: 4px 0;
 }
+
+/* エラーがないときは表示しない */
+.error:empty {
+  display: none;
+}
+
+/* エラーが発生したときは赤くする（sell.js が付け外しする） */
+.Form-Item-Input.is-invalid {
+  border-color: #e74c3c;
+  background-color: #fdf2f2;
+}
+
+/* 正しく入力できたときは緑にする */
+.Form-Item-Input.is-valid {
+  border-color: #27ae60;
+  background-color: #f8fff8;
+}

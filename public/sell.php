@@ -222,6 +222,8 @@ view('sell', [
   'form_product_name'  => $form_product_name,
   'form_genre_code'    => $form_genre_code,
   'form_price'         => $form_price,
+  'price_min'          => $price_min,
+  'price_max'          => $price_max,
   'error_db'           => $error_db,
   'error_product_name' => $error_product_name,
   'error_genre_code'   => $error_genre_code,
