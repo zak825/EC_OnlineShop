@@ -15,7 +15,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 // 発送通知送信画面のファイル名（config.php に書いていなければこの名前を使う）
 if (!defined('URL_SHIPPING')) {
-    define('URL_SHIPPING', 'shipping.php');
+    define('URL_SHIPPING', 'ship_notice.php');
 }
 
 $tab = ($_GET['tab'] ?? '') === 'sold' ? 'sold' : 'bought';
@@ -31,6 +31,7 @@ if (!is_logged_in()) {
     exit;
 }
 $userId = login_user_id();
+
 // ---- プロフィール画像のアップロード（「アイコンを変更」ボタン） ----------
 const ICON_MAX_BYTES = 2 * 1024 * 1024;                  // 2MB まで
 const ICON_DIR       = __DIR__ . '/uploads/icons';        // 保存先フォルダ
@@ -111,9 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-
 // ---- プロフィール（名前・アイコン）を取得 ------------------------
 $stmt = db()->prepare('SELECT UserName, IconPath FROM UserData WHERE Userid = :userId');
+$stmt->execute([':userId' => $userId]);
 $profile  = $stmt->fetch() ?: [];
 $userName = $profile['UserName'] ?? '';
 $iconPath = $profile['IconPath'] ?? null;   // 未設定（NULL）のときは名前の頭文字を表示する
@@ -158,14 +159,14 @@ $sold = $stmt->fetchAll();
 
 // ---- 4. 情報表示 -------------------------------------------------
 view('mypage', [
-    'flash'    => get_flash(),
-    'loggedIn' => true,
-    'userName'    => $userName,
-    'iconPath'    => $iconPath,
-    'avgScore'    => $avgScore,
-    'reviewCount' => $reviewCount,
-    'tab'      => $tab,
-    'bought'   => $bought,
-    'sold'     => $sold,
-    'token'    => csrf_token(),   // 発送ボタン用
+    'flash'       => get_flash(),      // メッセージ（アイコンを変更しました 等）
+    'loggedIn'    => true,             // ログイン済み
+    'userName'    => $userName,        // ユーザー名
+    'iconPath'    => $iconPath,        // アイコン画像のパス（NULL = 未設定）
+    'avgScore'    => $avgScore,        // 評価の平均（NULL = 評価なし）
+    'reviewCount' => $reviewCount,     // 評価の件数
+    'tab'         => $tab,             // 表示中のタブ（bought / sold）
+    'bought'      => $bought,          // 購入した商品
+    'sold'        => $sold,            // 出品した商品
+    'token'       => csrf_token(),     // 発送ボタン・アイコン変更用
 ]);

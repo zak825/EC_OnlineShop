@@ -14,7 +14,6 @@
 
   <main class="container container--wide">
     <h1 class="page-title">マイページ</h1>
-
     <?php if (!empty($flash)): ?>
       <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
     <?php endif; ?>
@@ -31,29 +30,31 @@
 
     <?php else: ?>
       <!-- ===== プロフィール（アイコン・名前・評価） ===== -->
+      <!-- ===== プロフィール（名前・アイコン・評価） ===== -->
       <section class="profile">
-        <?php if ($iconPath !== null && $iconPath !== ''): ?>
-          <img src="<?= h($iconPath) ?>" alt="" class="profile__icon">
-        <?php else: ?>
-          <!-- アイコン未設定のときは名前の頭文字を表示 -->
-          <span class="profile__icon profile__icon--initial" aria-hidden="true"><?= h(mb_substr($userName, 0, 1)) ?></span>
-        <?php endif; ?>
-
-        <div class="profile__body">
+        <div class="profile__head">
           <p class="profile__name"><?= h($userName) ?></p>
-          <p class="profile__rating">
-            平均評価
-            <?php if ($avgScore !== null): ?>
-              <span class="profile__stars" aria-label="評価の平均 <?= h(number_format($avgScore, 1)) ?>"><?= stars((int)round($avgScore)) ?></span>
-              <span class="profile__score"><?= h(number_format($avgScore, 1)) ?></span>
-              <span class="profile__count">（<?= (int)$reviewCount ?>件）</span>
-            <?php else: ?>
-              <span class="profile__count">まだ評価はありません</span>
-            <?php endif; ?>
-          </p>
-        </div>
-      </section>
 
+          <?php if ($iconPath !== null && $iconPath !== ''): ?>
+            <img src="<?= h($iconPath) ?>" alt="" class="profile__icon">
+          <?php else: ?>
+            <!-- アイコン未設定のときは名前の頭文字を表示 -->
+            <span class="profile__icon profile__icon--initial" aria-hidden="true"><?= h(mb_substr($userName, 0, 1)) ?></span>
+          <?php endif; ?>
+        </div>
+
+        <!-- ↓ 評価の表示（自分で直した版があればそれをここに入れる） -->
+        <p class="profile__rating">
+          <?php if ($avgScore !== null): ?>
+            平均評価
+            <span class="profile__stars" aria-label="評価の平均 <?= h(number_format($avgScore, 1)) ?>"><?= stars((int)round($avgScore)) ?></span>
+            <span class="profile__score"><?= h(number_format($avgScore, 1)) ?></span>
+            <span class="profile__count">（<?= (int)$reviewCount ?>件）</span>
+          <?php else: ?>
+            <span class="profile__count">まだ評価はありません</span>
+          <?php endif; ?>
+        </p>
+      </section>
             <!-- ===== アイコン変更 ===== -->
       <form action="mypage.php" method="post" enctype="multipart/form-data" class="icon-form">
         <input type="hidden" name="action" value="upload_icon">
