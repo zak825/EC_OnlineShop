@@ -1,0 +1,24 @@
+﻿header {
+    background: #fff;
+    display: flex;
+    justify-content:space-between;
+}
+
+nav a {
+    margin: 0px 20px;
+
+}
+
+.logo{
+    margin:0px 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5em 1em;
+    text-decoration: none;
+    background: #1e90ff;
+    color: #FFF;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29);
+    border-radius: 10px;
+}

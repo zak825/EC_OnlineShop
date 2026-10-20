@@ -1,0 +1,46 @@
+.container,
+.register-container {
+    width: 340px;
+    margin: 24px;
+}
+
+.error-msg {
+    color: #d00;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+.form-group .note {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.btn-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 16px;
+    gap: 8px;
+}
+
+.btn-row button {
+    padding: 4px 12px;
+    cursor: pointer;
+}
