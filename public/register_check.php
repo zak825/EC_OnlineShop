@@ -48,35 +48,64 @@
             try {
                 // 1. SQLインジェクション対策実施（プレースホルダ利用）
                 // 2. ユーザー情報をUserDataに登録
+                // DB の定義の違い（OnlineShop と sql/serverSetUp.sql）を先に調べておく
+                // ※トランザクション中に SQL がエラーになると、SQL Server がそれまでの INSERT を取り消してしまうため、
+                //   「失敗したら無視する」のではなく、必要なときだけ実行する
+                $hasIdentity = (int)$pdo->query("SELECT OBJECTPROPERTY(OBJECT_ID('dbo.UserData'), 'TableHasIdentity')")->fetchColumn() === 1;
+                $hasCommon   = $pdo->query("SELECT OBJECT_ID('dbo.Common')")->fetchColumn() !== null;
+
                 $pdo->beginTransaction();
                 $now = date('Y-m-d H:i:s');
 
-                // SQL Server IDENTITY列の挿入対応
-                try {
-                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData ON");
-                } catch (PDOException $e) {
-                    // IDENTITYが設定されていないテーブル構成の場合はスキップ
+                // ユーザーIDの重複対策
+                // ID は登録画面で発番しているので、「はい」を押すまでの間に他の人が同じ ID で登録していることがある。
+                // テーブルをロックしてから確認し、使われていたら今の最大値 + 1 で取り直す
+                $stmt = $pdo->prepare('SELECT ISNULL(MAX(UserId), 0) + 1 FROM dbo.UserData WITH (UPDLOCK, HOLDLOCK)');
+                $stmt->execute();
+                $nextUserId = (int)$stmt->fetchColumn();
+
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM dbo.UserData WHERE UserId = :user_id');
+                $stmt->execute([':user_id' => (int)$userId]);
+                if ((int)$stmt->fetchColumn() > 0) {
+                    $userId = $nextUserId;
+                    $registerUser['UserId']  = $userId;
+                    $registerUser['user_id'] = $userId;
                 }
 
-                $sql = "INSERT INTO dbo.UserData (UserId, UserName, ZipCode, Address, TEL, LoginPassword)
-                        VALUES (:user_id, :user_name, :zip_code, :address, :tel, :password)";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
+                // SQL Server IDENTITY列の挿入対応（serverSetUp.sql の DB は UserId が自動採番）
+                if ($hasIdentity) {
+                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData ON");
+                }
+
+                $columns = 'UserId, UserName, ZipCode, Address, TEL, LoginPassword';
+                $values  = ':user_id, :user_name, :zip_code, :address, :tel, :password';
+                $params  = [
                     ':user_id'   => (int)$userId,
                     ':user_name' => $userName,
                     ':zip_code'  => $zipCode,
                     ':address'   => $address,
                     ':tel'       => $tel,
                     ':password'  => $passwordHash,
-                ]);
+                ];
 
-                try {
-                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData OFF");
-                } catch (PDOException $e) {
+                // OnlineShop の DB には登録者・登録日時の列（必須）があるので、あるときだけ入れる
+                // （sql/serverSetUp.sql で作った DB には無い）
+                if (db_has_column('UserData', 'InsertUserId')) {
+                    $columns .= ', InsertUserId, InsertDateTime';
+                    $values  .= ', :insert_user_id, GETDATE()';
+                    $params[':insert_user_id'] = (int)$userId;
                 }
 
-                // 共通項目（Commonテーブル）が存在する場合は登録ログを残す
-                try {
+                $sql = "INSERT INTO dbo.UserData ($columns) VALUES ($values)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+
+                if ($hasIdentity) {
+                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData OFF");
+                }
+
+                // 共通項目（Commonテーブル）が存在する場合は登録ログを残す（serverSetUp.sql の DB のみ）
+                if ($hasCommon) {
                     $commonSql = "INSERT INTO dbo.Common (InsertUserId, InsertDateTime)
                                   VALUES (:user_id, :now)";
                     $commonStmt = $pdo->prepare($commonSql);
@@ -84,9 +113,6 @@
                         ':user_id' => (int)$userId,
                         ':now'     => $now,
                     ]);
-                } catch (PDOException $e) {
-                    // Commonテーブル未作成環境等の場合はスキップ
-                    error_log('Common table insert skipped: ' . $e->getMessage());
                 }
 
                 $pdo->commit();
@@ -96,7 +122,8 @@
 
                 if ($isAjax) {
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['success' => true]);
+                    // 重複で ID を取り直した場合があるので、実際に登録した ID を返す
+                    echo json_encode(['success' => true, 'user_id' => (int)$userId]);
                     exit;
                 }
             } catch (PDOException $e) {
