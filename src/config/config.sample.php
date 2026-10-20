@@ -23,6 +23,9 @@ define('URL_LOGIN', 'login.php');  // ログイン画面（?return= で戻り先
 define('URL_MAIN',   'index.php');    // メイン画面
 define('URL_STATUS', 'mypage.php');    // レビュー画面の戻り先
 define('URL_SHIPPING', 'ship_notice.php'); // 発送通知送信画面（マイページの「発送」ボタンの送信先）
+define('URL_MYPAGE', 'mypage.php');   // マイページ画面
+
+
 
 // ---- 開発中はエラーを画面に出す（本番サーバでは false にする） ----
 define('APP_DEBUG', true);
