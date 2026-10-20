@@ -57,6 +57,21 @@
                 $pdo->beginTransaction();
                 $now = date('Y-m-d H:i:s');
 
+                // ユーザーIDの重複対策
+                // ID は登録画面で発番しているので、「はい」を押すまでの間に他の人が同じ ID で登録していることがある。
+                // テーブルをロックしてから確認し、使われていたら今の最大値 + 1 で取り直す
+                $stmt = $pdo->prepare('SELECT ISNULL(MAX(UserId), 0) + 1 FROM dbo.UserData WITH (UPDLOCK, HOLDLOCK)');
+                $stmt->execute();
+                $nextUserId = (int)$stmt->fetchColumn();
+
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM dbo.UserData WHERE UserId = :user_id');
+                $stmt->execute([':user_id' => (int)$userId]);
+                if ((int)$stmt->fetchColumn() > 0) {
+                    $userId = $nextUserId;
+                    $registerUser['UserId']  = $userId;
+                    $registerUser['user_id'] = $userId;
+                }
+
                 // SQL Server IDENTITY列の挿入対応（serverSetUp.sql の DB は UserId が自動採番）
                 if ($hasIdentity) {
                     $pdo->exec("SET IDENTITY_INSERT dbo.UserData ON");
@@ -107,7 +122,8 @@
 
                 if ($isAjax) {
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['success' => true]);
+                    // 重複で ID を取り直した場合があるので、実際に登録した ID を返す
+                    echo json_encode(['success' => true, 'user_id' => (int)$userId]);
                     exit;
                 }
             } catch (PDOException $e) {
