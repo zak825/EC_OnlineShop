@@ -2,10 +2,25 @@
 // ============================================================
 // 購入画面
 //   GET  purchase.php?productId=123   … 商品情報を表示
-//   POST purchase.php                 … 数量チェック → 購入確認画面へ
+//   POST purchase.php                 … 購入確認画面へ
 // 設計書: docs/design/購入画面_設計処理.md
+//
+// Sales テーブルは「1行 = 1商品（1点もの）」
+//   BuyerUserid が NULL … 販売中
+//   BuyerUserid が入っている … 売り切れ
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
+
+// ===== 開発用：ログインをスキップする =====
+// 0 以外の Userid を入れると、その人としてログインした扱いになる
+//   2 … 購入 花子（購入テスト用）
+// ログイン画面ができたら、または提出前には必ず 0 に戻す
+$DEV_SKIP_LOGIN_USER_ID = 2;
+
+if ($DEV_SKIP_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = $DEV_SKIP_LOGIN_USER_ID;
+}
+// ===== ここまで =====
 
 // 商品ID（GET でも POST でも受け取る）
 $productId = filter_var($_REQUEST['productId'] ?? null, FILTER_VALIDATE_INT);
@@ -20,7 +35,7 @@ $userId = login_user_id();
 // ---- 2. 商品の存在チェック --------------------------------------
 $product = false;
 if ($productId) {
-    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Stock, s.Userid,
+    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid, s.BuyerUserid,
                    g.GenreName, u.UserName AS SellerName
             FROM Sales s
             JOIN Genre    g ON s.GenreCode = g.GenreCode
@@ -36,11 +51,11 @@ if (!$product) {
     redirect(URL_MAIN);
 }
 
-// ---- 3. 在庫チェック / 4. 出品者チェック -------------------------
+// ---- 3. 売り切れチェック / 4. 出品者チェック ---------------------
 $canBuy       = true;
 $blockMessage = '';
 
-if ((int)$product['Stock'] < 1) {
+if ($product['BuyerUserid'] !== null) {
     $canBuy       = false;
     $blockMessage = 'この商品は売り切れです。';
 } elseif ((int)$product['Userid'] === $userId) {
@@ -49,41 +64,27 @@ if ((int)$product['Stock'] < 1) {
 }
 
 // ---- 購入ボタン押下 ---------------------------------------------
-$error    = '';
-$quantity = 1; // 数量の初期値
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $quantity = $_POST['quantity'] ?? '';
-
     if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
         $error = '不正な操作です。もう一度やり直してください。';
     } elseif (!$canBuy) {
         // 画面を開いた後に売り切れた場合など
         $error = $blockMessage;
     } else {
-        // 1. 数量のチェック（整数・1以上・在庫数以下）
-        $qty = filter_var($quantity, FILTER_VALIDATE_INT);
-        if ($qty === false || $qty < 1 || $qty > (int)$product['Stock']) {
-            $error = '数量は1〜' . (int)$product['Stock'] . 'の範囲で入力してください。';
-        } else {
-            // 2. 購入情報をセッションに書き込む
-            $_SESSION['purchase'] = [
-                'product_id' => (int)$product['ProductID'],
-                'quantity'   => $qty,
-            ];
-            // 3. 購入確認画面へ
-            redirect('purchase_confirm.php');
-        }
+        // 購入する商品IDをセッションに書き込んで購入確認画面へ
+        $_SESSION['purchase'] = ['product_id' => (int)$product['ProductID']];
+        redirect('purchase_confirm.php');
     }
 }
 
 // ---- 5. 商品情報を表示 ------------------------------------------
-view('purchase/purchase', [
+view('purchase', [
     'flash'        => get_flash(),
     'token'        => csrf_token(),
     'product'      => $product,
     'canBuy'       => $canBuy,
     'blockMessage' => $blockMessage,
     'error'        => $error,
-    'quantity'     => $quantity,
 ]);
