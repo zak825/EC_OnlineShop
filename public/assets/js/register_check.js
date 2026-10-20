@@ -48,6 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (result.success) {
+                    // 実際に登録したユーザーIDを表示する（重複していたときは確認画面の ID から変わる）
+                    const completeUserId = document.getElementById('complete-user-id');
+                    if (completeUserId && result.user_id) {
+                        completeUserId.textContent = result.user_id;
+                    }
+
                     // 登録完了後、JSで完了画面表示
                     if (confirmSection) {
                         confirmSection.style.display = 'none';

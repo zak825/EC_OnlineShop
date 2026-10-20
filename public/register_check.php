@@ -3,7 +3,7 @@
 
     // 【画面を開く】すでにログイン済み（かつセッション有効期限内）であるか確認
     if (is_logged_in()) {
-        header('Location: main.php');
+        header('Location: index.php');
         exit;
     }
 
@@ -51,12 +51,23 @@
                 $pdo->beginTransaction();
                 $now = date('Y-m-d H:i:s');
 
-                // SQL Server IDENTITY列の挿入対応
-                try {
-                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData ON");
-                } catch (PDOException $e) {
-                    // IDENTITYが設定されていないテーブル構成の場合はスキップ
+                // ユーザーIDの重複対策
+                // ID は登録画面で発番しているので、「はい」を押すまでの間に他の人が同じ ID で登録していることがある。
+                // テーブルをロックしてから確認し、使われていたら今の最大値 + 1 で取り直す
+                $stmt = $pdo->prepare('SELECT ISNULL(MAX(UserId), 0) + 1 FROM dbo.UserData WITH (UPDLOCK, HOLDLOCK)');
+                $stmt->execute();
+                $nextUserId = (int)$stmt->fetchColumn();
+
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM dbo.UserData WHERE UserId = :user_id');
+                $stmt->execute([':user_id' => (int)$userId]);
+                if ((int)$stmt->fetchColumn() > 0) {
+                    $userId = $nextUserId;
+                    $registerUser['UserId']  = $userId;
+                    $registerUser['user_id'] = $userId;
                 }
+
+                // UserId は IDENTITY（自動採番）だが、発番済みの ID で登録するので一時的に指定できるようにする
+                $pdo->exec("SET IDENTITY_INSERT dbo.UserData ON");
 
                 $sql = "INSERT INTO dbo.UserData (UserId, UserName, ZipCode, Address, TEL, LoginPassword)
                         VALUES (:user_id, :user_name, :zip_code, :address, :tel, :password)";
@@ -70,24 +81,16 @@
                     ':password'  => $passwordHash,
                 ]);
 
-                try {
-                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData OFF");
-                } catch (PDOException $e) {
-                }
+                $pdo->exec("SET IDENTITY_INSERT dbo.UserData OFF");
 
-                // 共通項目（Commonテーブル）が存在する場合は登録ログを残す
-                try {
-                    $commonSql = "INSERT INTO dbo.Common (InsertUserId, InsertDateTime)
-                                  VALUES (:user_id, :now)";
-                    $commonStmt = $pdo->prepare($commonSql);
-                    $commonStmt->execute([
-                        ':user_id' => (int)$userId,
-                        ':now'     => $now,
-                    ]);
-                } catch (PDOException $e) {
-                    // Commonテーブル未作成環境等の場合はスキップ
-                    error_log('Common table insert skipped: ' . $e->getMessage());
-                }
+                // 共通項目（Commonテーブル）に登録ログを残す
+                $commonSql = "INSERT INTO dbo.Common (InsertUserId, InsertDateTime)
+                              VALUES (:user_id, :now)";
+                $commonStmt = $pdo->prepare($commonSql);
+                $commonStmt->execute([
+                    ':user_id' => (int)$userId,
+                    ':now'     => $now,
+                ]);
 
                 $pdo->commit();
 
@@ -96,7 +99,8 @@
 
                 if ($isAjax) {
                     header('Content-Type: application/json; charset=UTF-8');
-                    echo json_encode(['success' => true]);
+                    // 重複で ID を取り直した場合があるので、実際に登録した ID を返す
+                    echo json_encode(['success' => true, 'user_id' => (int)$userId]);
                     exit;
                 }
             } catch (PDOException $e) {
