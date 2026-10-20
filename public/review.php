@@ -147,8 +147,4 @@ view('review', [
     'score'     => (string)$score,
     'review'    => $review,
     'maxLength' => REVIEW_MAX_LENGTH,
-<<<<<<< Updated upstream
 ]);
-=======
-]);
->>>>>>> Stashed changes
