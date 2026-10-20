@@ -11,13 +11,6 @@ function view(string $name, array $vars = []): void
     include TEMPLATE_DIR . '/' . $name . '.html';
 }
 
-/** HTMLエスケープ（テンプレートで値を出すときは必ず通す） */
-function h($value): string
-{
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-}
-
-
 /** 評価値（1〜5）を ★★★☆☆ の形にする */
 function stars($score): string
 {
@@ -33,4 +26,10 @@ function format_datetime($value): string
     }
     $time = strtotime((string)$value);
     return $time === false ? (string)$value : date('Y/m/d H:i', $time);
+}
+
+/** HTMLエスケープ（テンプレートで値を出すときは必ず通す） */
+function h($value): string
+{
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }

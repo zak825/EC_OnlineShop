@@ -10,9 +10,12 @@
 //   （return は自サイト内のパスだけ許可すること）
 // ============================================================
 
+// セッションがまだ開始されていなければ開始する
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-}   // 開発用の自動ログイン（APP_DEBUG が true のときだけ）
+}
+
+// 開発用の自動ログイン（APP_DEBUG が true のときだけ）
 if (APP_DEBUG && defined('DEV_LOGIN_USER_ID') && DEV_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
     $_SESSION['user_id'] = DEV_LOGIN_USER_ID;
 }

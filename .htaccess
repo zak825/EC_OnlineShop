@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteBase /CSE_EC/
+
+# Render PHP-backed templates through their public controllers.
+RewriteRule ^templates/purchase\.html$ purchase.php [R=302,L,QSA]
+RewriteRule ^templates/purchase_confirm\.html$ purchase_confirm.php [R=302,L,QSA]
+
+# Keep the application URLs stable when the repository root is served by Apache.
+RewriteRule ^(purchase|purchase_confirm)\.php$ public/$0 [L]
+RewriteRule ^assets/(.*)$ public/assets/$1 [L]
+
+# Never expose application configuration, SQL files, or development sources.
+RewriteRule ^(src|sql|docs|\.git)(/|$) - [F,L,NC]

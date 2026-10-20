@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /CSE_EC/
+
+# Templates use PHP variables, so serve them through their controller instead
+# of exposing the template source as static HTML.
+RewriteRule ^templates/purchase\.html$ purchase.php [R=302,L,QSA]
+RewriteRule ^templates/purchase_confirm\.html$ purchase_confirm.php [R=302,L,QSA]

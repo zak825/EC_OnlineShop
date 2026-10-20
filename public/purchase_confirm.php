@@ -5,6 +5,8 @@
 //   POST purchase_confirm.php (action=confirm)  … 購入を確定
 //   POST purchase_confirm.php (action=cancel)   … 購入画面へ戻る
 // 設計書: docs/design/購入確認画面_設計処理.md
+//
+// 購入確定 = Sales の BuyerUserid / BuyerName / ShippingFlag / SoldDate を埋める
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
@@ -44,72 +46,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $userId    = login_user_id();
     $productId = (int)$purchase['product_id'];
-    $quantity  = (int)$purchase['quantity'];
-    $now       = date('Y-m-d H:i:s');
 
-    $pdo = db();
     try {
-        // 3. トランザクション開始
-        $pdo->beginTransaction();
-
-        // 4. 在庫を引き当てる（在庫 >= 購入数量 かつ 自分の出品でない）
+        // 2. 購入情報を登録する
+        //    BuyerUserid IS NULL … まだ誰も買っていない（同時購入対策）
+        //    Userid <> 自分     … 自分の出品は買えない
         $sql = 'UPDATE Sales
-                SET Stock           = Stock - :quantity,
-                    UpdateUserId    = :updateUser,
-                    UpdatedDateTime = :now
+                SET BuyerUserid  = :buyerId,
+                    BuyerName    = (SELECT UserName FROM UserData WHERE Userid = :buyerId2),
+                    ShippingFlag = 0,
+                    SoldDate     = GETDATE()
                 WHERE ProductID = :productId
-                  AND Stock    >= :quantityCheck
+                  AND BuyerUserid IS NULL
                   AND Userid   <> :loginUser';
-        $stmt = $pdo->prepare($sql);
+        $stmt = db()->prepare($sql);
         $stmt->execute([
-            ':quantity'      => $quantity,
-            ':updateUser'    => $userId,
-            ':now'           => $now,
-            ':productId'     => $productId,
-            ':quantityCheck' => $quantity,
-            ':loginUser'     => $userId,
+            ':buyerId'   => $userId,
+            ':buyerId2'  => $userId,
+            ':productId' => $productId,
+            ':loginUser' => $userId,
         ]);
 
         if ($stmt->rowCount() !== 1) {
-            // 引き当て失敗（在庫不足・自分の出品など）
-            $pdo->rollBack();
-            set_flash('在庫が不足しているため購入できません。', 'error');
+            // 他の人に先に買われた・自分の出品など
+            unset($_SESSION['purchase']);
+            set_flash('この商品は購入できません。（売り切れの可能性があります）', 'error');
             redirect('purchase.php?productId=' . $productId);
         }
-
-        // 5. 購入履歴を登録する（単価は購入時点の値段）
-        $sql = 'INSERT INTO Purchase
-                    (ProductID, BuyerUserid, Quantity, UnitPrice,
-                     SoldDate, ShippingFlag, InsertUserId, InsertDateTime)
-                SELECT ProductID, :buyer, :quantity, Price,
-                       :soldDate, 0, :insertUser, :insertDate
-                FROM Sales
-                WHERE ProductID = :productId';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':buyer'      => $userId,
-            ':quantity'   => $quantity,
-            ':soldDate'   => $now,
-            ':insertUser' => $userId,
-            ':insertDate' => $now,
-            ':productId'  => $productId,
-        ]);
-
-        // 6. コミット
-        $pdo->commit();
-    } catch (Throwable $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
+    } catch (PDOException $e) {
         error_log('[purchase_confirm] ' . $e->getMessage());
         set_flash('購入に失敗しました。', 'error');
         redirect(URL_MAIN);
     }
 
-    // 7. セッションの購入情報を削除
+    // 3. セッションの購入情報を削除
     unset($_SESSION['purchase']);
 
-    // 8. メイン画面へ
+    // 4. メイン画面へ
     set_flash('購入が完了しました。', 'success');
     redirect(URL_MAIN);
 }
@@ -131,7 +104,7 @@ if ($purchase === null) {
 
 // 3. 購入情報を表示する
 $stmt = db()->prepare(
-    'SELECT ProductID, ProductName, Price, Stock FROM Sales WHERE ProductID = :productId'
+    'SELECT ProductID, ProductName, Price FROM Sales WHERE ProductID = :productId'
 );
 $stmt->execute([':productId' => $purchase['product_id']]);
 $product = $stmt->fetch();
@@ -148,13 +121,9 @@ $stmt = db()->prepare(
 $stmt->execute([':userId' => login_user_id()]);
 $user = $stmt->fetch();
 
-$quantity = (int)$purchase['quantity'];
-
-view('purchase/purchase_confirm', [
-    'flash'    => get_flash(),
-    'token'    => csrf_token(),
-    'product'  => $product,
-    'user'     => $user,
-    'quantity' => $quantity,
-    'total'    => (int)$product['Price'] * $quantity,
+view('purchase_confirm', [
+    'flash'   => get_flash(),
+    'token'   => csrf_token(),
+    'product' => $product,
+    'user'    => $user,
 ]);

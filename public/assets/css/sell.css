@@ -1,0 +1,5 @@
+/* エラーメッセージ */
+.error {
+  color: #d00;
+  margin: 4px 0;
+}
