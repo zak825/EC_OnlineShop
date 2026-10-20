@@ -94,7 +94,7 @@
               <span class="item__price">¥<?= number_format((int)$item['Price']) ?></span>
             </div>
 
-            <?php if ($item['BuyerName'] === null): ?>
+            <?php if ($item['BuyerUserid'] === null): ?>
               <div class="item__status">
                 <span class="badge">販売中</span>
               </div>
@@ -120,7 +120,13 @@
                   <span class="badge badge--wait">発送済み</span>
                 <?php else: ?>
                   <span class="badge badge--alert">未発送</span>
-                  <a href="<?= h(URL_SHIPPING) ?>?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary btn--small">発送</a>
+                  <!-- 発送ボタン：発送通知送信画面へ POST で商品IDを渡す -->
+                  <form action="<?= h(URL_SHIPPING) ?>" method="post" class="inline-form">
+                    <input type="hidden" name="action" value="open">
+                    <input type="hidden" name="product_id" value="<?= (int)$item['ProductID'] ?>">
+                    <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+                    <button type="submit" class="btn btn--primary btn--small">発送</button>
+                  </form>
                 <?php endif; ?>
               </div>
 

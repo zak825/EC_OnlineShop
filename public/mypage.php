@@ -72,4 +72,5 @@ view('mypage', [
     'tab'      => $tab,
     'bought'   => $bought,
     'sold'     => $sold,
+    'token'    => csrf_token(),
 ]);
