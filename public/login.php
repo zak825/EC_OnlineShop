@@ -36,7 +36,7 @@
                     $stmt->execute();
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    if ($user && $user['LoginPassword'] === $password) {
+                    if ($user && password_verify($password, $user['LoginPassword'])) {
                         // 4. ログイン情報をセッションに書き込む
                         session_regenerate_id(true);
                         $_SESSION['logged_in']     = true;
