@@ -13,7 +13,9 @@ require_once __DIR__ . '/../src/bootstrap.php';
         <?php if (isset($_SESSION['Userid'])): ?>
             <!-- 🔓 ログイン済みの表示 -->
             <a href="mypage.php"><?php echo($_SESSION['Userid']); ?></a>
-            <a href="../templates/login.html">ログアウト</a>
+            <form action="logout.php" method="post">
+                <button type="submit">ログアウト</button>
+            </form>
             
         <?php else: ?>
             <!-- 🔒 未ログインの表示 -->
