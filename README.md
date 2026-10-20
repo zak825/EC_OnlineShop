@@ -1,6 +1,6 @@
 # CSE_EC
 
-インターン課題のフリマ形式オンラインショッピングサイト（PHP + MySQL / XAMPP）
+インターン課題のフリマ形式オンラインショッピングサイト（PHP + Microsoft SQL Server / XAMPP）
 
 ## ディレクトリ構成
 
@@ -147,12 +147,3 @@ include TEMPLATE_DIR . '/layout/header.html';
 
 ログイン中のユーザー情報は `current_user_id()`（互換関数 `login_user_id()`）と `current_user_name()` で取得できます。POSTフォームには `csrf_token()` の値を hidden 項目として含め、受信時は `check_csrf_token()` を呼びます。この関数は引数を省略すると `$_POST['csrf_token']` を検証します。
 
-## 担当
-
-| 画面 | 担当 |
-|---|---|
-| ログイン・アカウント登録 | |
-| メイン画面 | |
-| 販売・販売確認 | |
-| 購入・購入確認 | |
-| 状況確認・発送通知・レビュー | |
