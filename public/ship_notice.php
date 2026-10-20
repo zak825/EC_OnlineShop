@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // 発送通知送信画面
 //   POST ship_notice.php … マイページの発送ボタン（action=open）
@@ -61,7 +61,7 @@ try {
   // 発送ボタン（マイページから来たとき）：確認画面を出してよいか調べる
   // ----------------------------------------------------------
   if ($action === 'open') {
-    $stmt = $pdo->prepare('SELECT Userid, BuyerName, ShippingFlag FROM Sales WHERE ProductID = :product_id');
+    $stmt = $pdo->prepare('SELECT Userid, BuyerUserid, ShippingFlag FROM Sales WHERE ProductID = :product_id');
     $stmt->execute([':product_id' => (int)$product_id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -73,10 +73,10 @@ try {
     if ((int)$row['Userid'] !== $user_id) {
       redirect(URL_STATUS);
     }
-    // 売れていなかったら、マイページにてボタンがないからいらない
-    // if ($row['BuyerName'] === null) {
-    //   redirect(URL_STATUS);
-    // }
+    // 未購入の商品は発送できない
+    if ($row['BuyerUserid'] === null) {
+      redirect(URL_STATUS);
+    }
     // 発送済み
     if ((int)$row['ShippingFlag'] === 1) {
       redirect(URL_STATUS);
@@ -89,14 +89,13 @@ try {
   // ----------------------------------------------------------
   if ($action === 'ship') {
     $sql = 'UPDATE Sales '
-      . 'SET ShippingFlag = 1, UpdateUserId = :update_userid, UpdateDateTime = GETDATE() '
+      . 'SET ShippingFlag = 1 '
       . 'WHERE ProductID = :product_id '
       . 'AND Userid = :userid '
-      . 'AND BuyerName IS NOT NULL '
+      . 'AND BuyerUserid IS NOT NULL '
       . 'AND (ShippingFlag = 0 OR ShippingFlag IS NULL)';
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-      ':update_userid' => $user_id,
       ':product_id'    => (int)$product_id,
       ':userid'        => $user_id,
     ]);

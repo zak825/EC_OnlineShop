@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // セッション・ログイン関連の共通処理
 //
@@ -15,27 +15,49 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 開発用の自動ログイン（APP_DEBUG が true のときだけ）
-if (APP_DEBUG && defined('DEV_LOGIN_USER_ID') && DEV_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = DEV_LOGIN_USER_ID;
-}
+/**
+ * ログイン状態およびセッション有効期限（タイムアウト）を確認する
+ *
+ * @return bool ログイン中かつ有効期限内なら true、未ログインまたは期限切れなら false
+ */
+function is_logged_in(): bool {
+    // 1. ユーザーID・最終操作時刻が存在するか確認
+    if (
+        empty($_SESSION['user_id']) ||
+        empty($_SESSION['last_activity'])
+    ) {
+        $devUserId = development_login_user_id();
+        if ($devUserId === null) {
+            return false;
+        }
 
-/** ログイン済みか */
-function is_logged_in(): bool
-{
-    return isset($_SESSION['user_id']) || development_login_user_id() !== null;
-}
-
-/** ログイン中のユーザーID */
-function login_user_id(): int
-{
-    if (isset($_SESSION['user_id'])) {
-        return (int)$_SESSION['user_id'];
+        $_SESSION['logged_in']     = true;
+        $_SESSION['user_id']       = $devUserId;
+        $_SESSION['UserId']        = $devUserId; // 互換キー
+        $_SESSION['last_activity'] = time();
     }
 
-    $userId = development_login_user_id();
-    if ($userId === null) {
-        throw new LogicException('ログイン中のユーザーがありません。');
+    // 2. DB (SystemConfiguration) からセッションタイムアウト秒数を取得（初期値: 1800秒 = 30分）
+    $timeout = 30 * 60;
+    if (function_exists('db')) {
+        try {
+            $pdo = db();
+            $sql = "SELECT TOP (1) [Value]
+                    FROM dbo.SystemConfiguration
+                    WHERE Category = :category AND [Key] = :config_key";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':category'   => 'Session',
+                ':config_key' => 'SessionTimeout',
+            ]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row !== false && is_numeric($row['Value']) && (int)$row['Value'] > 0) {
+                $timeout = (int)$row['Value'] * 60;
+            }
+        } catch (PDOException $e) {
+            // DB接続エラーやテーブル未作成時はデフォルト値（1800秒）を使用
+            error_log('Session timeout config fetch error: ' . $e->getMessage());
+        }
     }
 
     return $userId;
@@ -69,11 +91,19 @@ function buyer_value(int $userId): string
     return (string)$userId;
 }
 
-/** 画面遷移して処理を終える */
-function redirect(string $url): void
-{
-    header('Location: ' . $url);
-    exit;
+/**
+ * 現在ログイン中のユーザーIDを取得する（未ログイン時は null）
+ *
+ * @return int|null
+ */
+function current_user_id(): ?int {
+    if (isset($_SESSION['user_id'])) {
+        return (int)$_SESSION['user_id'];
+    }
+    if (isset($_SESSION['UserId'])) {
+        return (int)$_SESSION['UserId'];
+    }
+    return null;
 }
 
 /** ログイン画面へ遷移する（$return があればログイン後そこへ戻る） */
@@ -86,10 +116,20 @@ function redirect_to_login(?string $return = null): void
     redirect($url);
 }
 
-/** 次の画面で1回だけ表示するメッセージを保存する（type: info / success / warning / error） */
-function set_flash(string $message, string $type = 'info'): void
-{
-    $_SESSION['flash'] = ['message' => $message, 'type' => $type];
+/**
+ * 現在ログイン中のユーザー名（氏名）を取得する
+ * （購入時の BuyerName 登録やマイページ表示用）
+ *
+ * @return string|null
+ */
+function current_user_name(): ?string {
+    if (isset($_SESSION['user_name'])) {
+        return (string)$_SESSION['user_name'];
+    }
+    if (isset($_SESSION['UserName'])) {
+        return (string)$_SESSION['UserName'];
+    }
+    return null;
 }
 
 /** 保存したメッセージを取り出す（取り出したら消える） */
@@ -100,10 +140,34 @@ function get_flash(): ?array
     return $flash;
 }
 
-/** CSRFトークン（二重送信対策も兼ねる）を発行する */
-function csrf_token(): string
-{
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+/**
+ * 開発用の自動ログインに使うユーザーIDを返す（有効な場合のみ）
+ */
+function development_login_user_id(): ?int {
+    if (!defined('APP_DEBUG') || APP_DEBUG !== true) {
+        return null;
+    }
+    if (!defined('DEV_LOGIN_USER_ID') || !is_numeric(DEV_LOGIN_USER_ID) || (int)DEV_LOGIN_USER_ID <= 0) {
+        return null;
+    }
+
+    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+    if ($remoteAddr !== '127.0.0.1' && $remoteAddr !== '::1') {
+        return null;
+    }
+
+    return (int)DEV_LOGIN_USER_ID;
+}
+
+/**
+ * CSRFトークンを生成・取得する（フォームのhidden項目用）
+ *
+ * @return string
+ */
+function csrf_token(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
     return $_SESSION['csrf_token'];
 }
 /**
