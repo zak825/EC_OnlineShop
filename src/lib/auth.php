@@ -21,28 +21,38 @@ if (session_status() === PHP_SESSION_NONE) {
  * @return bool ログイン中かつ有効期限内なら true、未ログインまたは期限切れなら false
  */
 function is_logged_in(): bool {
-    // 1. ログインフラグ・ユーザーID・最終操作時刻が存在するか確認
+    // 1. ユーザーID・最終操作時刻が存在するか確認
     if (
-        empty($_SESSION['logged_in']) ||
         empty($_SESSION['user_id']) ||
         empty($_SESSION['last_activity'])
     ) {
-        return false;
+        $devUserId = development_login_user_id();
+        if ($devUserId === null) {
+            return false;
+        }
+
+        $_SESSION['logged_in']     = true;
+        $_SESSION['user_id']       = $devUserId;
+        $_SESSION['UserId']        = $devUserId; // 互換キー
+        $_SESSION['last_activity'] = time();
     }
 
     // 2. DB (SystemConfiguration) からセッションタイムアウト秒数を取得（初期値: 1800秒 = 30分）
-    $timeout = 1800;
+    $timeout = 30 * 60;
     if (function_exists('db')) {
         try {
             $pdo = db();
             $sql = "SELECT TOP (1) [Value]
                     FROM dbo.SystemConfiguration
-                    WHERE Category = 'Session' AND [Key] = 'TimeoutSeconds'";
+                    WHERE Category = :category AND [Key] = :config_key";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute();
+            $stmt->execute([
+                ':category'   => 'Session',
+                ':config_key' => 'SessionTimeout',
+            ]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($row !== false && is_numeric($row['Value'])) {
-                $timeout = (int)$row['Value'];
+            if ($row !== false && is_numeric($row['Value']) && (int)$row['Value'] > 0) {
+                $timeout = (int)$row['Value'] * 60;
             }
         } catch (PDOException $e) {
             // DB接続エラーやテーブル未作成時はデフォルト値（1800秒）を使用
@@ -91,7 +101,13 @@ function redirect_to_login(?string $returnTo = null): void {
  * @return int|null
  */
 function current_user_id(): ?int {
-    return isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+    if (isset($_SESSION['user_id'])) {
+        return (int)$_SESSION['user_id'];
+    }
+    if (isset($_SESSION['UserId'])) {
+        return (int)$_SESSION['UserId'];
+    }
+    return null;
 }
 
 /**
@@ -115,7 +131,13 @@ function login_user_id(): int {
  * @return string|null
  */
 function current_user_name(): ?string {
-    return isset($_SESSION['user_name']) ? (string)$_SESSION['user_name'] : null;
+    if (isset($_SESSION['user_name'])) {
+        return (string)$_SESSION['user_name'];
+    }
+    if (isset($_SESSION['UserName'])) {
+        return (string)$_SESSION['UserName'];
+    }
+    return null;
 }
 
 /**
@@ -137,6 +159,25 @@ function logout_session(): void {
     }
     session_destroy();
     session_start();
+}
+
+/**
+ * 開発用の自動ログインに使うユーザーIDを返す（有効な場合のみ）
+ */
+function development_login_user_id(): ?int {
+    if (!defined('APP_DEBUG') || APP_DEBUG !== true) {
+        return null;
+    }
+    if (!defined('DEV_LOGIN_USER_ID') || !is_numeric(DEV_LOGIN_USER_ID) || (int)DEV_LOGIN_USER_ID <= 0) {
+        return null;
+    }
+
+    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+    if ($remoteAddr !== '127.0.0.1' && $remoteAddr !== '::1') {
+        return null;
+    }
+
+    return (int)DEV_LOGIN_USER_ID;
 }
 
 /**
