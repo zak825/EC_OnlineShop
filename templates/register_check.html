@@ -37,6 +37,14 @@
                     <span class="confirm-label">電話番号</span>
                     <span class="confirm-value"><?= h($user['TEL'] ?? $user['tel'] ?? '') ?></span>
                 </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">秘密の質問</span>
+                    <span class="confirm-value"><?= h($secretQuestionText ?? '') ?></span>
+                </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">回答</span>
+                    <span class="confirm-value"><?= h($secretAnswer ?? '') ?></span>
+                </div>
             </div>
 
             <form id="check-form" action="register_check.php" method="post">

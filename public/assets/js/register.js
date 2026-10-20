@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const addressInput = document.getElementById('address');
     const telInput = document.getElementById('tel');
     const passwordInput = document.getElementById('password');
+    const secretQuestionSelect = document.getElementById('secret_question_id');
+    const secretAnswerInput = document.getElementById('secret_answer');
     const clearBtn = document.getElementById('clear-btn');
     const errorMsg = document.getElementById('error-message');
     const minLenElem = document.getElementById('pass-min-length');
@@ -28,9 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const address = addressInput.value.trim();
         const tel = telInput.value.trim();
         const password = passwordInput.value;
+        const secretQuestionId = secretQuestionSelect ? secretQuestionSelect.value : '';
+        const secretAnswer = secretAnswerInput ? secretAnswerInput.value.trim() : '';
 
         // 1. 未入力・桁数チェックを行う
-        if (userName === '' || zipCode === '' || address === '' || tel === '' || password === '') {
+        if (userName === '' || zipCode === '' || address === '' || tel === '' || password === ''
+            || secretQuestionId === '' || secretAnswer === '') {
             e.preventDefault();
             showError('すべての項目を入力してください。');
             return;
@@ -60,6 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 秘密の質問IDが定義済み（1〜5）であるかチェックする
+        if (!/^[1-5]$/.test(secretQuestionId)) {
+            e.preventDefault();
+            showError('秘密の質問を正しく選択してください。');
+            return;
+        }
+
+        if (secretAnswer.length > 100) {
+            e.preventDefault();
+            showError('秘密の質問の回答は100文字以内で入力してください。');
+            return;
+        }
+
         // 2. パスワードポリシーのチェックを行う
         const minLen = parseInt(minLenElem ? minLenElem.value : '8', 10) || 8;
         const maxLen = parseInt(maxLenElem ? maxLenElem.value : '50', 10) || 50;
@@ -82,6 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
             addressInput.value = '';
             telInput.value = '';
             passwordInput.value = '';
+            if (secretQuestionSelect) secretQuestionSelect.value = '';
+            if (secretAnswerInput) secretAnswerInput.value = '';
             hideError();
             userNameInput.focus();
         });

@@ -19,7 +19,8 @@
     margin-bottom: 4px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     width: 100%;
     padding: 4px;
     box-sizing: border-box;

@@ -21,9 +21,13 @@
     $address  = $registerUser['Address'] ?? $registerUser['address'] ?? '';
     $tel      = $registerUser['TEL'] ?? $registerUser['tel'] ?? '';
     $passwordHash = $registerUser['LoginPassword'] ?? $registerUser['password'] ?? '';
+    $secretQuestionId = (int)($registerUser['SecretQuestionId'] ?? $registerUser['secret_question_id'] ?? 0);
+    $secretAnswer     = $registerUser['SecretAnswer'] ?? $registerUser['secret_answer'] ?? '';
+    $secretQuestions  = get_secret_questions();
 
     // 必須セッション情報が欠落している場合もアカウント登録画面へリダイレクト
-    if (empty($userId) || $userName === '' || $passwordHash === '') {
+    if (empty($userId) || $userName === '' || $passwordHash === ''
+        || !array_key_exists($secretQuestionId, $secretQuestions) || $secretAnswer === '') {
         header('Location: register.php');
         exit;
     }
@@ -58,16 +62,18 @@
                     // IDENTITYが設定されていないテーブル構成の場合はスキップ
                 }
 
-                $sql = "INSERT INTO dbo.UserData (UserId, UserName, ZipCode, Address, TEL, LoginPassword)
-                        VALUES (:user_id, :user_name, :zip_code, :address, :tel, :password)";
+                $sql = "INSERT INTO dbo.UserData (UserId, UserName, ZipCode, Address, TEL, LoginPassword, SecretQuestionId, SecretAnswer)
+                        VALUES (:user_id, :user_name, :zip_code, :address, :tel, :password, :secret_question_id, :secret_answer)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
-                    ':user_id'   => (int)$userId,
-                    ':user_name' => $userName,
-                    ':zip_code'  => $zipCode,
-                    ':address'   => $address,
-                    ':tel'       => $tel,
-                    ':password'  => $passwordHash,
+                    ':user_id'            => (int)$userId,
+                    ':user_name'          => $userName,
+                    ':zip_code'           => $zipCode,
+                    ':address'            => $address,
+                    ':tel'                => $tel,
+                    ':password'           => $passwordHash,
+                    ':secret_question_id' => $secretQuestionId,
+                    ':secret_answer'      => $secretAnswer,
                 ]);
 
                 try {
@@ -125,4 +131,6 @@
         'token'        => csrf_token(),
         'errorMessage' => $errorMessage,
         'user'         => $registerUser,
+        'secretQuestionText' => $secretQuestions[$secretQuestionId] ?? '',
+        'secretAnswer'       => $secretAnswer,
     ]);

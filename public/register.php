@@ -16,12 +16,15 @@
 
     $pdo = db();
     $errorMessage = '';
+    $secretQuestions = get_secret_questions();
 
     // 入力フォーム保持用変数
-    $userNameInput = '';
-    $zipCodeInput  = '';
-    $addressInput  = '';
-    $telInput      = '';
+    $userNameInput         = '';
+    $zipCodeInput          = '';
+    $addressInput          = '';
+    $telInput              = '';
+    $secretQuestionIdInput = '';
+    $secretAnswerInput     = '';
 
     // パスワード文字数設定のデフォルト値
     $passwordMinLength = 8;
@@ -64,6 +67,8 @@
             $addressInput  = trim($_POST['address'] ?? '');
             $telInput      = trim($_POST['tel'] ?? '');
             $password      = $_POST['password'] ?? '';
+            $secretQuestionIdInput = trim((string)($_POST['secret_question_id'] ?? ''));
+            $secretAnswerInput     = trim((string)($_POST['secret_answer'] ?? ''));
 
             // 1. 未入力・桁数チェックを行う
             // すべての項目が入力されているか、また各項目（氏名、郵便番号、住所、電話番号）がUserDataテーブル定義の桁数・形式内であるかチェックする
@@ -71,8 +76,10 @@
             $addressLen  = mb_strlen($addressInput, 'UTF-8');
             $zipCodeLen  = strlen($zipCodeInput);
             $telLen      = strlen($telInput);
+            $secretAnswerLen = mb_strlen($secretAnswerInput, 'UTF-8');
 
-            if ($userNameInput === '' || $zipCodeInput === '' || $addressInput === '' || $telInput === '' || $password === '') {
+            if ($userNameInput === '' || $zipCodeInput === '' || $addressInput === '' || $telInput === '' || $password === ''
+                || $secretQuestionIdInput === '' || $secretAnswerInput === '') {
                 $errorMessage = 'すべての項目を入力してください。';
             } elseif ($userNameLen > 50) {
                 $errorMessage = '氏名は50文字以内で入力してください。';
@@ -82,6 +89,11 @@
                 $errorMessage = '住所は256文字以内で入力してください。';
             } elseif ($telLen > 15 || !preg_match('/^[0-9\-]{10,15}$/', $telInput)) {
                 $errorMessage = '電話番号は15桁以内の半角数字（ハイフン可）で入力してください。';
+            } elseif (!preg_match('/\A\d+\z/', $secretQuestionIdInput) || !array_key_exists((int)$secretQuestionIdInput, $secretQuestions)) {
+                // 秘密の質問IDが定義済み（1〜5）であるかチェックする
+                $errorMessage = '秘密の質問を正しく選択してください。';
+            } elseif ($secretAnswerLen > 100) {
+                $errorMessage = '秘密の質問の回答は100文字以内で入力してください。';
             } else {
                 // 2. パスワードポリシーのチェックを行う
                 // 入力されたパスワードの長さが、SystemConfigurationテーブルから取得した文字数設定の範囲内であるかチェックする
@@ -119,6 +131,10 @@
                                 'tel'           => $telInput,
                                 'LoginPassword' => $passwordHash,
                                 'password'      => $passwordHash,
+                                'SecretQuestionId'   => (int)$secretQuestionIdInput,
+                                'secret_question_id' => (int)$secretQuestionIdInput,
+                                'SecretAnswer'       => $secretAnswerInput,
+                                'secret_answer'      => $secretAnswerInput,
                             ];
 
                             // 5. 画面遷移：ユーザーID発行（登録確認）画面へ遷移する
@@ -149,4 +165,7 @@
         'telInput'          => $telInput,
         'passwordMinLength' => $passwordMinLength,
         'passwordMaxLength' => $passwordMaxLength,
+        'secretQuestions'       => $secretQuestions,
+        'secretQuestionIdInput' => $secretQuestionIdInput,
+        'secretAnswerInput'     => $secretAnswerInput,
     ]);

@@ -44,6 +44,22 @@
                 <small class="note">※<?= h($passwordMinLength ?? 8) ?>文字以上<?= h($passwordMaxLength ?? 50) ?>文字以内で入力してください。</small>
             </div>
 
+            <div class="form-group">
+                <label for="secret_question_id">秘密の質問</label>
+                <select id="secret_question_id" name="secret_question_id" required>
+                    <option value="">選択してください</option>
+                    <?php foreach (($secretQuestions ?? []) as $questionId => $questionText): ?>
+                        <option value="<?= h($questionId) ?>"<?= (string)($secretQuestionIdInput ?? '') === (string)$questionId ? ' selected' : '' ?>><?= h($questionText) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="secret_answer">秘密の質問の回答</label>
+                <input type="text" id="secret_answer" name="secret_answer" maxlength="100" value="<?= h($secretAnswerInput ?? '') ?>" required>
+                <small class="note">※パスワードを忘れた際の本人確認に使用します（100文字以内）。</small>
+            </div>
+
             <div class="btn-row">
                 <button type="submit" id="register-btn">登録</button>
                 <button type="button" id="clear-btn">クリア</button>

@@ -34,3 +34,12 @@
 .register-section .section-label {
     margin: 0 0 6px 0;
 }
+
+/* パスワード再設定画面への導線 */
+.login-links {
+    margin-top: 16px;
+}
+
+.login-links .btn-passreset-link {
+    font-size: 14px;
+}
