@@ -66,16 +66,15 @@ if ($action === 'sell') {
     $stmt->execute();
     $product_id = (int)$stmt->fetchColumn();
 
-    $sql = 'INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, ShippingFlag, InsertUserId, InsertDateTime) '
-      . 'VALUES (:product_id, :genre_code, :product_name, :price, :userid, 0, :insert_userid, GETDATE())';
+    $sql = 'INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, ShippingFlag) '
+      . 'VALUES (:product_id, :genre_code, :product_name, :price, :userid, 0)';
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-      ':product_id'    => $product_id,
-      ':genre_code'    => $sell['genre_code'],
-      ':product_name'  => $sell['product_name'],
-      ':price'         => $sell['price'],
-      ':userid'        => $user_id,
-      ':insert_userid' => $user_id,
+      ':product_id'   => $product_id,
+      ':genre_code'   => $sell['genre_code'],
+      ':product_name' => $sell['product_name'],
+      ':price'        => $sell['price'],
+      ':userid'       => $user_id,
     ]);
 
     $pdo->commit();

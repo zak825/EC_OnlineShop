@@ -51,6 +51,8 @@
         <!-- 完了画面領域（初期状態は非表示、JSで完了時に表示） -->
         <div id="complete-section" class="section" style="display: none;">
             <p class="complete-message">登録が完了しました！</p>
+            <!-- 実際に登録したユーザーID（確認画面の表示から変わることがあるので JS で入れる） -->
+            <p class="complete-user-id">あなたのユーザーIDは <strong id="complete-user-id"><?= h($user['UserId'] ?? $user['user_id'] ?? '') ?></strong> です</p>
             <div class="btn-row">
                 <button type="button" id="login-page-btn" class="btn-primary" onclick="location.href='login.php'">ログインページ</button>
             </div>
