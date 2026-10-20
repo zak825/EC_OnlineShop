@@ -18,23 +18,3 @@ function db(): PDO
     }
     return $pdo;
 }
-
-/**
- * テーブルに列があるかを返す（1リクエスト中は結果を使い回す）
- *
- * DB の定義が人によって違う（OnlineShop と sql/serverSetUp.sql）ため、
- * 列の有無で INSERT する列を切り替えるときに使う
- *   db_has_column('UserData', 'InsertUserId')
- */
-function db_has_column(string $table, string $column): bool
-{
-    static $cache = [];
-    $key = $table . '.' . $column;
-    if (!array_key_exists($key, $cache)) {
-        // COL_LENGTH は列が無ければ NULL を返す
-        $stmt = db()->prepare('SELECT COL_LENGTH(:table, :column)');
-        $stmt->execute([':table' => $table, ':column' => $column]);
-        $cache[$key] = $stmt->fetchColumn() !== null;
-    }
-    return $cache[$key];
-}

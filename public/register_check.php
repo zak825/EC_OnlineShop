@@ -48,12 +48,6 @@
             try {
                 // 1. SQLインジェクション対策実施（プレースホルダ利用）
                 // 2. ユーザー情報をUserDataに登録
-                // DB の定義の違い（OnlineShop と sql/serverSetUp.sql）を先に調べておく
-                // ※トランザクション中に SQL がエラーになると、SQL Server がそれまでの INSERT を取り消してしまうため、
-                //   「失敗したら無視する」のではなく、必要なときだけ実行する
-                $hasIdentity = (int)$pdo->query("SELECT OBJECTPROPERTY(OBJECT_ID('dbo.UserData'), 'TableHasIdentity')")->fetchColumn() === 1;
-                $hasCommon   = $pdo->query("SELECT OBJECT_ID('dbo.Common')")->fetchColumn() !== null;
-
                 $pdo->beginTransaction();
                 $now = date('Y-m-d H:i:s');
 
@@ -72,48 +66,31 @@
                     $registerUser['user_id'] = $userId;
                 }
 
-                // SQL Server IDENTITY列の挿入対応（serverSetUp.sql の DB は UserId が自動採番）
-                if ($hasIdentity) {
-                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData ON");
-                }
+                // UserId は IDENTITY（自動採番）だが、発番済みの ID で登録するので一時的に指定できるようにする
+                $pdo->exec("SET IDENTITY_INSERT dbo.UserData ON");
 
-                $columns = 'UserId, UserName, ZipCode, Address, TEL, LoginPassword';
-                $values  = ':user_id, :user_name, :zip_code, :address, :tel, :password';
-                $params  = [
+                $sql = "INSERT INTO dbo.UserData (UserId, UserName, ZipCode, Address, TEL, LoginPassword)
+                        VALUES (:user_id, :user_name, :zip_code, :address, :tel, :password)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
                     ':user_id'   => (int)$userId,
                     ':user_name' => $userName,
                     ':zip_code'  => $zipCode,
                     ':address'   => $address,
                     ':tel'       => $tel,
                     ':password'  => $passwordHash,
-                ];
+                ]);
 
-                // OnlineShop の DB には登録者・登録日時の列（必須）があるので、あるときだけ入れる
-                // （sql/serverSetUp.sql で作った DB には無い）
-                if (db_has_column('UserData', 'InsertUserId')) {
-                    $columns .= ', InsertUserId, InsertDateTime';
-                    $values  .= ', :insert_user_id, GETDATE()';
-                    $params[':insert_user_id'] = (int)$userId;
-                }
+                $pdo->exec("SET IDENTITY_INSERT dbo.UserData OFF");
 
-                $sql = "INSERT INTO dbo.UserData ($columns) VALUES ($values)";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute($params);
-
-                if ($hasIdentity) {
-                    $pdo->exec("SET IDENTITY_INSERT dbo.UserData OFF");
-                }
-
-                // 共通項目（Commonテーブル）が存在する場合は登録ログを残す（serverSetUp.sql の DB のみ）
-                if ($hasCommon) {
-                    $commonSql = "INSERT INTO dbo.Common (InsertUserId, InsertDateTime)
-                                  VALUES (:user_id, :now)";
-                    $commonStmt = $pdo->prepare($commonSql);
-                    $commonStmt->execute([
-                        ':user_id' => (int)$userId,
-                        ':now'     => $now,
-                    ]);
-                }
+                // 共通項目（Commonテーブル）に登録ログを残す
+                $commonSql = "INSERT INTO dbo.Common (InsertUserId, InsertDateTime)
+                              VALUES (:user_id, :now)";
+                $commonStmt = $pdo->prepare($commonSql);
+                $commonStmt->execute([
+                    ':user_id' => (int)$userId,
+                    ':now'     => $now,
+                ]);
 
                 $pdo->commit();
 
