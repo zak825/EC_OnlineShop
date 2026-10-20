@@ -71,10 +71,14 @@ function csrf_token(): string
     return $_SESSION['csrf_token'];
 }
 
-/** CSRFトークンを確認する（1回使ったら無効にする） */
-function check_csrf_token(?string $token): bool
+/**
+ * CSRFトークンを確認する（1回使ったら無効にする）
+ * 引数を省略したときは、フォームから送られた csrf_token を確認する
+ */
+function check_csrf_token(?string $token = null): bool
 {
-    $saved = $_SESSION['csrf_token'] ?? '';
-    unset($_SESSION['csrf_token']);
+    $token = $token ?? ($_POST['csrf_token'] ?? null);   // 引数が無ければ POST の値を使う
+    $saved = $_SESSION['csrf_token'] ?? '';               // セッションに保存したトークン
+    unset($_SESSION['csrf_token']);                       // 1回使ったら無効にする
     return $token !== null && $saved !== '' && hash_equals($saved, $token);
 }
