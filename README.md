@@ -56,11 +56,11 @@ CSE_EC/
    ```powershell
    copy src\config\config.sample.php src\config\config.php
    ```
-   XAMPP の初期設定（root / パスワードなし）ならそのままで動く。
+   `config.php` の `DB_DSN`（サーバー名・DB名）、`DB_USER`、`DB_PASS` を自分の SQL Server の接続情報に書き換える。
 
-4. **DBを作成**：XAMPP で Apache と MySQL を Start し、`http://localhost/phpmyadmin` の「SQL」タブで `sql/01_schema.sql` → `sql/02_seed.sql` の順に実行
+5. **DBについて**：テーブル構築済みの SQL Server を使用するため、テーブル作成は不要。XAMPP では Apache のみ Start する（MySQL は使わない）。SQL Server のサービスが起動していることを確認する。
 
-5. **動作確認**：`http://localhost/CSE_EC/purchase.php?productId=1`
+6. **動作確認**：`http://localhost/CSE_EC/purchase.php?productId=1`
 
 ### テンプレート画面・JS・PHPをブラウザで開く
 
