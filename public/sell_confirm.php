@@ -66,17 +66,27 @@ if ($action === 'sell') {
     $stmt->execute();
     $product_id = (int)$stmt->fetchColumn();
 
-    $sql = 'INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, ShippingFlag, InsertUserId, InsertDateTime) '
-      . 'VALUES (:product_id, :genre_code, :product_name, :price, :userid, 0, :insert_userid, GETDATE())';
+    $columns = 'ProductID, GenreCode, ProductName, Price, Userid, ShippingFlag';
+    $values  = ':product_id, :genre_code, :product_name, :price, :userid, 0';
+    $params  = [
+      ':product_id'   => $product_id,
+      ':genre_code'   => $sell['genre_code'],
+      ':product_name' => $sell['product_name'],
+      ':price'        => $sell['price'],
+      ':userid'       => $user_id,
+    ];
+
+    // OnlineShop の DB には登録者・登録日時の列（必須）があるので、あるときだけ入れる
+    // （sql/serverSetUp.sql で作った DB には無い）
+    if (db_has_column('Sales', 'InsertUserId')) {
+      $columns .= ', InsertUserId, InsertDateTime';
+      $values  .= ', :insert_userid, GETDATE()';
+      $params[':insert_userid'] = $user_id;
+    }
+
+    $sql = 'INSERT INTO Sales (' . $columns . ') VALUES (' . $values . ')';
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      ':product_id'    => $product_id,
-      ':genre_code'    => $sell['genre_code'],
-      ':product_name'  => $sell['product_name'],
-      ':price'         => $sell['price'],
-      ':userid'        => $user_id,
-      ':insert_userid' => $user_id,
-    ]);
+    $stmt->execute($params);
 
     $pdo->commit();
 
