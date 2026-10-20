@@ -58,7 +58,6 @@ $stmt = db()->prepare(
 );
 $stmt->execute();
 $products = $stmt->fetchAll();
-var_dump(count($products));
 
 // ---- 3. 情報表示 ---------------------------------------------------
 view('index', [
