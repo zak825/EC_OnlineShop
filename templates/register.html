@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>アカウント登録画面</title>
-    <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/register.css">
 </head>
 
@@ -12,7 +11,7 @@
     <div id="wrap">
         <div class="container register-container">
             <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-            <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : '' ?>>
+            <p id="error-message" class="error-msg"<?= ($errorMessage ?? '') === '' ? ' style="display:none;"' : '' ?>>
                 <?= h($errorMessage ?? '') ?>
             </p>
 
