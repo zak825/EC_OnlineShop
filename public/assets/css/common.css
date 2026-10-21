@@ -1,4 +1,4 @@
-/* ---------- ヘッダーのリンク（ロゴは左、マイページは右） ---------- */
+﻿/* ---------- ヘッダーのリンク（ロゴは左、マイページは右） ---------- */
 .site-header {
   display: flex;
   justify-content: space-between;
@@ -13,4 +13,10 @@
 
 .site-nav__link:hover {
   text-decoration: underline;
+}
+
+#wrap {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0px auto;
 }
