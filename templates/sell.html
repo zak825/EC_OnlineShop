@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>販売画面</title>
-  <link rel="stylesheet" href="assets/css/sell.css">
+  <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
+  <link rel="stylesheet" href="assets/css/sell.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell.css') ?>">
 </head>
 
 <body>
@@ -56,7 +57,7 @@
           <p>選択中の画像（選び直すと入れ替わります）</p>
           <div class="image-list">
             <?php foreach ($image_urls as $url): ?>
-              <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item">
+              <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
