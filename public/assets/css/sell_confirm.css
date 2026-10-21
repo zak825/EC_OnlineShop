@@ -19,3 +19,12 @@
   object-fit: cover;   /* 縦横比を保ったまま、はみ出た部分を切り取る */
   border: 1px solid #ccc;
 }
+
+/* プレビューの画像は、sell.php のサムネイルと同じ 100×100 にする */
+.product__image--photo {
+  width: 100px;
+  height: 100px;
+  aspect-ratio: auto;   /* index.css の 4/3 指定を打ち消す */
+  object-fit: cover;    /* 縦横比を保ったまま、はみ出た部分を切り取る */
+  border: 1px solid #ccc;
+}

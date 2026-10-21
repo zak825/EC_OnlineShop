@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>ログイン画面</title>
+    <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/login.css">
 </head>
+
 <body>
     <div id="wrap">
         <div class="container">
             <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-            <p id="error-message" class="error-msg"<?= ($errorMessage ?? '') === '' ? ' style="display:none;"' : '' ?>>
+            <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : '' ?>>
                 <?= h($errorMessage ?? '') ?>
             </p>
 
@@ -36,9 +39,15 @@
                 <p class="section-label">ユーザー登録</p>
                 <button type="button" onclick="location.href='register.php'">登録</button>
             </div>
+
+            <!-- パスワード再設定画面への導線 -->
+            <div class="login-links">
+                <a href="passreset.php" class="btn-passreset-link">パスワードを忘れた方へ</a>
+            </div>
         </div>
 
         <script src="assets/js/login.js"></script>
     </div>
 </body>
+
 </html>

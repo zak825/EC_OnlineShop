@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 -- CSE_EC 開発用DBセットアップ（SQL Server）
 --
 -- データベース作成 → テーブル作成 → テストデータ投入 までを一括で行う。
@@ -15,6 +15,11 @@
 --   Userid 1 : 出品 太郎 … 商品を出品している人
 --   Userid 2 : 購入 花子 … 購入テスト・レビューテスト用（商品8をレビューできる）
 --   Userid 3 : 閲覧 次郎 … 同時購入テスト用
+--
+-- 秘密の質問（パスワード再設定用。質問IDは src/lib/auth.php の get_secret_questions() を参照）
+--   Userid 1 : 質問1（出身小学校の名前は？）       … 回答「千代田小学校」
+--   Userid 2 : 質問2（初めて飼ったペットの名前は？） … 回答「ポチ」
+--   Userid 3 : 質問4（好きな食べ物は？）           … 回答「カレー」
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -53,7 +58,9 @@ CREATE TABLE UserData (
     Address       NVARCHAR(256) NOT NULL,
     TEL           VARCHAR(15)   NOT NULL,
     LoginPassword VARCHAR(255)  NOT NULL,
-    IconPath      NVARCHAR(256)            -- プロフィールアイコンの画像パス（NULL = 未設定）
+    IconPath      NVARCHAR(256),           -- プロフィールアイコンの画像パス（NULL = 未設定）
+    SecretQuestionId INT           NOT NULL CONSTRAINT DF_UserData_SecretQuestionId DEFAULT (1),          -- 秘密の質問ID（1〜5）
+    SecretAnswer     NVARCHAR(100) NOT NULL CONSTRAINT DF_UserData_SecretAnswer     DEFAULT (N'初期回答') -- 秘密の質問の回答
 );
 
 -- 商品ジャンル
@@ -102,10 +109,10 @@ GO
 
 -- ユーザー（Userid は IDENTITY なので、番号を指定するときだけ ON にする）
 SET IDENTITY_INSERT UserData ON;
-INSERT INTO UserData (Userid, UserName, ZipCode, Address, TEL, LoginPassword) VALUES
-    (1, N'出品 太郎', '1000001', N'東京都千代田区千代田1-1',  '0312345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW'),
-    (2, N'購入 花子', '5300001', N'大阪府大阪市北区梅田1-1',  '0612345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW'),
-    (3, N'閲覧 次郎', '4600001', N'愛知県名古屋市中区三の丸1-1', '0521234567', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW');
+INSERT INTO UserData (Userid, UserName, ZipCode, Address, TEL, LoginPassword, SecretQuestionId, SecretAnswer) VALUES
+    (1, N'出品 太郎', '1000001', N'東京都千代田区千代田1-1',  '0312345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 1, N'千代田小学校'),
+    (2, N'購入 花子', '5300001', N'大阪府大阪市北区梅田1-1',  '0612345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 2, N'ポチ'),
+    (3, N'閲覧 次郎', '4600001', N'愛知県名古屋市中区三の丸1-1', '0521234567', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 4, N'カレー');
 SET IDENTITY_INSERT UserData OFF;
 
 -- ジャンル
