@@ -14,3 +14,8 @@
 .site-nav__link:hover {
   text-decoration: underline;
 }
+
+/* 省略された名前（ホバーで全文が出る） */
+.name-ellipsis {
+  cursor: help;
+}

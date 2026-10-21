@@ -22,11 +22,11 @@ if ($headerLoggedIn) {
     <nav>
         <?php if ($headerLoggedIn): ?>
             <div class="right">
-                <a href="mypage.php" class="UserName"><?= htmlspecialchars($headerUserName, ENT_QUOTES, 'UTF-8') ?></a>
+                <a href="mypage.php" class="UserName"><?= name_label($headerUserName) ?></a>
                 <form action="logout.php" method="post"
                       onsubmit="return confirm('ログアウトしますか？');">
                     <input type="hidden" name="csrf_token"
-                       value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+                       value="<?= h(csrf_token()) ?>">
                     <button type="submit" class="btn-logout">ログアウト</button>
             </form>
             </div>
