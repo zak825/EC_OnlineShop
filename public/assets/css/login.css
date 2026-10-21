@@ -34,3 +34,8 @@
 .register-section .section-label {
     margin: 0 0 6px 0;
 }
+
+.login-links {
+    margin-top: 16px;
+    font-size: 14px;
+}

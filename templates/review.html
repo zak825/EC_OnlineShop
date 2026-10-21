@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>レビュー | CSE_EC</title>
+  <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/review.css">
+</head>
+<body>
+  <div id="wrap">
+    <header class="site-header">
+      <a href="<?= h(URL_MAIN) ?>" class="site-logo">CSE_EC</a>
+    </header>
+
+    <main class="container">
+      <h1 class="page-title"><?= $mode === 'form' ? '受け取り完了・レビュー' : 'レビュー' ?></h1>
+
+      <?php if (!empty($flash)): ?>
+        <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
+      <?php endif; ?>
+
+      <?php if ($errors): ?>
+        <div class="message message--error">
+          <?php foreach ($errors as $e): ?>
+            <p class="message__line"><?= h($e) ?></p>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+
+      <!-- ===== 商品情報 ===== -->
+      <section class="card">
+        <h2 class="section-title"><?= $isBuyer ? '購入した商品' : '出品した商品' ?></h2>
+        <dl class="info-list">
+          <dt>商品名</dt>
+          <dd><?= h($product['ProductName']) ?></dd>
+
+          <dt>値段</dt>
+          <dd>¥<?= number_format((int)$product['Price']) ?></dd>
+
+          <?php if ($isBuyer): ?>
+            <dt>出品者</dt>
+            <dd><?= h($product['SellerName']) ?></dd>
+          <?php else: ?>
+            <dt>購入者</dt>
+            <dd><?= h($product['BuyerUserName'] ?? '不明') ?></dd>
+          <?php endif; ?>
+
+          <dt>購入日時</dt>
+          <dd><?= h(format_datetime($product['SoldDate'])) ?></dd>
+        </dl>
+      </section>
+
+      <?php if ($mode === 'form'): ?>
+        <!-- ===== 受け取り完了・レビュー記入 ===== -->
+        <form method="post" action="review.php" class="card" id="review-form">
+          <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
+          <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+
+          <h2 class="section-title">レビューを書く</h2>
+
+          <fieldset class="rating">
+            <legend class="form-label">評価 <span class="required">必須</span></legend>
+            <div class="rating__stars">
+              <?php for ($i = 5; $i >= 1; $i--): ?>
+                <input type="radio" id="score<?= $i ?>" name="score" value="<?= $i ?>"
+                      <?= $score === (string)$i ? 'checked' : '' ?> required>
+                <label for="score<?= $i ?>" title="★<?= $i ?>">★</label>
+              <?php endfor; ?>
+            </div>
+            <p class="rating__text" id="rating-text" aria-live="polite"></p>
+          </fieldset>
+
+          <label for="review" class="form-label">コメント <span class="optional">任意</span></label>
+          <textarea id="review" name="review" class="form-textarea" rows="4"
+                    maxlength="<?= (int)$maxLength ?>"
+                    placeholder="商品の状態や取引の感想など"><?= h($review) ?></textarea>
+          <p class="char-count"><span id="char-count"><?= mb_strlen($review) ?></span> / <?= (int)$maxLength ?></p>
+
+          <p class="note">投稿すると受け取り完了になります。レビューは後から変更できません。</p>
+
+          <div class="actions">
+            <a href="<?= h(URL_STATUS) ?>" class="btn btn--secondary">戻る</a>
+            <button type="submit" class="btn btn--primary" id="review-submit">受け取り完了</button>
+          </div>
+        </form>
+
+      <?php else: ?>
+        <!-- ===== レビュー表示 ===== -->
+        <section class="card">
+          <h2 class="section-title"><?= $isBuyer ? 'あなたのレビュー' : '購入者からのレビュー' ?></h2>
+
+          <?php if ($mode === 'view'): ?>
+            <span class="badge badge--done">受け取り完了</span>
+            <div class="review-body">
+              <p class="review-body__stars" aria-label="評価<?= (int)$product['sucre'] ?>"><?= stars($product['sucre']) ?></p>
+              <?php if ($product['revwe'] !== null): ?>
+                <p class="review-body__text"><?= nl2br(h($product['revwe'])) ?></p>
+              <?php else: ?>
+                <p class="review-body__text review-body__text--empty">（コメントなし）</p>
+              <?php endif; ?>
+            </div>
+          <?php else: ?>
+            <span class="badge badge--wait"><?= (int)$product['ShippingFlag'] === 1 ? '発送済み・受け取り待ち' : '未発送' ?></span>
+            <p class="empty">まだレビューはありません。</p>
+          <?php endif; ?>
+        </section>
+
+        <div class="actions">
+          <a href="<?= h(URL_STATUS) ?>" class="btn btn--secondary">戻る</a>
+        </div>
+      <?php endif; ?>
+    </main>
+
+    <script src="assets/js/common.js"></script>
+    <?php if ($mode === 'form'): ?>
+      <script src="assets/js/review.js"></script>
+    <?php endif; ?>
+  </div>
+</body>
+</html>

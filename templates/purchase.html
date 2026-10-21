@@ -1,57 +1,72 @@
-<?php
-$title   = '購入画面';
-$styles  = ['purchase.css'];
-$scripts = ['purchase.js'];
-include TEMPLATE_DIR . '/layout/header.html';
-?>
+<!DOCTYPE html>
+<html lang="ja">
 
-<h1 class="page-title">商品の購入</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購入画面 | CSE_EC</title>
+  <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/purchase.css">
+</head>
 
-<?php if ($error !== ''): ?>
-  <p class="message message--error"><?= h($error) ?></p>
-<?php endif; ?>
+<body>
+  <div id="wrap">
+    <header class="site-header">
+      <a href="<?= h(URL_MAIN) ?>" class="site-logo">CSE_EC</a>
+      <!-- マイページへのリンク（どの画面からでも行けるようにヘッダーに置く） -->
+      <nav class="site-nav">
+        <a href="<?= h(URL_STATUS) ?>" class="site-nav__link">マイページ</a>
+      </nav>
+    </header>
 
-<section class="card">
-  <h2 class="product-name"><?= h($product['ProductName']) ?></h2>
-  <p class="product-price">¥<?= number_format((int)$product['Price']) ?></p>
+    <main class="container">
+      <h1 class="page-title">商品の購入</h1>
 
-  <dl class="info-list">
-    <dt>ジャンル</dt>
-    <dd><?= h($product['GenreName']) ?></dd>
+      <?php if (!empty($flash)): ?>
+        <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
+      <?php endif; ?>
 
-    <dt>出品者</dt>
-    <dd><?= h($product['SellerName']) ?></dd>
+      <?php if ($error !== ''): ?>
+        <p class="message message--error"><?= h($error) ?></p>
+      <?php endif; ?>
 
-    <dt>在庫数</dt>
-    <dd><?= (int)$product['Stock'] ?></dd>
-  </dl>
-</section>
+      <section class="card">
+        <h2 class="product-name"><?= h($product['ProductName']) ?></h2>
+        <p class="product-price">¥<?= number_format((int)$product['Price']) ?></p>
 
-<?php if (!$canBuy): ?>
-  <p class="message message--warning"><?= h($blockMessage) ?></p>
+        <dl class="info-list">
+          <dt>ジャンル</dt>
+          <dd><?= h($product['GenreName']) ?></dd>
 
-  <div class="actions">
-    <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
+          <dt>出品者</dt>
+          <dd><?= h($product['SellerName']) ?></dd>
+
+          <dt>状態</dt>
+          <dd><?= $product['BuyerUserid'] === null ? '販売中' : '売り切れ' ?></dd>
+        </dl>
+      </section>
+
+      <?php if (!$canBuy): ?>
+        <p class="message message--warning"><?= h($blockMessage) ?></p>
+
+        <div class="actions">
+          <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
+        </div>
+      <?php else: ?>
+        <form method="post" action="purchase.php">
+          <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
+          <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+
+          <div class="actions">
+            <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
+            <button type="submit" class="btn btn--primary">購入</button>
+          </div>
+        </form>
+      <?php endif; ?>
+    </main>
+
+    <script src="assets/js/common.js"></script>
   </div>
-<?php else: ?>
-  <form method="post" action="purchase.php" class="card" id="purchase-form">
-    <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
-    <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+</body>
 
-    <label for="quantity" class="form-label">数量</label>
-    <div class="quantity">
-      <input type="number" id="quantity" name="quantity" class="form-input"
-             value="<?= h($quantity) ?>"
-             min="1" max="<?= (int)$product['Stock'] ?>" step="1" required
-             data-price="<?= (int)$product['Price'] ?>">
-      <p class="quantity__subtotal">小計 <span id="subtotal">¥<?= number_format((int)$product['Price'] * max(1, (int)$quantity)) ?></span></p>
-    </div>
-
-    <div class="actions">
-      <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
-      <button type="submit" class="btn btn--primary">購入</button>
-    </div>
-  </form>
-<?php endif; ?>
-
-<?php include TEMPLATE_DIR . '/layout/footer.html'; ?>
+</html>

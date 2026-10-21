@@ -1,0 +1,37 @@
+/* エラーメッセージ */
+.error {
+  color: #d00;
+  margin: 4px 0;
+}
+
+/* エラーがないときは表示しない */
+.error:empty {
+  display: none;
+}
+
+/* エラーが発生したときは赤くする（sell.js が付け外しする） */
+.Form-Item-Input.is-invalid {
+  border-color: #e74c3c;
+  background-color: #fdf2f2;
+}
+
+/* 正しく入力できたときは緑にする */
+.Form-Item-Input.is-valid {
+  border-color: #27ae60;
+  background-color: #f8fff8;
+}
+
+/* 商品画像の一覧（サムネイル） */
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.image-list__item {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}

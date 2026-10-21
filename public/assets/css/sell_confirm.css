@@ -1,0 +1,20 @@
+/* エラーメッセージ */
+.error {
+  color: #d00;
+  margin: 4px 0;
+}
+
+/* 商品画像の一覧（サムネイル） */
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.image-list__item {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>販売画面</title>
+  <link rel="stylesheet" href="assets/css/sell.css">
+</head>
+
+<body>
+  <div id="wrap">
+    <main>
+      <h1>販売画面</h1>
+
+      <?php if ($error_db !== ''): ?>
+        <p class="error"><?= h($error_db) ?></p>
+      <?php endif; ?>
+
+      <!-- 画像を送るので enctype="multipart/form-data" -->
+      <form action="sell.php" method="post" id="sell_form" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+
+        <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
+        <p><label for="product_name">商品名</label></p>
+        <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="50" value="<?= h($form_product_name) ?>">
+        <p class="error" id="error_product_name"><?= h($error_product_name) ?></p>
+
+        <p><label for="genre_code">ジャンル</label></p>
+        <select id="genre_code" name="genre_code" class="Form-Item-Input">
+          <option value="">選択してください</option>
+          <?php foreach ($genres as $genre_code => $genre_name): ?>
+            <?php if ((string)$genre_code === $form_genre_code): ?>
+              <option value="<?= h($genre_code) ?>" selected><?= h($genre_name) ?></option>
+            <?php else: ?>
+              <option value="<?= h($genre_code) ?>"><?= h($genre_name) ?></option>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </select>
+        <p class="error" id="error_genre_code"><?= h($error_genre_code) ?></p>
+
+        <!-- 全角数字・カンマも受け付けるので type="text"（type="number" だと入力できない） -->
+        <p><label for="price">値段</label></p>
+        <input type="text" id="price" name="price" class="Form-Item-Input" inputmode="numeric"
+          data-price-min="<?= h($price_min) ?>" data-price-max="<?= h($price_max) ?>"
+          value="<?= h($form_price) ?>"> 円
+        <p class="error" id="error_price"><?= h($error_price) ?></p>
+
+        <p><label for="images">商品画像（任意・<?= h($image_max) ?>枚まで・1枚2MBまで）</label></p>
+        <input type="file" id="images" name="images[]" accept="image/jpeg,image/png,image/gif,image/webp" multiple
+          data-image-max="<?= h($image_max) ?>">
+        <p class="error" id="error_images"><?= h($error_images) ?></p>
+
+        <?php if ($image_urls): ?>
+          <!-- 前に選んだ画像（画像を選び直すと入れ替わる） -->
+          <p>選択中の画像（選び直すと入れ替わります）</p>
+          <div class="image-list">
+            <?php foreach ($image_urls as $url): ?>
+              <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item">
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+        <p>
+          <button type="submit" name="action" value="sell">販売</button>
+          <button type="submit" name="action" value="clear">クリア</button>
+          <button type="submit" name="action" value="back">戻る</button>
+        </p>
+      </form>
+    </main>
+
+    <script src="assets/js/sell.js"></script>
+  </div>
+</body>
+
+</html>

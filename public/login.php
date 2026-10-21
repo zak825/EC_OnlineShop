@@ -3,7 +3,7 @@
 
     // 【画面を開く】すでにログイン済み（かつセッション有効期限内）であるか確認
     if (is_logged_in()) {
-        header('Location: main.php');
+        header('Location: index.php');
         exit;
     }
 
@@ -36,7 +36,7 @@
                     $stmt->execute();
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    if ($user && $user['LoginPassword'] === $password) {
+                    if ($user && password_verify($password, $user['LoginPassword'])) {
                         // 4. ログイン情報をセッションに書き込む
                         session_regenerate_id(true);
                         $_SESSION['logged_in']     = true;
@@ -47,11 +47,11 @@
                         $_SESSION['last_activity'] = time();
 
                         // 画面遷移：リダイレクト指定があればその画面へ、なければメイン画面へ
-                        $redirectTo = $_SESSION['redirect_after_login'] ?? $_GET['redirect'] ?? $_GET['return'] ?? 'main.php';
+                        $redirectTo = $_SESSION['redirect_after_login'] ?? $_GET['redirect'] ?? $_GET['return'] ?? 'index.php';
                         unset($_SESSION['redirect_after_login']);
                         // 外部URLへのオープンリダイレクト防止（クエリパラメータ付きURLも許可）
                         if (!preg_match('/^[a-zA-Z0-9_\-\.]+\.php(\?[a-zA-Z0-9_\-\.=&]+)?$/', $redirectTo)) {
-                            $redirectTo = 'main.php';
+                            $redirectTo = 'index.php';
                         }
 
                         header('Location: ' . $redirectTo);
@@ -77,4 +77,4 @@
         'token'        => csrf_token(),
         'errorMessage' => $errorMessage,
         'userIdInput'  => $userIdInput,
-    ]);
+    ]);

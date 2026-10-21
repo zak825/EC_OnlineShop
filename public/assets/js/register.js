@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const addressInput = document.getElementById('address');
     const telInput = document.getElementById('tel');
     const passwordInput = document.getElementById('password');
+<<<<<<< HEAD
+=======
+    const secretQuestionSelect = document.getElementById('secret_question_id');
+    const secretAnswerInput = document.getElementById('secret_answer');
+>>>>>>> main
     const clearBtn = document.getElementById('clear-btn');
     const errorMsg = document.getElementById('error-message');
     const minLenElem = document.getElementById('pass-min-length');
@@ -28,9 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const address = addressInput.value.trim();
         const tel = telInput.value.trim();
         const password = passwordInput.value;
+<<<<<<< HEAD
 
         // 1. 未入力・桁数チェックを行う
         if (userName === '' || zipCode === '' || address === '' || tel === '' || password === '') {
+=======
+        const secretQuestionId = secretQuestionSelect ? secretQuestionSelect.value : '';
+        const secretAnswer = secretAnswerInput ? secretAnswerInput.value.trim() : '';
+
+        // 1. 未入力・桁数チェックを行う
+        if (userName === '' || zipCode === '' || address === '' || tel === '' || password === ''
+            || secretQuestionId === '' || secretAnswer === '') {
+>>>>>>> main
             e.preventDefault();
             showError('すべての項目を入力してください。');
             return;
@@ -60,6 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+<<<<<<< HEAD
+=======
+        // 秘密の質問の回答は100文字以内
+        if (secretAnswer.length > 100) {
+            e.preventDefault();
+            showError('秘密の質問の回答は100文字以内で入力してください。');
+            return;
+        }
+
+>>>>>>> main
         // 2. パスワードポリシーのチェックを行う
         const minLen = parseInt(minLenElem ? minLenElem.value : '8', 10) || 8;
         const maxLen = parseInt(maxLenElem ? maxLenElem.value : '50', 10) || 50;
@@ -82,6 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addressInput.value = '';
             telInput.value = '';
             passwordInput.value = '';
+<<<<<<< HEAD
+=======
+            if (secretQuestionSelect) secretQuestionSelect.value = '';
+            if (secretAnswerInput) secretAnswerInput.value = '';
+>>>>>>> main
             hideError();
             userNameInput.focus();
         });
