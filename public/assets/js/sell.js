@@ -85,6 +85,35 @@ function validatePrice() {
   return message === '';
 }
 
+// 画像のチェック（任意。選ばれたときだけ）
+var images    = document.getElementById('images');
+var imageMax  = Number(images.dataset.imageMax);
+var imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+function checkImages() {
+  var files = images.files;
+  if (files.length > imageMax) {
+    return '画像は' + imageMax + '枚までです';
+  }
+  for (var i = 0; i < files.length; i++) {
+    if (files[i].size > 2 * 1024 * 1024) {
+      return '画像は1枚2MBまでです';
+    }
+    if (imageTypes.indexOf(files[i].type) === -1) {
+      return 'JPEG・PNG・GIF・WebP の画像を選択してください';
+    }
+  }
+  return '';
+}
+
+function validateImages() {
+  var message = checkImages();
+  document.getElementById('error_images').textContent = message;
+  return message === '';
+}
+
+images.addEventListener('change', validateImages);
+
 // サーバー側のエラーで画面が戻ってきたときは、その入力欄を最初から赤くする
 [productName, genreCode, price].forEach(function(input) {
   if (document.getElementById('error_' + input.id).textContent !== '') {
@@ -106,12 +135,13 @@ form.addEventListener('submit', function(event) {
     return;
   }
 
-  // 3項目とも必ずチェックする（&& でつなぐと途中で止まるので別々に呼ぶ）
+  // 4項目とも必ずチェックする（&& でつなぐと途中で止まるので別々に呼ぶ）
   var okProductName = validateProductName();
   var okGenreCode   = validateGenreCode();
   var okPrice       = validatePrice();
+  var okImages      = validateImages();
 
-  if (!okProductName || !okGenreCode || !okPrice) {
+  if (!okProductName || !okGenreCode || !okPrice || !okImages) {
     event.preventDefault();
   }
 });
