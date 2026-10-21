@@ -1,72 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 <head>
     <meta charset="UTF-8">
     <title>アカウント登録画面</title>
+    <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/register.css">
 </head>
-<<<<<<< HEAD
-<body>
-    <div class="container register-container">
-        <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-        <p id="error-message" class="error-msg"<?= ($errorMessage ?? '') === '' ? ' style="display:none;"' : '' ?>>
-            <?= h($errorMessage ?? '') ?>
-        </p>
-
-        <form id="register-form" action="register.php" method="post" novalidate>
-            <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
-            <!-- JSバリデーション用のパスワードポリシー設定値 -->
-            <input type="hidden" id="pass-min-length" value="<?= h($passwordMinLength ?? 8) ?>">
-            <input type="hidden" id="pass-max-length" value="<?= h($passwordMaxLength ?? 50) ?>">
-
-            <div class="form-group">
-                <label for="user_name">氏名</label>
-                <input type="text" id="user_name" name="user_name" maxlength="50" value="<?= h($userNameInput ?? '') ?>" placeholder="例：山田 太郎">
-            </div>
-
-            <div class="form-group">
-                <label for="zip_code">郵便番号</label>
-                <input type="text" id="zip_code" name="zip_code" maxlength="8" value="<?= h($zipCodeInput ?? '') ?>" placeholder="例：1234567 または 123-4567">
-            </div>
-
-            <div class="form-group">
-                <label for="address">住所</label>
-                <input type="text" id="address" name="address" maxlength="256" value="<?= h($addressInput ?? '') ?>" placeholder="例：東京都千代田区1-1-1">
-            </div>
-
-            <div class="form-group">
-                <label for="tel">電話番号</label>
-                <input type="tel" id="tel" name="tel" maxlength="15" value="<?= h($telInput ?? '') ?>" placeholder="例：09012345678">
-            </div>
-
-            <div class="form-group">
-                <label for="password">パスワード</label>
-                <input type="password" id="password" name="password" maxlength="<?= h($passwordMaxLength ?? 50) ?>">
-                <small class="note">※<?= h($passwordMinLength ?? 8) ?>文字以上<?= h($passwordMaxLength ?? 50) ?>文字以内で入力してください。</small>
-            </div>
-
-            <div class="btn-row">
-                <button type="submit" id="register-btn">登録</button>
-                <button type="button" id="clear-btn">クリア</button>
-                <button type="button" id="back-btn" onclick="location.href='register.php?action=back'">戻る</button>
-            </div>
-        </form>
-    </div>
-
-    <script src="assets/js/register.js"></script>
-</body>
-</html>
-=======
 
 <body>
     <div id="wrap">
         <div class="container register-container">
             <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-            <p id="error-message" class="error-msg"<?= ($errorMessage ?? '') === '' ? ' style="display:none;"' : '' ?>>
+            <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : '' ?>>
                 <?= h($errorMessage ?? '') ?>
             </p>
 
@@ -143,4 +89,3 @@
 </body>
 
 </html>
->>>>>>> main
