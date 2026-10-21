@@ -10,6 +10,9 @@
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
+// 商品画像のパスを取る関数（販売担当の src/lib/product_image.php）
+require_once SRC_DIR . '/lib/product_image.php';
+
 // 販売画面のファイル名（config.php に書いていなければこの名前を使う）
 if (!defined('URL_SELL')) {
     define('URL_SELL', 'sell.php');
@@ -69,6 +72,13 @@ $stmt->execute($params);
 $products = $stmt->fetchAll();
 
 
+// 各商品の1枚目の画像をサムネイルに使う（無ければ null）
+// 画像が無い商品は、商品名から背景色を決めて頭文字を出す（文字色は背景の明るさで白か黒に振る）
+foreach ($products as &$item) {
+    $urls = product_image_urls((int)$item['ProductID']);
+    $item['image_url'] = $urls[0] ?? null;
+}
+unset($item);
 
 // ---- 3. 情報表示 ---------------------------------------------------
 view('index', [

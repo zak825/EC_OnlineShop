@@ -41,11 +41,11 @@
       <ul class="product-list">
         <?php foreach ($products as $item): ?>
           <li class="product">
-            <!-- 商品画像の列が無いので、ジャンル名を入れた枠を表示する -->
-            <div class="product__image" aria-hidden="true"><?= h($item['GenreName']) ?></div>
-
             <div class="product__body">
-              <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
+              <div class="product__title">
+                <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
+                <?= product_icon($item['ProductName'], $item['image_url'] ?? null) ?>
+              </div>
               <p class="product__price">¥<?= number_format((int)$item['Price']) ?></p>
               <p class="product__meta">
                 <span class="product__genre"><?= h($item['GenreName']) ?></span>
