@@ -1,65 +1,246 @@
-.container,
-.register-check-container {
-    width: 360px;
-    margin: 24px;
+@charset "UTF-8";
+
+
+/* 全体コンテナ配置 */
+.register-check-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 48px 16px;
+    box-sizing: border-box;
 }
 
+/* 登録確認カード本体 */
+.register-check-card {
+    width: 100%;
+    max-width: 480px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+    padding: 44px 36px 36px;
+    box-sizing: border-box;
+    border-radius: 2px;
+}
+
+/* ヘッダーエリア（ロゴ & h1 を中央配置） */
+.register-check-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.register-check-logo {
+    display: block;
+    max-width: 160px;
+    height: auto;
+    margin: 0 auto 16px;
+    object-fit: contain;
+}
+
+.register-check-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.06em;
+    margin: 0;
+    position: relative;
+    padding-bottom: 12px;
+}
+
+.register-check-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 2px;
+    background-color: #8c52ff;
+}
+
+/* エラーメッセージ表示領域 */
 .error-msg {
-    color: #d00;
-    font-size: 14px;
-    margin-bottom: 12px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 3px solid #ef4444;
+    color: #991b1b;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 20px 0;
+    border-radius: 0;
+    word-break: break-all;
 }
 
+/* 確認画面リード文 */
 .confirm-lead {
-    font-size: 14px;
-    margin-bottom: 16px;
-    font-weight: bold;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 20px 0;
+    text-align: center;
 }
 
+/* 確認項目リスト */
 .confirm-list {
-    border: 1px solid #ccc;
-    padding: 12px;
-    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 0;
+    background-color: #ffffff;
+    margin-bottom: 28px;
+    overflow: hidden;
 }
 
 .confirm-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 14px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 .confirm-item:last-child {
-    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.confirm-item:nth-child(even) {
+    background-color: #f8fafc;
 }
 
 .confirm-label {
-    font-weight: bold;
-    color: #333;
-    width: 100px;
+    font-weight: 600;
+    color: #475569;
+    width: 110px;
+    flex-shrink: 0;
 }
 
 .confirm-value {
     flex: 1;
     text-align: right;
+    color: #0f172a;
     word-break: break-all;
+    font-weight: 500;
+}
+
+/* ボタン行（はい / キャンセル） */
+.btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+/* プライマリボタン（はい：login.cssの.btn-loginに準拠） */
+.btn-primary {
+    flex: 2;
+    height: 44px;
+    background-color: #8c52ff;
+    color: #ffffff;
+    border: 1px solid #8c52ff;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+    background-color: #4f23a0;
+    border-color: #4f23a0;
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+.btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+/* セカンダリボタン（キャンセル：login.cssの.btn-clearに準拠） */
+.btn-secondary {
+    flex: 1;
+    height: 44px;
+    background-color: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 0;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #f8fafc;
+    color: #8c52ff;
+    border-color: #8c52ff;
+}
+
+.btn-secondary:active {
+    transform: translateY(1px);
+}
+
+/* 完了画面表示領域 */
+.complete-section {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.complete-box {
+    text-align: center;
+    padding: 16px 0 8px;
+}
+
+.complete-icon-img {
+    display: block;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    object-fit: contain;
 }
 
 .complete-message {
-    font-size: 16px;
-    font-weight: bold;
-    color: #2b7a0b;
-    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 12px 0;
+    letter-spacing: 0.02em;
 }
 
-.btn-row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 16px;
-    gap: 12px;
+.complete-user-id {
+    font-size: 15px;
+    color: #334155;
+    margin: 0 0 8px 0;
+    padding: 12px;
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0;
 }
 
-.btn-row button {
-    padding: 6px 16px;
-    cursor: pointer;
+.complete-user-id strong {
+    font-size: 18px;
+    color: #8c52ff;
+    letter-spacing: 0.05em;
+}
+
+.complete-sub {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

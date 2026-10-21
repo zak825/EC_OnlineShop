@@ -13,6 +13,9 @@
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
+// 商品画像のパスを取る関数（販売担当の src/lib/product_image.php）
+require_once SRC_DIR . '/lib/product_image.php';
+
 // 発送通知送信画面のファイル名（config.php に書いていなければこの名前を使う）
 if (!defined('URL_SHIPPING')) {
     define('URL_SHIPPING', 'ship_notice.php');
@@ -143,6 +146,13 @@ $stmt = db()->prepare(
 $stmt->execute([':buyer' => $userId]);
 $bought = $stmt->fetchAll();
 
+// 各商品の1枚目の画像を取る（無ければ null）
+foreach ($bought as &$item) {
+    $urls = product_image_urls((int)$item['ProductID']);
+    $item['image_url'] = $urls[0] ?? null;
+}
+unset($item);
+
 // ---- 3. 出品情報参照（出品者が自分の商品） ------------------------
 // 購入者名・配送先は、BuyerUserid で UserData と結合して取る
 $stmt = db()->prepare(
@@ -156,6 +166,12 @@ $stmt = db()->prepare(
 );
 $stmt->execute([':seller' => $userId]);
 $sold = $stmt->fetchAll();
+
+foreach ($sold as &$item) {
+    $urls = product_image_urls((int)$item['ProductID']);
+    $item['image_url'] = $urls[0] ?? null;
+}
+unset($item);
 
 // ---- 4. 情報表示 -------------------------------------------------
 view('mypage', [

@@ -35,3 +35,11 @@
   font-size: 1.2rem;
   font-weight: bold;
 }
+
+
+/* タイトルと丸アイコンを横並びにする */
+.item__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
