@@ -7,15 +7,14 @@
 ```
 CSE_EC/
 ├─ public/                  ブラウザから見える場所（XAMPPはここを公開する）
-│   ├─ purchase.php           各画面の入口（1画面 = 1ファイル）
-│   ├─ purchase_confirm.php
+│   ├─ index.php            各画面の入口（1画面 = 1ファイル）
 │   ├─ assets/
 │   │   ├─ css/
 │   │   │   ├─ common.css     全画面共通（色・ボタン・カード・メッセージ）
-│   │   │   └─ purchase.css   画面ごとのCSS
+│   │   │   └─ index.css      画面ごとのCSS
 │   │   ├─ js/
 │   │   │   ├─ common.js      全画面共通
-│   │   │   └─ purchase.js    画面ごとのJS
+│   │   │   └─ index.js       画面ごとのJS
 │   │   └─ images/            サイトで使う画像（ロゴ等）
 │   └─ uploads/               出品時にアップロードされた商品画像（gitに上げない）
 │
@@ -30,14 +29,11 @@ CSE_EC/
 │       └─ view.php           テンプレート表示 view()・エスケープ h()
 │
 ├─ templates/               画面のHTML（PHPから読み込む）
-│    ├─ purchase.html
-│    └─ purchase_confirm.html
+│    └─ index.html
 │
-├─ sql/
-│   ├─ 01_schema.sql          テーブル作成
-│   └─ 02_seed.sql            テストデータ
-│
-└─ docs/design/             設計書（画面ごとに 設計処理・処理手順）
+└─ sql/
+    ├─ serverSetUp.sql        DB,テーブル,テストデータ作成
+    └─ 仮商品を並べる.sq　　　　テスト表示用の商品データ
 ```
 
 ## 環境構築（XAMPP）
@@ -58,9 +54,10 @@ CSE_EC/
    ```
    `config.php` の `DB_DSN`（サーバー名・DB名）、`DB_USER`、`DB_PASS` を自分の SQL Server の接続情報に書き換える。
 
-5. **DBについて**：テーブル構築済みの SQL Server を使用するため、テーブル作成は不要。XAMPP では Apache のみ Start する（MySQL は使わない）。SQL Server のサービスが起動していることを確認する。
+5. **DB構築**
+   SSMS上で`serverSetUp.sql`を実行し、動作用のDB[CSE_EC]とテーブル、テストデータを作成する。
 
-6. **動作確認**：`http://localhost/CSE_EC/purchase.php?productId=1`
+6. **動作確認**：`http://localhost/CSE_EC/index.php`
 
 ### テンプレート画面・JS・PHPをブラウザで開く
 
@@ -91,13 +88,12 @@ CSE_EC/
 
 | 作るもの | 置き場所 |
 |---|---|
-| 処理（PHP） | `public/sell.php` |
-| HTML | `templates/sell/sell.html` |
-| CSS | `public/assets/css/sell.css` |
-| JS（必要なら） | `public/assets/js/sell.js` |
-| 設計書 | `docs/design/販売画面_設計処理.md` / `販売画面_処理手順.md` |
+| 処理（PHP） | `public/index.php` |
+| HTML | `templates/index.html` |
+| CSS | `public/assets/css/common.css` |
+| JS（必要なら） | `public/assets/js/index.js` |
 
-PHP の書き方（`public/purchase.php` を参考に）
+PHP の書き方（`public/index.php` を参考に）
 
 ```php
 <?php
@@ -116,7 +112,7 @@ view('sell/sell', [
 ]);
 ```
 
-HTML の書き方（`templates/purchase/purchase.html` を参考に）
+HTML の書き方（`templates/purchase/index.html` を参考に）
 
 ```php
 <?php
