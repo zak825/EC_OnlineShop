@@ -7,3 +7,49 @@ main {
     max-width: 1000px;
     margin: 0px auto;
 }
+
+/* 商品写真を枠に収める（枠が無いときの object-fit 用） */
+/* 商品写真を枠（4:3）に収める */
+.product__image--photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.product__image--initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+/* 中に丸を作って、その中に頭文字を出す */
+/* 画像が無いとき：商品名の頭文字を中央に大きく出す（背景色・文字色は PHP が付ける） */
+.product__image--initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  font-weight: bold;
+}
+.product__image--initial::before {
+  content: attr(data-char);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+  background: var(--color-primary);
+}
+
+
+/* タイトルと丸アイコンを横並びにする（くっつけて左寄せ） */
+.product__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

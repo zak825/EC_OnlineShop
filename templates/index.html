@@ -8,24 +8,11 @@
   <link rel="stylesheet" href="assets/css/index.css">
 </head>
 <body>
-  <header class="site-header">
-    <a href="<?= h(URL_MAIN) ?>" class="site-logo">CSE_EC</a>
 
-    <!-- ===== ヘッダーのボタン（ログイン中 / 未ログインで切り替え） ===== -->
-    <nav class="site-nav">
-      <?php if ($loggedIn): ?>
-        <a href="<?= h(URL_SELL) ?>" class="site-nav__btn">販売</a>
-        <a href="<?= h(URL_MYPAGE) ?>" class="site-nav__link"><?= h($userName) ?> さん</a>
-        <form action="index.php" method="post" id="logout-form" class="site-nav__form">
-          <input type="hidden" name="action" value="logout">
-          <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-          <button type="submit" class="site-nav__link site-nav__link--button">ログアウト</button>
-        </form>
-      <?php else: ?>
-        <a href="<?= h(URL_LOGIN) ?>" class="site-nav__btn">ログイン</a>
-      <?php endif; ?>
-    </nav>
-  </header>
+  <!--ヘッダー読み込み-->
+  <?php require __DIR__ . '/../public/header.php'; ?>
+
+
 
   <main class="container container--grid">
     <h1 class="page-title">商品一覧</h1>
@@ -41,11 +28,11 @@
       <ul class="product-list">
         <?php foreach ($products as $item): ?>
           <li class="product">
-            <!-- 商品画像の列が無いので、ジャンル名を入れた枠を表示する -->
-            <div class="product__image" aria-hidden="true"><?= h($item['GenreName']) ?></div>
-
             <div class="product__body">
-              <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
+              <div class="product__title">
+                <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
+                <?= product_icon($item['ProductName'], $item['image_url'] ?? null) ?>
+              </div>
               <p class="product__price">¥<?= number_format((int)$item['Price']) ?></p>
               <p class="product__meta">
                 <span class="product__genre"><?= h($item['GenreName']) ?></span>
