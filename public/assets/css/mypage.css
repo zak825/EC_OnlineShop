@@ -1,24 +1,43 @@
-/* ---------- プロフィール（名前・アイコン・評価） ---------- */
+﻿/* ---------- プロフィール（名前・アイコン・評価） ---------- */
 .profile {
-  margin-bottom: 24px;
+  display: flex;
+  max-width: 800px;
+  align-items: center;
+  margin: 0px auto 24px auto;
 }
 
-/* 名前とアイコンを横並びにする（名前 → その右にアイコン） */
-.profile__head {
+.profile__stars {
+  color: #ffd700;
+}
+
+.profile__left {
   display: flex;
-  align-items: center;
-  gap: 12px;
+}
+
+/* アイコン編集を右に*/
+.profile__right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* アイコンの右に名前と評価を表示 */
+.profile__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 16px;
+  gap: 8px;
 }
 
 .profile__name {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.7rem;
   font-weight: bold;
 }
 
 .profile__icon {
-  width: 48px;
-  height: 48px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -36,6 +55,30 @@
   font-weight: bold;
 }
 
+main {
+  margin-top: 50px;
+}
+
+/* 購入・出品商品タブ横並び */
+.tabs {
+  display: flex;
+  width: 100%;
+}
+
+.tabs__item {
+  width: 50%;
+  text-align: center;
+  text-decoration: none;
+  justify-content: center;
+  padding: 15px;
+  margin: 80px 0px 20px 0px;
+  color: #808080;
+}
+
+.tabs__item.is-active {
+  color: #000;
+  border-bottom: 2px solid #000;
+}
 
 /* タイトルと丸アイコンを横並びにする */
 .item__title {

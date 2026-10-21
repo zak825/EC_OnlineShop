@@ -36,7 +36,7 @@
               <p class="product__price">¥<?= number_format((int)$item['Price']) ?></p>
               <p class="product__meta">
                 <span class="product__genre"><?= h($item['GenreName']) ?></span>
-                出品者：<?= h($item['SellerName']) ?>
+                出品者：<?= name_label($item['SellerName']) ?>
               </p>
 
               <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
