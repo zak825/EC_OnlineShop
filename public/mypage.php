@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // マイページ画面
 //   GET mypage.php            … 購入した商品の一覧
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        set_flash('アイコンを変更しました。', 'success');
+        set_flash('', 'success');
         redirect('mypage.php');
     }
 }

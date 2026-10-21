@@ -1,4 +1,4 @@
-/* ---------- ヘッダーのリンク（ロゴは左、マイページは右） ---------- */
+﻿/* ---------- ヘッダーのリンク（ロゴは左、マイページは右） ---------- */
 .site-header {
   display: flex;
   justify-content: space-between;
@@ -15,10 +15,17 @@
   text-decoration: underline;
 }
 
+#wrap {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0px auto;
+}
+
 /* 省略された名前（ホバーで全文が出る） */
 .name-ellipsis {
   cursor: help;
 }
+
 /* ---------- 丸アイコン（商品名などの頭文字・色は PHP が付ける） ---------- */
 .initial-icon {
   display: inline-flex;
@@ -30,8 +37,10 @@
   font-size: 0.85rem;
   font-weight: bold;
   line-height: 1;
-  flex: none;        /* 縮まない・伸びない */
-  overflow: hidden;  /* はみ出し防止 */
+  flex: none;
+  /* 縮まない・伸びない */
+  overflow: hidden;
+  /* はみ出し防止 */
 }
 
 /* アイコンが写真のとき：丸い枠に収める */
