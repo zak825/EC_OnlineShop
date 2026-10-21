@@ -22,6 +22,11 @@
     $zipCodeInput  = '';
     $addressInput  = '';
     $telInput      = '';
+    $secretQuestionIdInput = '';
+    $secretAnswerInput     = '';
+
+    // 秘密の質問リスト（質問ID => 質問文）
+    $secretQuestions = get_secret_questions();
 
     // パスワード文字数設定のデフォルト値
     $passwordMinLength = 8;
@@ -64,6 +69,8 @@
             $addressInput  = trim($_POST['address'] ?? '');
             $telInput      = trim($_POST['tel'] ?? '');
             $password      = $_POST['password'] ?? '';
+            $secretQuestionIdInput = trim($_POST['secret_question_id'] ?? '');
+            $secretAnswerInput     = trim($_POST['secret_answer'] ?? '');
 
             // 1. 未入力・桁数チェックを行う
             // すべての項目が入力されているか、また各項目（氏名、郵便番号、住所、電話番号）がUserDataテーブル定義の桁数・形式内であるかチェックする
@@ -72,7 +79,8 @@
             $zipCodeLen  = strlen($zipCodeInput);
             $telLen      = strlen($telInput);
 
-            if ($userNameInput === '' || $zipCodeInput === '' || $addressInput === '' || $telInput === '' || $password === '') {
+            if ($userNameInput === '' || $zipCodeInput === '' || $addressInput === '' || $telInput === '' || $password === ''
+                || $secretQuestionIdInput === '' || $secretAnswerInput === '') {
                 $errorMessage = 'すべての項目を入力してください。';
             } elseif ($userNameLen > 50) {
                 $errorMessage = '氏名は50文字以内で入力してください。';
@@ -82,6 +90,11 @@
                 $errorMessage = '住所は256文字以内で入力してください。';
             } elseif ($telLen > 15 || !preg_match('/^[0-9\-]{10,15}$/', $telInput)) {
                 $errorMessage = '電話番号は15桁以内の半角数字（ハイフン可）で入力してください。';
+            } elseif (!ctype_digit($secretQuestionIdInput) || !isset($secretQuestions[(int)$secretQuestionIdInput])) {
+                // 秘密の質問は定義済みの質問ID（1〜5）であること
+                $errorMessage = '秘密の質問を選択してください。';
+            } elseif (mb_strlen($secretAnswerInput, 'UTF-8') > 100) {
+                $errorMessage = '秘密の質問の回答は100文字以内で入力してください。';
             } else {
                 // 2. パスワードポリシーのチェックを行う
                 // 入力されたパスワードの長さが、SystemConfigurationテーブルから取得した文字数設定の範囲内であるかチェックする
@@ -119,6 +132,10 @@
                                 'tel'           => $telInput,
                                 'LoginPassword' => $passwordHash,
                                 'password'      => $passwordHash,
+                                'SecretQuestionId'   => (int)$secretQuestionIdInput,
+                                'secret_question_id' => (int)$secretQuestionIdInput,
+                                'SecretAnswer'       => $secretAnswerInput,
+                                'secret_answer'      => $secretAnswerInput,
                             ];
 
                             // 5. 画面遷移：ユーザーID発行（登録確認）画面へ遷移する
@@ -149,4 +166,7 @@
         'telInput'          => $telInput,
         'passwordMinLength' => $passwordMinLength,
         'passwordMaxLength' => $passwordMaxLength,
+        'secretQuestions'       => $secretQuestions,
+        'secretQuestionIdInput' => $secretQuestionIdInput,
+        'secretAnswerInput'     => $secretAnswerInput,
     ]);
