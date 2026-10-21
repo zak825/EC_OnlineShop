@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>登録確認画面</title>
+    <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/register_check.css">
 </head>
+
 <body>
     <div id="wrap">
         <div class="container register-check-container">
             <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-            <p id="error-message" class="error-msg"<?= ($errorMessage ?? '') === '' ? ' style="display:none;"' : '' ?>>
+            <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : '' ?>>
                 <?= h($errorMessage ?? '') ?>
             </p>
 
@@ -20,23 +23,45 @@
                 <div class="confirm-list">
                     <div class="confirm-item">
                         <span class="confirm-label">ユーザーID</span>
-                        <span class="confirm-value"><?= h($user['UserId'] ?? $user['user_id'] ?? '') ?></span>
+                        <span class="confirm-value">
+                            <?= h($user['UserId'] ?? $user['user_id'] ?? '') ?>
+                        </span>
                     </div>
                     <div class="confirm-item">
                         <span class="confirm-label">名前</span>
-                        <span class="confirm-value"><?= h($user['UserName'] ?? $user['user_name'] ?? '') ?></span>
+                        <span class="confirm-value">
+                            <?= h($user['UserName'] ?? $user['user_name'] ?? '') ?>
+                        </span>
                     </div>
                     <div class="confirm-item">
                         <span class="confirm-label">郵便番号</span>
-                        <span class="confirm-value"><?= h($user['ZipCode'] ?? $user['zip_code'] ?? '') ?></span>
+                        <span class="confirm-value">
+                            <?= h($user['ZipCode'] ?? $user['zip_code'] ?? '') ?>
+                        </span>
                     </div>
                     <div class="confirm-item">
                         <span class="confirm-label">住所</span>
-                        <span class="confirm-value"><?= h($user['Address'] ?? $user['address'] ?? '') ?></span>
+                        <span class="confirm-value">
+                            <?= h($user['Address'] ?? $user['address'] ?? '') ?>
+                        </span>
                     </div>
                     <div class="confirm-item">
                         <span class="confirm-label">電話番号</span>
-                        <span class="confirm-value"><?= h($user['TEL'] ?? $user['tel'] ?? '') ?></span>
+                        <span class="confirm-value">
+                            <?= h($user['TEL'] ?? $user['tel'] ?? '') ?>
+                        </span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">秘密の質問</span>
+                        <span class="confirm-value">
+                            <?= h($secretQuestionText ?? '') ?>
+                        </span>
+                    </div>
+                    <div class="confirm-item">
+                        <span class="confirm-label">回答</span>
+                        <span class="confirm-value">
+                            <?= h($user['SecretAnswer'] ?? $user['secret_answer'] ?? '') ?>
+                        </span>
                     </div>
                 </div>
 
@@ -44,7 +69,8 @@
                     <input type="hidden" name="csrf_token" id="csrf-token" value="<?= h($token ?? csrf_token()) ?>">
                     <div class="btn-row">
                         <button type="button" id="submit-btn" class="btn-primary">はい</button>
-                        <button type="button" id="cancel-btn" class="btn-secondary" onclick="location.href='register.php'">キャンセル</button>
+                        <button type="button" id="cancel-btn" class="btn-secondary"
+                            onclick="location.href='register.php'">キャンセル</button>
                     </div>
                 </form>
             </div>
@@ -53,22 +79,14 @@
             <div id="complete-section" class="section" style="display: none;">
                 <p class="complete-message">登録が完了しました！</p>
                 <div class="btn-row">
-                    <button type="button" id="login-page-btn" class="btn-primary" onclick="location.href='login.php'">ログインページ</button>
+                    <button type="button" id="login-page-btn" class="btn-primary"
+                        onclick="location.href='login.php'">ログインページ</button>
                 </div>
-            </form>
-        </div>
-
-        <!-- 完了画面領域（初期状態は非表示、JSで完了時に表示） -->
-        <div id="complete-section" class="section" style="display: none;">
-            <p class="complete-message">登録が完了しました！</p>
-            <!-- 実際に登録したユーザーID（確認画面の表示から変わることがあるので JS で入れる） -->
-            <p class="complete-user-id">あなたのユーザーIDは <strong id="complete-user-id"><?= h($user['UserId'] ?? $user['user_id'] ?? '') ?></strong> です</p>
-            <div class="btn-row">
-                <button type="button" id="login-page-btn" class="btn-primary" onclick="location.href='login.php'">ログインページ</button>
             </div>
         </div>
 
         <script src="assets/js/register_check.js"></script>
     </div>
 </body>
+
 </html>

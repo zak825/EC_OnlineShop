@@ -246,3 +246,20 @@ function get_flash(): ?array {
     unset($_SESSION['flash']);
     return $flash;
 }
+
+/**
+ * 秘密の質問リストを取得する（パスワード再設定用）
+ * アカウント登録画面（register.php / register_check.php）と
+ * パスワード再設定画面（passreset.php）の双方から参照する
+ *
+ * @return array<int, string> [質問ID(SecretQuestionId) => 質問文]
+ */
+function get_secret_questions(): array {
+    return [
+        1 => '出身小学校の名前は？',
+        2 => '初めて飼ったペットの名前は？',
+        3 => '母親の旧姓は？',
+        4 => '好きな食べ物は？',
+        5 => '思い出の場所は？',
+    ];
+}
