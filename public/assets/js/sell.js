@@ -112,7 +112,52 @@ function validateImages() {
   return message === '';
 }
 
-images.addEventListener('change', validateImages);
+// 選んだ画像をすぐにプレビューする（サーバーには送らず、ブラウザの中だけで表示する）
+var imagePreview      = document.getElementById('image_preview');
+var imagePreviewLabel = document.getElementById('image_preview_label');
+var previewUrls       = [];   // 前のプレビューのURL（入れ替えるときに解放する）
+var savedPreviewHtml  = imagePreview.innerHTML;   // サーバーに保存済みの画像（販売確認画面から戻ったとき）
+
+function showImagePreview() {
+  var files = images.files;
+
+  previewUrls.forEach(function(url) {
+    URL.revokeObjectURL(url);
+  });
+  previewUrls = [];
+
+  // 選択をやめた（ファイル選択画面でキャンセルした）ときは、保存済みの画像の表示に戻す
+  // （このまま販売ボタンを押すと、保存済みの画像が使われるため）
+  if (files.length === 0) {
+    imagePreview.innerHTML = savedPreviewHtml;
+    imagePreviewLabel.hidden = savedPreviewHtml.trim() === '';
+    return;
+  }
+
+  imagePreview.innerHTML = '';
+
+  for (var i = 0; i < files.length; i++) {
+    if (imageTypes.indexOf(files[i].type) === -1) {
+      continue;   // 画像でないファイルは出さない（エラーは validateImages() が出す）
+    }
+    var url = URL.createObjectURL(files[i]);
+    previewUrls.push(url);
+
+    var img = document.createElement('img');
+    img.src       = url;
+    img.alt       = '商品画像';
+    img.className = 'image-list__item';
+    img.width     = 100;
+    img.height    = 100;
+    imagePreview.appendChild(img);
+  }
+  imagePreviewLabel.hidden = imagePreview.children.length === 0;
+}
+
+images.addEventListener('change', function() {
+  validateImages();
+  showImagePreview();
+});
 
 // サーバー側のエラーで画面が戻ってきたときは、その入力欄を最初から赤くする
 [productName, genreCode, price].forEach(function(input) {

@@ -15,6 +15,7 @@
 .image-list__item {
   width: 100px;
   height: 100px;
-  object-fit: cover;
+  flex: none;          /* 横並びのとき縮んだり伸びたりしないようにする */
+  object-fit: cover;   /* 縦横比を保ったまま、はみ出た部分を切り取る */
   border: 1px solid #ccc;
 }
