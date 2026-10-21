@@ -77,12 +77,18 @@ if ($action === 'sell') {
       ':userid'       => $user_id,
     ]);
 
+    // 販売画面で一時保存した画像を、商品IDのフォルダ（uploads/products/{商品ID}）に移す
+    // 移せなかったら商品の登録も取り消す
+    if (isset($_SESSION['sell_images']) && !move_product_images($_SESSION['sell_images'], $product_id)) {
+      throw new RuntimeException('商品画像を移せませんでした: ' . $_SESSION['sell_images']);
+    }
+
     $pdo->commit();
 
     // 登録できたら入力値を消す（リロードしても二重登録されない）
-    unset($_SESSION['sell']);
+    unset($_SESSION['sell'], $_SESSION['sell_images']);
     $done = true;
-  } catch (PDOException $e) {
+  } catch (PDOException | RuntimeException $e) {
     // 失敗したら入力値は残したまま、この画面にとどまる
     if ($pdo !== null && $pdo->inTransaction()) {
       $pdo->rollBack();
@@ -95,9 +101,19 @@ if ($action === 'sell') {
 // ------------------------------------------------------------
 // 画面を表示する（templates/sell_confirm.html）
 // ------------------------------------------------------------
+// 表示する画像（登録後は商品IDのフォルダ、登録前は一時フォルダ）
+if ($done) {
+  $image_urls = product_image_urls($product_id);
+} elseif (isset($_SESSION['sell_images'])) {
+  $image_urls = product_image_tmp_urls($_SESSION['sell_images']);
+} else {
+  $image_urls = [];
+}
+
 view('sell_confirm', [
-  'token' => csrf_token(),
-  'sell'  => $sell,
-  'done'  => $done,
-  'error' => $error,
+  'token'      => csrf_token(),
+  'sell'       => $sell,
+  'done'       => $done,
+  'error'      => $error,
+  'image_urls' => $image_urls,
 ]);

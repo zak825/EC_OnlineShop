@@ -55,7 +55,10 @@ $error_db = '';   // フォームの上に出すエラー（DB エラー・不�
 
 $action = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if (check_csrf_token()) {
+  // 画像が大きすぎると（php.ini の post_max_size 超え）$_POST が空になる
+  if (empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+    $error_db = '画像の合計サイズが大きすぎます。枚数を減らしてください。';
+  } elseif (check_csrf_token()) {
     if (isset($_POST['action'])) {
       $action = $_POST['action'];
     }
@@ -64,15 +67,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
+// 入力値と一時保存した画像を消す
+function clear_sell_input()
+{
+  unset($_SESSION['sell']);
+  if (isset($_SESSION['sell_images'])) {
+    delete_product_images_tmp($_SESSION['sell_images']);
+    unset($_SESSION['sell_images']);
+  }
+}
+
 // 戻るボタン：入力値を消してメイン画面へ
 if ($action === 'back') {
-  unset($_SESSION['sell']);
+  clear_sell_input();
   redirect(URL_MAIN);
 }
 
 // クリアボタン：入力値を消して空のフォームを表示する
 if ($action === 'clear') {
-  unset($_SESSION['sell']);
+  clear_sell_input();
 }
 
 // ------------------------------------------------------------
@@ -130,6 +143,7 @@ try {
 $error_product_name = '';
 $error_genre_code   = '';
 $error_price        = '';
+$error_images       = '';
 
 // ------------------------------------------------------------
 // フォームに表示する値
@@ -201,8 +215,22 @@ if ($action === 'sell' && $error_db === '') {
     }
   }
 
-  // 3項目ともエラーがなければセッションに保存して販売確認画面へ
-  if ($error_product_name === '' && $error_genre_code === '' && $error_price === '') {
+  // 画像（任意・10枚まで）
+  // 選ばれたときだけチェックして一時フォルダに保存する。選ばれなかったら前に保存した画像をそのまま使う
+  // 他の項目がエラーでも保存しておく（選び直さなくて済むように）
+  $files = $_FILES['images'] ?? null;
+  if ($files !== null && $files['error'][0] !== UPLOAD_ERR_NO_FILE) {
+    $error_images = check_product_images($files);
+    if ($error_images === '') {
+      if (isset($_SESSION['sell_images'])) {
+        delete_product_images_tmp($_SESSION['sell_images']);   // 前に選んだ画像は入れ替える
+      }
+      $_SESSION['sell_images'] = save_product_images_tmp($files);
+    }
+  }
+
+  // 4項目ともエラーがなければセッションに保存して販売確認画面へ
+  if ($error_product_name === '' && $error_genre_code === '' && $error_price === '' && $error_images === '') {
     $_SESSION['sell'] = [
       'genre_code'   => (int)$form_genre_code,
       'genre_name'   => $genres[$form_genre_code],
@@ -228,4 +256,7 @@ view('sell', [
   'error_product_name' => $error_product_name,
   'error_genre_code'   => $error_genre_code,
   'error_price'        => $error_price,
+  'error_images'       => $error_images,
+  'image_urls'         => isset($_SESSION['sell_images']) ? product_image_tmp_urls($_SESSION['sell_images']) : [],
+  'image_max'          => PRODUCT_IMAGE_MAX,
 ]);

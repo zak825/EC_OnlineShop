@@ -17,7 +17,8 @@
         <p class="error"><?= h($error_db) ?></p>
       <?php endif; ?>
 
-      <form action="sell.php" method="post" id="sell_form" novalidate>
+      <!-- 画像を送るので enctype="multipart/form-data" -->
+      <form action="sell.php" method="post" id="sell_form" enctype="multipart/form-data" novalidate>
         <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
         <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
@@ -44,6 +45,21 @@
           data-price-min="<?= h($price_min) ?>" data-price-max="<?= h($price_max) ?>"
           value="<?= h($form_price) ?>"> 円
         <p class="error" id="error_price"><?= h($error_price) ?></p>
+
+        <p><label for="images">商品画像（任意・<?= h($image_max) ?>枚まで・1枚2MBまで）</label></p>
+        <input type="file" id="images" name="images[]" accept="image/jpeg,image/png,image/gif,image/webp" multiple
+          data-image-max="<?= h($image_max) ?>">
+        <p class="error" id="error_images"><?= h($error_images) ?></p>
+
+        <?php if ($image_urls): ?>
+          <!-- 前に選んだ画像（画像を選び直すと入れ替わる） -->
+          <p>選択中の画像（選び直すと入れ替わります）</p>
+          <div class="image-list">
+            <?php foreach ($image_urls as $url): ?>
+              <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item">
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
 
         <p>
           <button type="submit" name="action" value="sell">販売</button>

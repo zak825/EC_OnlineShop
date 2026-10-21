@@ -20,6 +20,16 @@
       <p><?= h($sell['product_name']) ?> <?= h(number_format($sell['price'])) ?>円 で販売しますか？</p>
       <p>ジャンル：<?= h($sell['genre_name']) ?></p>
 
+      <?php if ($image_urls): ?>
+        <div class="image-list">
+          <?php foreach ($image_urls as $url): ?>
+            <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item">
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <p>画像：なし</p>
+      <?php endif; ?>
+
       <?php if ($done): ?>
         <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する（sell_confirm.js） -->
         <p>出品が完了しました</p>
