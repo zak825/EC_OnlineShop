@@ -40,10 +40,10 @@
 
           <?php if ($isBuyer): ?>
             <dt>出品者</dt>
-            <dd><?= h($product['SellerName']) ?></dd>
+            <dd><?= name_label($product['SellerName']) ?></dd>
           <?php else: ?>
             <dt>購入者</dt>
-            <dd><?= h($product['BuyerUserName'] ?? '不明') ?></dd>
+            <dd><?= name_label($product['BuyerUserName'] ?? '不明') ?></dd>
           <?php endif; ?>
 
           <dt>購入日時</dt>
