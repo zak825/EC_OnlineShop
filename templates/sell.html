@@ -9,50 +9,52 @@
 </head>
 
 <body>
-  <main>
-    <h1>販売画面</h1>
+  <div id="wrap">
+    <main>
+      <h1>販売画面</h1>
 
-    <?php if ($error_db !== ''): ?>
-      <p class="error"><?= h($error_db) ?></p>
-    <?php endif; ?>
+      <?php if ($error_db !== ''): ?>
+        <p class="error"><?= h($error_db) ?></p>
+      <?php endif; ?>
 
-    <form action="sell.php" method="post" id="sell_form" novalidate>
-      <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+      <form action="sell.php" method="post" id="sell_form" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
-      <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
-      <p><label for="product_name">商品名</label></p>
-      <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="50" value="<?= h($form_product_name) ?>">
-      <p class="error" id="error_product_name"><?= h($error_product_name) ?></p>
+        <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
+        <p><label for="product_name">商品名</label></p>
+        <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="50" value="<?= h($form_product_name) ?>">
+        <p class="error" id="error_product_name"><?= h($error_product_name) ?></p>
 
-      <p><label for="genre_code">ジャンル</label></p>
-      <select id="genre_code" name="genre_code" class="Form-Item-Input">
-        <option value="">選択してください</option>
-        <?php foreach ($genres as $genre_code => $genre_name): ?>
-          <?php if ((string)$genre_code === $form_genre_code): ?>
-            <option value="<?= h($genre_code) ?>" selected><?= h($genre_name) ?></option>
-          <?php else: ?>
-            <option value="<?= h($genre_code) ?>"><?= h($genre_name) ?></option>
-          <?php endif; ?>
-        <?php endforeach; ?>
-      </select>
-      <p class="error" id="error_genre_code"><?= h($error_genre_code) ?></p>
+        <p><label for="genre_code">ジャンル</label></p>
+        <select id="genre_code" name="genre_code" class="Form-Item-Input">
+          <option value="">選択してください</option>
+          <?php foreach ($genres as $genre_code => $genre_name): ?>
+            <?php if ((string)$genre_code === $form_genre_code): ?>
+              <option value="<?= h($genre_code) ?>" selected><?= h($genre_name) ?></option>
+            <?php else: ?>
+              <option value="<?= h($genre_code) ?>"><?= h($genre_name) ?></option>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </select>
+        <p class="error" id="error_genre_code"><?= h($error_genre_code) ?></p>
 
-      <!-- 全角数字・カンマも受け付けるので type="text"（type="number" だと入力できない） -->
-      <p><label for="price">値段</label></p>
-      <input type="text" id="price" name="price" class="Form-Item-Input" inputmode="numeric"
-        data-price-min="<?= h($price_min) ?>" data-price-max="<?= h($price_max) ?>"
-        value="<?= h($form_price) ?>"> 円
-      <p class="error" id="error_price"><?= h($error_price) ?></p>
+        <!-- 全角数字・カンマも受け付けるので type="text"（type="number" だと入力できない） -->
+        <p><label for="price">値段</label></p>
+        <input type="text" id="price" name="price" class="Form-Item-Input" inputmode="numeric"
+          data-price-min="<?= h($price_min) ?>" data-price-max="<?= h($price_max) ?>"
+          value="<?= h($form_price) ?>"> 円
+        <p class="error" id="error_price"><?= h($error_price) ?></p>
 
-      <p>
-        <button type="submit" name="action" value="sell">販売</button>
-        <button type="submit" name="action" value="clear">クリア</button>
-        <button type="submit" name="action" value="back">戻る</button>
-      </p>
-    </form>
-  </main>
+        <p>
+          <button type="submit" name="action" value="sell">販売</button>
+          <button type="submit" name="action" value="clear">クリア</button>
+          <button type="submit" name="action" value="back">戻る</button>
+        </p>
+      </form>
+    </main>
 
-  <script src="assets/js/sell.js"></script>
+    <script src="assets/js/sell.js"></script>
+  </div>
 </body>
 
 </html>
