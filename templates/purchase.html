@@ -23,61 +23,45 @@
       <h1 class="page-title">商品の購入</h1>
 
       <?php if (!empty($flash)): ?>
-      <p class="message message--<?= h($flash['type']) ?>">
-        <?= h($flash['message']) ?>
-      </p>
+        <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
       <?php endif; ?>
 
       <?php if ($error !== ''): ?>
-      <p class="message message--error">
-        <?= h($error) ?>
-      </p>
+        <p class="message message--error"><?= h($error) ?></p>
       <?php endif; ?>
 
       <section class="card">
-        <h2 class="product-name">
-          <?= h($product['ProductName']) ?>
-        </h2>
-        <p class="product-price">¥
-          <?= number_format((int)$product['Price']) ?>
-        </p>
+        <h2 class="product-name"><?= h($product['ProductName']) ?></h2>
+        <p class="product-price">¥<?= number_format((int)$product['Price']) ?></p>
 
         <dl class="info-list">
           <dt>ジャンル</dt>
-          <dd>
-            <?= h($product['GenreName']) ?>
-          </dd>
+          <dd><?= h($product['GenreName']) ?></dd>
 
           <dt>出品者</dt>
-          <dd>
-            <?= h($product['SellerName']) ?>
-          </dd>
+          <dd><?= h($product['SellerName']) ?></dd>
 
           <dt>状態</dt>
-          <dd>
-            <?= $product['BuyerUserid'] === null ? '販売中' : '売り切れ' ?>
-          </dd>
+          <dd><?= $product['BuyerUserid'] === null ? '販売中' : '売り切れ' ?></dd>
         </dl>
       </section>
 
       <?php if (!$canBuy): ?>
-      <p class="message message--warning">
-        <?= h($blockMessage) ?>
-      </p>
-
-      <div class="actions">
-        <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
-      </div>
-      <?php else: ?>
-      <form method="post" action="purchase.php">
-        <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
-        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+        <p class="message message--warning"><?= h($blockMessage) ?></p>
 
         <div class="actions">
           <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
-          <button type="submit" class="btn btn--primary">購入</button>
         </div>
-      </form>
+      <?php else: ?>
+        <form method="post" action="purchase.php">
+          <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
+          <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+
+          <div class="actions">
+            <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
+            <button type="submit" class="btn btn--primary">購入</button>
+          </div>
+        </form>
       <?php endif; ?>
     </main>
 
