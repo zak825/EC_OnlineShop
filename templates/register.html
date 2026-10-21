@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>アカウント登録画面</title>
     <link rel="stylesheet" href="assets/css/register.css">
 </head>
+
 <body>
     <div id="wrap">
         <div class="container register-container">
@@ -21,28 +23,56 @@
 
                 <div class="form-group">
                     <label for="user_name">氏名</label>
-                    <input type="text" id="user_name" name="user_name" maxlength="50" value="<?= h($userNameInput ?? '') ?>" placeholder="例：山田 太郎">
+                    <input type="text" id="user_name" name="user_name" maxlength="50"
+                        value="<?= h($userNameInput ?? '') ?>" placeholder="例：山田 太郎">
                 </div>
 
                 <div class="form-group">
                     <label for="zip_code">郵便番号</label>
-                    <input type="text" id="zip_code" name="zip_code" maxlength="8" value="<?= h($zipCodeInput ?? '') ?>" placeholder="例：1234567 または 123-4567">
+                    <input type="text" id="zip_code" name="zip_code" maxlength="8" value="<?= h($zipCodeInput ?? '') ?>"
+                        placeholder="例：1234567 または 123-4567">
                 </div>
 
                 <div class="form-group">
                     <label for="address">住所</label>
-                    <input type="text" id="address" name="address" maxlength="256" value="<?= h($addressInput ?? '') ?>" placeholder="例：東京都千代田区1-1-1">
+                    <input type="text" id="address" name="address" maxlength="256" value="<?= h($addressInput ?? '') ?>"
+                        placeholder="例：東京都千代田区1-1-1">
                 </div>
 
                 <div class="form-group">
                     <label for="tel">電話番号</label>
-                    <input type="tel" id="tel" name="tel" maxlength="15" value="<?= h($telInput ?? '') ?>" placeholder="例：09012345678">
+                    <input type="tel" id="tel" name="tel" maxlength="15" value="<?= h($telInput ?? '') ?>"
+                        placeholder="例：09012345678">
+                </div>
+
+                <!-- パスワード再設定時の本人確認に使う秘密の質問 -->
+                <div class="form-group">
+                    <label for="secret_question_id">秘密の質問</label>
+                    <select id="secret_question_id" name="secret_question_id">
+                        <option value="">選択してください</option>
+                        <?php foreach (($secretQuestions ?? []) as $questionId => $questionText): ?>
+                        <option value="<?= h($questionId) ?>" <?=(string)($secretQuestionIdInput ?? ''
+                            )===(string)$questionId ? ' selected' : '' ?>>
+                            <?= h($questionText) ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="secret_answer">秘密の質問の回答</label>
+                    <input type="text" id="secret_answer" name="secret_answer" maxlength="100"
+                        value="<?= h($secretAnswerInput ?? '') ?>" required>
+                    <small class="note">※パスワードを忘れたときの本人確認に使用します（100文字以内）。</small>
                 </div>
 
                 <div class="form-group">
                     <label for="password">パスワード</label>
                     <input type="password" id="password" name="password" maxlength="<?= h($passwordMaxLength ?? 50) ?>">
-                    <small class="note">※<?= h($passwordMinLength ?? 8) ?>文字以上<?= h($passwordMaxLength ?? 50) ?>文字以内で入力してください。</small>
+                    <small class="note">※
+                        <?= h($passwordMinLength ?? 8) ?>文字以上
+                        <?= h($passwordMaxLength ?? 50) ?>文字以内で入力してください。
+                    </small>
                 </div>
 
                 <div class="btn-row">
@@ -56,4 +86,5 @@
         <script src="assets/js/register.js"></script>
     </div>
 </body>
+
 </html>
