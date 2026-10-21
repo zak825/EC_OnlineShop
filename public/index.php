@@ -46,18 +46,29 @@ if ($loggedIn) {
 
 // ---- 2. DBの参照 ---------------------------------------------------
 // 販売中の商品を新しい順に取得する（ジャンル名・出品者名も結合して取る）
-$stmt = db()->prepare(
+// ログイン中は、自分が出品した商品は一覧に出さない
+$sql =
     'SELECT s.ProductID, s.ProductName, s.Price, s.Userid,
             g.GenreName,
             u.UserName AS SellerName
      FROM Sales s
      JOIN Genre    g ON s.GenreCode = g.GenreCode
      JOIN UserData u ON s.Userid    = u.Userid
-     WHERE s.BuyerUserid IS NULL
-     ORDER BY s.ProductID DESC'
-);
-$stmt->execute();
+     WHERE s.BuyerUserid IS NULL';
+
+$params = [];
+if ($loggedIn) {
+    $sql .= ' AND s.Userid <> :me';   // 自分の出品を除く
+    $params[':me'] = $userId;
+}
+
+$sql .= ' ORDER BY s.ProductID DESC';
+
+$stmt = db()->prepare($sql);
+$stmt->execute($params);
 $products = $stmt->fetchAll();
+
+
 
 // ---- 3. 情報表示 ---------------------------------------------------
 view('index', [
