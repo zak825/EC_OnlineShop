@@ -9,30 +9,32 @@
 </head>
 
 <body>
-  <main>
-    <h1>販売確認画面</h1>
+  <div id="wrap">
+    <main>
+      <h1>販売確認画面</h1>
 
-    <?php if ($error !== ''): ?>
-      <p class="error"><?= h($error) ?></p>
-    <?php endif; ?>
+      <?php if ($error !== ''): ?>
+        <p class="error"><?= h($error) ?></p>
+      <?php endif; ?>
 
-    <p><?= h($sell['product_name']) ?> <?= h(number_format($sell['price'])) ?>円 で販売しますか？</p>
-    <p>ジャンル：<?= h($sell['genre_name']) ?></p>
+      <p><?= h($sell['product_name']) ?> <?= h(number_format($sell['price'])) ?>円 で販売しますか？</p>
+      <p>ジャンル：<?= h($sell['genre_name']) ?></p>
 
-    <?php if ($done): ?>
-      <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する（sell_confirm.js） -->
-      <p>出品が完了しました</p>
-      <p><a href="<?= h(URL_MAIN) ?>" id="main_link">移動しない場合はこちら</a></p>
-    <?php else: ?>
-      <form action="sell_confirm.php" method="post" id="confirm_form">
-        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-        <button type="submit" name="action" value="sell" id="sell_button">販売する</button>
-        <button type="submit" name="action" value="cancel">キャンセル</button>
-      </form>
-    <?php endif; ?>
-  </main>
+      <?php if ($done): ?>
+        <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する（sell_confirm.js） -->
+        <p>出品が完了しました</p>
+        <p><a href="<?= h(URL_MAIN) ?>" id="main_link">移動しない場合はこちら</a></p>
+      <?php else: ?>
+        <form action="sell_confirm.php" method="post" id="confirm_form">
+          <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+          <button type="submit" name="action" value="sell" id="sell_button">販売する</button>
+          <button type="submit" name="action" value="cancel">キャンセル</button>
+        </form>
+      <?php endif; ?>
+    </main>
 
-  <script src="assets/js/sell_confirm.js"></script>
+    <script src="assets/js/sell_confirm.js"></script>
+  </div>
 </body>
 
 </html>
