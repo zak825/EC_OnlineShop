@@ -23,6 +23,8 @@ if ($headerLoggedIn) {
         <?php if ($headerLoggedIn): ?>
             <div class="right">
                 <a href="mypage.php" class="UserName"><?= name_label($headerUserName) ?></a>
+                <a href="sell.php" class="btn-sell">出品</a>
+                <a href="mypage.php" class="UserName"><?= htmlspecialchars($headerUserName, ENT_QUOTES, 'UTF-8') ?></a>
                 <form action="logout.php" method="post"
                       onsubmit="return confirm('ログアウトしますか？');">
                     <input type="hidden" name="csrf_token"

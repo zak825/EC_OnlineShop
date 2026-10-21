@@ -18,4 +18,25 @@
 /* 省略された名前（ホバーで全文が出る） */
 .name-ellipsis {
   cursor: help;
+
+/* ---------- 丸アイコン（商品名などの頭文字・色は PHP が付ける） ---------- */
+.initial-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: bold;
+  line-height: 1;
+  flex: none;        /* 縮まない・伸びない */
+  overflow: hidden;  /* はみ出し防止 */
+}
+
+/* アイコンが写真のとき：丸い枠に収める */
+.initial-icon--photo {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
 }
