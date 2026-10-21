@@ -52,15 +52,14 @@
           data-image-max="<?= h($image_max) ?>">
         <p class="error" id="error_images"><?= h($error_images) ?></p>
 
-        <?php if ($image_urls): ?>
-          <!-- 前に選んだ画像（画像を選び直すと入れ替わる） -->
-          <p>選択中の画像（選び直すと入れ替わります）</p>
-          <div class="image-list">
-            <?php foreach ($image_urls as $url): ?>
-              <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
-            <?php endforeach; ?>
-          </div>
-        <?php endif; ?>
+        <!-- 選択中の画像のプレビュー
+             最初は前に選んだ画像（販売確認画面から戻ったとき）を出し、画像を選ぶと sell.js が入れ替える -->
+        <p id="image_preview_label"<?= $image_urls ? '' : ' hidden' ?>>選択中の画像（選び直すと入れ替わります）</p>
+        <div class="image-list" id="image_preview">
+          <?php foreach ($image_urls as $url): ?>
+            <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
+          <?php endforeach; ?>
+        </div>
 
         <p>
           <button type="submit" name="action" value="sell">販売</button>
@@ -70,7 +69,7 @@
       </form>
     </main>
 
-    <script src="assets/js/sell.js"></script>
+    <script src="assets/js/sell.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/sell.js') ?>"></script>
   </div>
 </body>
 
