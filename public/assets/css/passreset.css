@@ -41,7 +41,7 @@
 .passreset-title {
     font-size: 20px;
     font-weight: 700;
-    color: #0f172a;
+    color: #606060;
     letter-spacing: 0.06em;
     margin: 0;
     position: relative;
@@ -56,7 +56,7 @@
     transform: translateX(-50%);
     width: 32px;
     height: 2px;
-    background-color: #0f172a;
+    background-color: #8c52ff;
 }
 
 /* JSおよびサーバー側で使用するフェーズ非表示制御クラス（最重要） */
@@ -190,13 +190,13 @@
 
 .back-link {
     font-size: 13px;
-    color: #64748b;
+    color: #737373;
     text-decoration: none;
     transition: color 0.15s ease;
 }
 
 .back-link:hover {
-    color: #8c52ff;
+    color: #6639c0;
     text-decoration: underline;
 }
 
