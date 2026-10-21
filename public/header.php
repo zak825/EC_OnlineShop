@@ -24,13 +24,12 @@ if ($headerLoggedIn) {
             <div class="right">
                 <a href="mypage.php" class="UserName"><?= name_label($headerUserName) ?></a>
                 <a href="sell.php" class="btn-sell">出品</a>
-                <a href="mypage.php" class="UserName"><?= htmlspecialchars($headerUserName, ENT_QUOTES, 'UTF-8') ?></a>
                 <form action="logout.php" method="post"
-                      onsubmit="return confirm('ログアウトしますか？');">
+                    onsubmit="return confirm('ログアウトしますか？');">
                     <input type="hidden" name="csrf_token"
-                       value="<?= h(csrf_token()) ?>">
+                        value="<?= h(csrf_token()) ?>">
                     <button type="submit" class="btn-logout">ログアウト</button>
-            </form>
+                </form>
             </div>
         <?php else: ?>
             <a href="<?= URL_LOGIN ?>" class="btn-login">ログイン</a>
