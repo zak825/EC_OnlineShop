@@ -34,7 +34,7 @@
         <!-- ===== プロフィール（名前・アイコン・評価） ===== -->
         <section class="profile">
           <div class="profile__head">
-            <p class="profile__name"><?= h($userName) ?></p>
+            <p class="profile__name"><?= name_label($userName) ?></p>
 
             <?php if ($iconPath !== null && $iconPath !== ''): ?>
               <img src="<?= h($iconPath) ?>" alt="" class="profile__icon">
@@ -87,7 +87,7 @@
                 <span class="item__price">¥<?= number_format((int)$item['Price']) ?></span>
               </div>
               <dl class="item__meta">
-                <dt>出品者</dt><dd><?= h($item['SellerName']) ?></dd>
+                <dt>出品者</dt><dd><?= name_label($item['SellerName']) ?></dd>
                 <dt>購入日時</dt><dd><?= h(format_datetime($item['SoldDate'])) ?></dd>
               </dl>
 
@@ -135,7 +135,7 @@
                 </div>
               <?php else: ?>
                 <dl class="item__meta">
-                  <dt>購入者</dt><dd><?= h($item['BuyerUserName'] ?? '不明') ?></dd>
+                  <dt>購入者</dt><dd><?= name_label($item['BuyerUserName'] ?? '不明') ?></dd>
                   <dt>購入日時</dt><dd><?= h(format_datetime($item['SoldDate'])) ?></dd>
                   <?php if ((int)$item['ShippingFlag'] !== 1): ?>
                     <!-- 配送先は発送に必要なので、未発送のあいだだけ表示する -->

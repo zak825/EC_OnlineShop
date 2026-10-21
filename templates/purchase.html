@@ -39,7 +39,7 @@
           <dd><?= h($product['GenreName']) ?></dd>
 
           <dt>出品者</dt>
-          <dd><?= h($product['SellerName']) ?></dd>
+          <dd><?= name_label($product['SellerName']) ?></dd>
 
           <dt>状態</dt>
           <dd><?= $product['BuyerUserid'] === null ? '販売中' : '売り切れ' ?></dd>
