@@ -2,11 +2,12 @@
 // ============================================================
 // 購入確認画面
 //   GET  purchase_confirm.php                   … 購入内容を表示
-//   POST purchase_confirm.php (action=confirm)  … 購入を確定
+//   POST purchase_confirm.php (action=confirm)  … 購入を確定 → 完了画面
 //   POST purchase_confirm.php (action=cancel)   … 購入画面へ戻る
 // 設計書: docs/design/購入確認画面_設計処理.md
 //
 // 購入確定 = Sales の BuyerUserid / BuyerName / ShippingFlag / SoldDate を埋める
+// 確定できたら、メイン画面へは戻さず「購入完了」画面を表示する
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
@@ -79,12 +80,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect(URL_MAIN);
     }
 
-    // 3. セッションの購入情報を削除
+    // 3. セッションの購入情報を削除（リロードで二重登録されないように）
     unset($_SESSION['purchase']);
 
-    // 4. メイン画面へ
-    set_flash('購入が完了しました。', 'success');
-    redirect(URL_MAIN);
+    // 4. 購入完了画面を表示する
+    view('purchase_confirm', [
+        'done'    => true,
+        'flash'   => null,
+        'product' => null,
+        'user'    => null,
+        'token'   => '',
+    ]);
+    exit;
 }
 
 // ============================================================
@@ -122,6 +129,7 @@ $stmt->execute([':userId' => login_user_id()]);
 $user = $stmt->fetch();
 
 view('purchase_confirm', [
+    'done'    => false,
     'flash'   => get_flash(),
     'token'   => csrf_token(),
     'product' => $product,
