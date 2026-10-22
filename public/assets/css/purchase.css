@@ -1,0 +1,295 @@
+/* ============================================================
+   共通ベース（login/register 系の世界観：紫アクセント・シャープ）
+   新 common.css にヘッダー等しか無いので、画面で使う部品はここで定義する
+   ============================================================ */
+
+body {
+  margin: 0;
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  color: #0f172a;
+  background: #f1f5f9;
+  line-height: 1.6;
+}
+
+* { box-sizing: border-box; }
+
+/* ---------- ヘッダー ---------- */
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 24px;
+}
+
+.site-logo {
+  color: #8c52ff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+/* ---------- レイアウト ---------- */
+.container {
+  max-width: 640px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.04em;
+  position: relative;
+  margin: 0 0 24px;
+  padding-bottom: 12px;
+}
+
+.page-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 2px;
+  background: #8c52ff;
+}
+
+/* ---------- カード ---------- */
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  border-radius: 2px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.03em;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ---------- 項目一覧（ラベル：値） ---------- */
+.info-list {
+  display: grid;
+  grid-template-columns: 7em 1fr;
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.info-list dt {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.info-list dd {
+  margin: 0;
+  color: #0f172a;
+  word-break: break-all;
+}
+
+/* ---------- メッセージ ---------- */
+.message {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  border: 1px solid transparent;
+  border-left-width: 3px;
+  word-break: break-all;
+}
+
+.message--error   { background: #fef2f2; border-color: #fecaca; border-left-color: #ef4444; color: #991b1b; }
+.message--warning { background: #fffbeb; border-color: #fde68a; border-left-color: #f59e0b; color: #92400e; }
+.message--success { background: #f0fdf4; border-color: #bbf7d0; border-left-color: #22c55e; color: #166534; }
+.message--info    { background: #eff6ff; border-color: #bfdbfe; border-left-color: #3b82f6; color: #1e40af; }
+
+.message__line { margin: 0; }
+.message__line + .message__line { margin-top: 4px; }
+
+/* ---------- ボタン ---------- */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn--primary {
+  flex: 2;
+  background: #8c52ff;
+  color: #fff;
+  border-color: #8c52ff;
+}
+
+.btn--primary:hover { background: #4f23a0; border-color: #4f23a0; }
+
+.btn--secondary {
+  background: #fff;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.btn--secondary:hover { background: #f8fafc; color: #8c52ff; border-color: #8c52ff; }
+
+.btn:active { transform: translateY(1px); }
+
+/* ---------- スマホ ---------- */
+@media (max-width: 480px) {
+  .info-list {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .info-list dd { margin-bottom: 8px; }
+}
+
+/* ============================================================
+   購入画面・購入確認画面
+   ============================================================ */
+
+/* ---------- 商品名・価格（購入画面） ---------- */
+.product-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+  word-break: break-all;
+}
+
+.product-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #8c52ff;
+  margin: 0 0 20px;
+}
+
+/* ---------- お支払い内容の表（購入確認画面） ---------- */
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.summary-table th,
+.summary-table td {
+  padding: 12px 4px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.summary-table th {
+  width: 9em;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.summary-table td {
+  color: #0f172a;
+  word-break: break-all;
+}
+
+.summary-table tr:last-child th,
+.summary-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* 合計金額の行は強調する */
+.summary-table__total th,
+.summary-table__total td {
+  padding-top: 14px;
+  font-weight: 700;
+}
+
+.summary-table__total td {
+  font-size: 1.3rem;
+  color: #8c52ff;
+}
+
+/* ---------- ヘッダーロゴ（画像） ---------- */
+.site-logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-logo__img {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+/* ---------- 完了メッセージに緑チェックを付ける ---------- */
+.message--success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.message--success::before {
+  content: '';
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: url("assets/images/checkpoint.png") no-repeat center / contain;
+}
+
+/* ---------- 購入完了画面 ---------- */
+.complete-card {
+  text-align: center;
+  padding: 44px 28px 40px;
+}
+
+.complete-check {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  object-fit: contain;
+}
+
+.complete-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+}
+
+.complete-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+
+/* 完了画面のボタンは中央に1つ */
+.complete-card .actions {
+  justify-content: center;
+  margin-top: 0;
+}
+
+.complete-card .btn {
+  flex: 0 0 auto;
+  min-width: 220px;
+}
