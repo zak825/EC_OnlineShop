@@ -1,4 +1,8 @@
-﻿/* ---------- ヘッダーのリンク（ロゴは左、マイページは右） ---------- */
+﻿body {
+    margin: 0px auto;
+}
+
+/* ---------- ヘッダーのリンク（ロゴは左、マイページは右） ---------- */
 .site-header {
   display: flex;
   justify-content: space-between;
