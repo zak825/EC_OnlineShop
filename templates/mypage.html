@@ -25,13 +25,10 @@
 
       <?php if (!$loggedIn): ?>
       <!-- ===== 未ログイン ===== -->
-      <section class="card login-prompt">
+      <section class="card-login-prompt">
+        <img src="assets/images/key_off.png" width="70" height="70" alt="key_off" class="key_off">
+        <h1>セッションがタイムアウトしました</h1>
         <p>マイページを見るにはログインしてください。</p>
-        <div class="actions">
-          <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">メイン画面へ</a>
-          <a href="<?= h(URL_LOGIN) ?>?return=<?= urlencode('mypage.php' . ($tab === 'sold' ? '?tab=sold' : '')) ?>"
-            class="btn btn--primary">ログイン</a>
-        </div>
       </section>
 
       <?php else: ?>
