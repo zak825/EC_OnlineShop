@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>登録確認画面</title>
+    <title>e shop | 登録確認</title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/register_check.css">
 </head>
@@ -76,8 +76,8 @@
                     <form id="check-form" action="register_check.php" method="post">
                         <input type="hidden" name="csrf_token" id="csrf-token" value="<?= h($token ?? csrf_token()) ?>">
                         <div class="btn-row">
-                            <button type="button" id="submit-btn" class="btn-primary">はい（登録する）</button>
-                            <button type="button" id="cancel-btn" class="btn-secondary"
+                            <button type="button" id="submit-btn" class="btn-main">はい（登録する）</button>
+                            <button type="button" id="cancel-btn" class="btn-sub"
                                 onclick="location.href='register.php'">キャンセル</button>
                         </div>
                     </form>
@@ -89,7 +89,7 @@
                         <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
                         <p class="complete-message">登録が完了しました！</p>
                         <div class="btn-row">
-                            <button type="button" id="login-page-btn" class="btn-primary"
+                            <button type="button" id="login-page-btn" class="btn-main"
                                 onclick="location.href='login.php'">ログインページへ</button>
                         </div>
                     </div>

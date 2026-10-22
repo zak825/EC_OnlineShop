@@ -17,13 +17,18 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-    padding: 44px 36px 36px;
+    padding: 28px 36px 36px;
     box-sizing: border-box;
     border-radius: 2px;
-    /* 角丸は多用せず極めてシャープに */
 }
 
-/* ヘッダーエリア（ロゴ & h1 を中央配置） */
+/* トップへ戻るリンク */
+.top-link {
+    text-align: left;
+    margin-bottom: 28px;
+}
+
+/* ヘッダーエリア */
 .login-header {
     text-align: center;
     margin-bottom: 28px;
@@ -40,7 +45,7 @@
 .login-title {
     font-size: 20px;
     font-weight: 700;
-    color: #0f172a;
+    color: #606060;
     letter-spacing: 0.06em;
     margin: 0;
     position: relative;
@@ -55,7 +60,7 @@
     transform: translateX(-50%);
     width: 32px;
     height: 2px;
-    background-color: #0f172a;
+    background-color: #8c52ff;
 }
 
 /* エラーメッセージ表示領域 */
@@ -118,8 +123,8 @@
     margin-top: 28px;
 }
 
-/* ログインボタン（メイン） */
-.btn-login {
+/* ログインボタン */
+.btn-main {
     flex: 2;
     height: 44px;
     background-color: #8c52ff;
@@ -133,21 +138,21 @@
     transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
-.btn-login:hover {
+.btn-main:hover {
     background-color: #4f23a0;
     border-color: #4f23a0;
 }
 
-.btn-login:active {
+.btn-main:active {
     transform: translateY(1px);
 }
 
-/* クリアボタン（サブ） */
-.btn-clear {
+/* クリアボタン */
+.btn-sub {
     flex: 1;
     height: 44px;
     background-color: #ffffff;
-    color: #475569;
+    color: #737373;
     border: 1px solid #cbd5e1;
     border-radius: 0;
     /* 角丸なし */
@@ -157,13 +162,13 @@
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.btn-clear:hover {
+.btn-sub:hover {
     background-color: #f8fafc;
-    color: #8c52ff;
+    color: #6639c0;
     border-color: #8c52ff;
 }
 
-.btn-clear:active {
+.btn-sub:active {
     transform: translateY(1px);
 }
 
@@ -173,15 +178,15 @@
     margin-top: 14px;
 }
 
-.btn-passreset-link {
+.btn-link {
     font-size: 12px;
-    color: #64748b;
+    color: #606060;
     text-decoration: none;
     transition: color 0.15s ease;
 }
 
-.btn-passreset-link:hover {
-    color: #0f172a;
+.btn-link:hover {
+    color: #737373;
     text-decoration: underline;
 }
 

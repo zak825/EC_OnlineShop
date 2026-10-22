@@ -1,20 +1,3 @@
-/* ---------- ヘッダーのリンク（ロゴは左、マイページは右） ---------- */
-.site-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.site-nav__link {
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.site-nav__link:hover {
-  text-decoration: underline;
-}
-
 /* 省略された名前（ホバーで全文が出る） */
 .name-ellipsis {
   cursor: help;
