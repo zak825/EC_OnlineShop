@@ -7,12 +7,13 @@
 body {
   margin: 0;
   color: #0f172a;
-  background: #f1f5f9;
   font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   line-height: 1.6;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 /* フォーム全体をカードにして中央に置く */
 main {
@@ -46,7 +47,7 @@ main h1::after {
 }
 
 /* ラベル（<p><label> で囲まれている） */
-#sell_form > p {
+#sell_form>p {
   margin: 16px 0 6px;
 }
 
@@ -117,7 +118,7 @@ select.Form-Item-Input {
 }
 
 /* フォーム上部のまとめエラー */
-main > .error {
+main>.error {
   margin: 0 0 20px;
   padding: 10px 14px;
   font-size: 13px;
@@ -144,33 +145,47 @@ input[type="file"] {
    枠を超えたら横スクロール。DOM で後に追加された画像ほど左に来る（row-reverse） */
 .image-list {
   display: flex;
-  flex-direction: row-reverse;   /* 後から入った画像を左に置く */
-  justify-content: flex-end;     /* row-reverse では flex-end が「左詰め」 */
-  flex-wrap: nowrap;             /* 折り返さず1列 */
+  flex-direction: row-reverse;
+  /* 後から入った画像を左に置く */
+  justify-content: flex-end;
+  /* row-reverse では flex-end が「左詰め」 */
+  flex-wrap: nowrap;
+  /* 折り返さず1列 */
   gap: 8px;
   margin: 8px 0 0;
-  overflow-x: auto;              /* 枠を超えたら横スクロール */
-  padding-bottom: 8px;           /* スクロールバーのぶんの余白 */
+  overflow-x: auto;
+  /* 枠を超えたら横スクロール */
+  padding-bottom: 8px;
+  /* スクロールバーのぶんの余白 */
   scrollbar-width: thin;
 }
 
 .image-list__item {
   width: 100px;
   height: 100px;
-  flex: none;                    /* 縮まない（スクロールさせる） */
+  flex: none;
+  /* 縮まない（スクロールさせる） */
   object-fit: cover;
   border: 1px solid #e2e8f0;
-  animation: imageSlideIn 0.25s ease;   /* 左からスライドインで登場 */
+  animation: imageSlideIn 0.25s ease;
+  /* 左からスライドインで登場 */
 }
 
 /* 新しい画像が左から入ってくる動き */
 @keyframes imageSlideIn {
-  from { transform: translateX(-28px); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(-28px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* ボタン行 */
-#sell_form > p:last-of-type {
+#sell_form>p:last-of-type {
   display: flex;
   gap: 12px;
   margin-top: 28px;
@@ -210,6 +225,11 @@ input[type="file"] {
 }
 
 @media (max-width: 480px) {
-  main { padding: 24px 20px; }
-  #price { width: 140px; }
+  main {
+    padding: 24px 20px;
+  }
+
+  #price {
+    width: 140px;
+  }
 }

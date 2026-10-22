@@ -7,12 +7,13 @@
 body {
   margin: 0;
   color: #0f172a;
-  background: #f1f5f9;
   font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   line-height: 1.6;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 /* 内容をカードにして中央に置く */
 main {
@@ -46,13 +47,13 @@ main h1::after {
 }
 
 /* 確認文・ジャンルなどの本文 */
-main > p {
+main>p {
   margin: 0 0 10px;
   color: #334155;
 }
 
 /* 商品名＋金額の確認文は少し強調 */
-main > p:first-of-type {
+main>p:first-of-type {
   font-size: 1.05rem;
   font-weight: 600;
   color: #0f172a;
