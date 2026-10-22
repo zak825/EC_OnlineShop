@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -67,16 +67,48 @@
           </div>
         </div>
 
-        <!-- ===== アイコン変更 ===== -->
+        <!-- ===== アイコン変更ボタン（押すとモーダルが開く） ===== -->
         <div class="profile__right">
-          <form action="mypage.php" method="post" enctype="multipart/form-data" class="icon-form">
-            <input type="hidden" name="action" value="upload_icon">
-            <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-            <input type="file" name="icon" accept="image/jpeg,image/png,image/gif,image/webp" required>
-            <button type="submit" class="btn btn--secondary btn--small">アイコンを変更</button>
-          </form>
+          <button type="button" class="btn btn--secondary btn--small" id="openIconModal">アイコンを変更</button>
         </div>
       </section>
+
+      <!-- ===== アイコン変更モーダル ===== -->
+      <div class="modal-overlay" id="iconModal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="iconModalTitle">
+          <h2 id="iconModalTitle" class="modal-title">アイコンを変更</h2>
+
+          <form action="mypage.php" method="post" enctype="multipart/form-data" id="iconForm">
+            <input type="hidden" name="action" value="upload_icon">
+            <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+
+            <!-- プレビュー（選択前は今のアイコン、選択後は選んだ画像） -->
+            <div class="modal-preview">
+              <?php if ($iconPath !== null && $iconPath !== ''): ?>
+              <img src="<?= h($iconPath) ?>" alt="" class="profile__icon__md" id="iconPreviewImg">
+              <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" hidden aria-hidden="true"></span>
+              <?php else: ?>
+              <img src="" alt="" class="profile__icon" id="iconPreviewImg" hidden>
+              <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" aria-hidden="true">
+                <?= h(mb_substr($userName, 0, 1)) ?>
+              </span>
+              <?php endif; ?>
+            </div>
+
+            <!-- ファイル選択（input本体は隠して、ラベルをボタンとして使う） -->
+            <label for="iconFile" class="btn btn--secondary btn--small">ファイルを選択</label>
+            <input type="file" id="iconFile" name="icon" class="visually-hidden"
+              accept="image/jpeg,image/png,image/gif,image/webp" required>
+            <p class="modal-filename" id="iconFileName">ファイルが選択されていません</p>
+            <p class="modal-error" id="iconError" hidden></p>
+
+            <div class="modal-actions">
+              <button type="button" class="btn btn--small" id="closeIconModal">キャンセル</button>
+              <button type="submit" class="btn btn--primary btn--small" id="iconSubmit" disabled>決定</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
       <!-- ===== 購入した商品 / 出品した商品 の切り替え ===== -->
       <nav class="tabs">
@@ -235,6 +267,7 @@
     <?php require __DIR__ . '/../public/footer.php'; ?>
 
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/mypage.js"></script>
   </div>
 </body>
 

@@ -1,30 +1,159 @@
-/* エラーメッセージ */
-.error {
-  color: #d00;
-  margin: 4px 0;
+/* ============================================================
+   販売確認画面
+   出品画面（sell.css）と同じ世界観（紫アクセント・シャープ）
+   ヘッダーは header.php / header.css
+   ============================================================ */
+
+body {
+  margin: 0;
+  color: #0f172a;
+  background: #f1f5f9;
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  line-height: 1.6;
 }
 
-/* 商品画像の一覧（サムネイル） */
+* { box-sizing: border-box; }
+
+/* 内容をカードにして中央に置く */
+main {
+  width: 100%;
+  max-width: 520px;
+  margin: 32px auto;
+  padding: 36px 36px 32px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+}
+
+main h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  position: relative;
+  margin: 0 0 24px;
+  padding-bottom: 12px;
+}
+
+main h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 2px;
+  background: #8c52ff;
+}
+
+/* 確認文・ジャンルなどの本文 */
+main > p {
+  margin: 0 0 10px;
+  color: #334155;
+}
+
+/* 商品名＋金額の確認文は少し強調 */
+main > p:first-of-type {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* エラーメッセージ */
+.error {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  font-size: 13px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 3px solid #ef4444;
+  color: #991b1b;
+}
+
+/* 商品画像のサムネイル（出品画面と同じ 100×100） */
 .image-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 8px 0;
+  margin: 12px 0 20px;
 }
 
 .image-list__item {
   width: 100px;
   height: 100px;
-  flex: none;          /* 横並びのとき縮んだり伸びたりしないようにする */
-  object-fit: cover;   /* 縦横比を保ったまま、はみ出た部分を切り取る */
-  border: 1px solid #ccc;
+  flex: none;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
 }
 
-/* プレビューの画像は、sell.php のサムネイルと同じ 100×100 にする */
-.product__image--photo {
-  width: 100px;
-  height: 100px;
-  aspect-ratio: auto;   /* index.css の 4/3 指定を打ち消す */
-  object-fit: cover;    /* 縦横比を保ったまま、はみ出た部分を切り取る */
-  border: 1px solid #ccc;
+/* ボタン行（販売する／キャンセル） */
+#confirm_form {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+#confirm_form button {
+  flex: 1;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 0;
+  cursor: pointer;
+  background: #fff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+#confirm_form button:hover {
+  background: #f8fafc;
+  color: #8c52ff;
+  border-color: #8c52ff;
+}
+
+/* 販売する（メインの操作）だけ紫で強調 */
+#sell_button {
+  flex: 2;
+  background: #8c52ff;
+  color: #fff;
+  border-color: #8c52ff;
+}
+
+#sell_button:hover {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
+
+/* ---------- 出品完了 ---------- */
+/* 「出品が完了しました」を中央に大きく（緑チェック付き） */
+.complete-box {
+  text-align: center;
+  padding: 16px 0 8px;
+}
+
+.complete-check {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  object-fit: contain;
+}
+
+.complete-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 20px;
+}
+
+/* 「移動しない場合はこちら」リンク */
+#main_link {
+  color: #8c52ff;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+#main_link:hover {
+  text-decoration: underline;
 }

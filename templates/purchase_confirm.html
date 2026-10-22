@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -10,9 +10,21 @@
 </head>
 
 <body>
-  <div id="wrap">
     <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
+    <div id="wrap">
+        <main class="container">
+            <?php if (!empty($done)): ?>
+            <!-- ===== 購入完了 ===== -->
+            <h1 class="page-title">購入完了</h1>
+            <section class="card complete-card">
+                <img src="assets/images/checkpoint.png" alt="" class="complete-check">
+                <p class="complete-title">購入が完了しました</p>
+                <p class="complete-sub">ご購入ありがとうございました。<br>商品の発送をお待ちください。</p>
+                <div class="actions">
+                    <a href="<?= h(URL_MAIN) ?>" class="btn btn--primary" id="main_link">メイン画面へ</a>
+                </div>
+            </section>
 
     <main class="container">
       <?php if (!empty($done)): ?>

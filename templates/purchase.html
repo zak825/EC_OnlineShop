@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -11,12 +11,12 @@
 </head>
 
 <body>
-  <div id="wrap">
     <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
+    <div id="wrap">
 
-    <main class="container">
-      <h1 class="page-title">商品の購入</h1>
+        <main class="container">
+            <h1 class="page-title">商品の購入</h1>
 
       <?php if (!empty($flash)): ?>
       <p class="message message--<?= h($flash['type']) ?>">

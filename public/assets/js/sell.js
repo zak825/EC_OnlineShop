@@ -113,34 +113,30 @@ function validateImages() {
 }
 
 // 選んだ画像をすぐにプレビューする（サーバーには送らず、ブラウザの中だけで表示する）
+// file input は選び直すたびに前の選択を捨てるので、DataTransfer に自分でためていく
 var imagePreview      = document.getElementById('image_preview');
 var imagePreviewLabel = document.getElementById('image_preview_label');
-var previewUrls       = [];   // 前のプレビューのURL（入れ替えるときに解放する）
+var previewUrls       = [];   // 前のプレビューのURL（作り直すときに解放する）
 var savedPreviewHtml  = imagePreview.innerHTML;   // サーバーに保存済みの画像（販売確認画面から戻ったとき）
+var picked            = new DataTransfer();   // 選んだ画像をためておく入れ物
 
-function showImagePreview() {
-  var files = images.files;
-
+// ためている画像でプレビューを作り直す（DOM で後の img ほど CSS で左に来る）
+function renderImagePreview() {
   previewUrls.forEach(function(url) {
     URL.revokeObjectURL(url);
   });
   previewUrls = [];
 
-  // 選択をやめた（ファイル選択画面でキャンセルした）ときは、保存済みの画像の表示に戻す
-  // （このまま販売ボタンを押すと、保存済みの画像が使われるため）
-  if (files.length === 0) {
+  // 1枚も無いときは、保存済みの画像の表示に戻す
+  if (picked.files.length === 0) {
     imagePreview.innerHTML = savedPreviewHtml;
     imagePreviewLabel.hidden = savedPreviewHtml.trim() === '';
     return;
   }
 
   imagePreview.innerHTML = '';
-
-  for (var i = 0; i < files.length; i++) {
-    if (imageTypes.indexOf(files[i].type) === -1) {
-      continue;   // 画像でないファイルは出さない（エラーは validateImages() が出す）
-    }
-    var url = URL.createObjectURL(files[i]);
+  for (var i = 0; i < picked.files.length; i++) {
+    var url = URL.createObjectURL(picked.files[i]);
     previewUrls.push(url);
 
     var img = document.createElement('img');
@@ -154,9 +150,43 @@ function showImagePreview() {
   imagePreviewLabel.hidden = imagePreview.children.length === 0;
 }
 
+// 同じファイルが既にためられているか
+function isAlreadyPicked(file) {
+  for (var i = 0; i < picked.files.length; i++) {
+    var g = picked.files[i];
+    if (g.name === file.name && g.size === file.size && g.lastModified === file.lastModified) {
+      return true;
+    }
+  }
+  return false;
+}
+
 images.addEventListener('change', function() {
+  // 今回ダイアログで選ばれた分を、ためているリストに足していく
+  var files = images.files;
+  var over  = false;
+
+  for (var i = 0; i < files.length; i++) {
+    if (picked.files.length >= imageMax) {   // 上限まで来たらそれ以上足さない
+      over = true;
+      break;
+    }
+    if (imageTypes.indexOf(files[i].type) === -1) {
+      continue;   // 画像でないファイルは足さない（エラーは validateImages が出す）
+    }
+    if (!isAlreadyPicked(files[i])) {
+      picked.items.add(files[i]);
+    }
+  }
+
+  // input 自体のファイルを、ためた全部に差し替える（送信もこの全部になる）
+  images.files = picked.files;
+
   validateImages();
-  showImagePreview();
+  if (over) {
+    document.getElementById('error_images').textContent = '画像は' + imageMax + '枚までです';
+  }
+  renderImagePreview();
 });
 
 // サーバー側のエラーで画面が戻ってきたときは、その入力欄を最初から赤くする

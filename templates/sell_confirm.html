@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>e shop | 販売確認</title>
+  <title>e shop | 出品確認</title>
   <link rel="stylesheet" href="assets/css/common.css">
   <link rel="stylesheet" href="assets/css/index.css">
   <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
@@ -15,73 +15,74 @@
 </head>
 
 <body>
-  <div id="wrap">
     <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
     <main>
-      <h1>販売確認画面</h1>
+      <h1>出品確認画面</h1>
 
-      <?php if ($error !== ''): ?>
-      <p class="error">
-        <?= h($error) ?>
-      </p>
-      <?php endif; ?>
-
-      <p>
-        <?= h($sell['product_name']) ?>
-        <?= h(number_format($sell['price'])) ?>円 で販売しますか？
-      </p>
-      <p>ジャンル：
-        <?= h($sell['genre_name']) ?>
-      </p>
-
-
-      <!-- ===== メイン画面での見え方プレビュー ===== -->
-      <p class="preview-label">メイン画面ではこのように表示されます</p>
-      <ul class="product-list product-list--preview">
-        <li class="product">
-          <?php if ($image_urls): ?>
-          <img src="<?= h($image_urls[0]) ?>" alt="商品画像" class="product__image product__image--photo">
-          <?php else: ?>
-          <!-- 画像が無いときは、メイン画面と同じくジャンル名の枠を出す -->
-          <div class="product__image" aria-hidden="true">
-            <?= h($sell['genre_name']) ?>
-          </div>
-          <?php endif; ?>
-
-          <div class="product__body">
-            <h2 class="product__name">
-              <?= h($sell['product_name']) ?>
-            </h2>
-            <p class="product__price">¥
-              <?= number_format((int)$sell['price']) ?>
+            <?php if ($error !== ''): ?>
+            <p class="error">
+                <?= h($error) ?>
             </p>
-            <p class="product__meta">
-              <span class="product__genre">
+            <?php endif; ?>
+
+            <p>
+                <?= h($sell['product_name']) ?>
+                <?= h(number_format($sell['price'])) ?>円 で販売しますか？
+            </p>
+            <p>
+                ジャンル：
                 <?= h($sell['genre_name']) ?>
-              </span>
-              出品者：あなた
             </p>
-            <!-- 自分の出品なので、メイン画面では購入ボタンの代わりにこの表示になる -->
-            <span class="product__own">自分の出品</span>
-          </div>
-        </li>
-      </ul>
+
+
+            <!-- ===== メイン画面での見え方プレビュー ===== -->
+            <p class="preview-label">メイン画面ではこのように表示されます</p>
+            <ul class="product-list product-list--preview">
+                <li class="product">
+                    <?php if ($image_urls): ?>
+                    <img src="<?= h($image_urls[0]) ?>" alt="商品画像" class="product__image product__image--photo">
+                    <?php else: ?>
+                    <!-- 画像が無いときは、メイン画面と同じくジャンル名の枠を出す -->
+                    <div class="product__image" aria-hidden="true">
+                        <?= h($sell['genre_name']) ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="product__body">
+                        <h2 class="product__name">
+                            <?= h($sell['product_name']) ?>
+                        </h2>
+                        <p class="product__price">
+                            ¥
+                            <?= number_format((int)$sell['price']) ?>
+                        </p>
+                        <p class="product__meta">
+                            <span class="product__genre">
+                                <?= h($sell['genre_name']) ?>
+                            </span>
+                            出品者：あなた
+                        </p>
+                        <!-- 自分の出品なので、メイン画面では購入ボタンの代わりにこの表示になる -->
+                        <span class="product__own">自分の出品</span>
+                    </div>
+                </li>
+            </ul>
 
 
 
-      <?php if ($done): ?>
-      <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する（sell_confirm.js） -->
-      <p>出品が完了しました</p>
-      <p><a href="<?= h(URL_MAIN) ?>" id="main_link">移動しない場合はこちら</a></p>
-      <?php else: ?>
-      <form action="sell_confirm.php" method="post" id="confirm_form">
-        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-        <button type="submit" name="action" value="sell" id="sell_button">販売する</button>
-        <button type="submit" name="action" value="cancel">キャンセル</button>
-      </form>
-      <?php endif; ?>
-    </main>
+            <?php if ($done): ?>
+            <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する（sell_confirm.js） -->
+            <p>出品が完了しました</p>
+            <p><a href="<?= h(URL_MAIN) ?>" id="main_link">移動しない場合はこちら</a></p>
+            <?php else: ?>
+            <form action="sell_confirm.php" method="post" id="confirm_form">
+                <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+                <button type="submit" name="action" value="sell" id="sell_button">販売する</button>
+                <button type="submit" name="action" value="cancel">キャンセル</button>
+            </form>
+            <?php endif; ?>
+        </main>
 
     <script src="assets/js/sell_confirm.js"></script>
 
