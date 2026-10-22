@@ -149,19 +149,18 @@ div.product__image {
   min-width: 160px;
   height: 40px;
   padding: 0 24px;
-  background: #fff;
-  color: #8c52ff;
-  border: 1px solid #c4b5fd;   /* 薄い紫の枠 */
+  background: #8c52ff;
+  color: #fff;
+  border: 1px solid #8c52ff;
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .product__buy:hover {
-  background: #f5f3ff;         /* ホバーで薄紫に */
-  border-color: #8c52ff;
+  background: #4f23a0;
+  border-color: #4f23a0;
 }
 
 .product__own {
