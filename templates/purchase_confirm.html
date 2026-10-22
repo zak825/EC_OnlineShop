@@ -16,72 +16,90 @@
 
     <main class="container">
       <?php if (!empty($done)): ?>
-        <!-- ===== 購入完了 ===== -->
-        <h1 class="page-title">購入完了</h1>
-        <section class="card complete-card">
-          <img src="assets/images/checkpoint.png" alt="" class="complete-check">
-          <p class="complete-title">購入が完了しました</p>
-          <p class="complete-sub">ご購入ありがとうございました。<br>商品の発送をお待ちください。</p>
-          <div class="actions">
-            <a href="<?= h(URL_MAIN) ?>" class="btn btn--primary" id="main_link">メイン画面へ</a>
-          </div>
-        </section>
+      <!-- ===== 購入完了 ===== -->
+      <h1 class="page-title">購入完了</h1>
+      <section class="card complete-card">
+        <img src="assets/images/checkpoint.png" alt="" class="complete-check">
+        <p class="complete-title">購入が完了しました</p>
+        <p class="complete-sub">ご購入ありがとうございました。<br>商品の発送をお待ちください。</p>
+        <div class="actions">
+          <a href="<?= h(URL_MAIN) ?>" class="btn btn--primary" id="main_link">メイン画面へ</a>
+        </div>
+      </section>
 
       <?php else: ?>
-        <!-- ===== 購入内容の確認 ===== -->
-        <h1 class="page-title">購入内容の確認</h1>
+      <!-- ===== 購入内容の確認 ===== -->
+      <h1 class="page-title">購入内容の確認</h1>
 
-        <?php if (!empty($flash)): ?>
-          <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
-        <?php endif; ?>
+      <?php if (!empty($flash)): ?>
+      <p class="message message--<?= h($flash['type']) ?>">
+        <?= h($flash['message']) ?>
+      </p>
+      <?php endif; ?>
 
-        <section class="card">
-          <h2 class="section-title">商品</h2>
-          <table class="summary-table">
-            <tr>
-              <th>商品名</th>
-              <td><?= h($product['ProductName']) ?></td>
-            </tr>
-            <tr class="summary-table__total">
-              <th>お支払い金額</th>
-              <td>¥<?= number_format((int)$product['Price']) ?></td>
-            </tr>
-          </table>
-        </section>
+      <section class="card">
+        <h2 class="section-title">商品</h2>
+        <table class="summary-table">
+          <tr>
+            <th>商品名</th>
+            <td>
+              <?= h($product['ProductName']) ?>
+            </td>
+          </tr>
+          <tr class="summary-table__total">
+            <th>お支払い金額</th>
+            <td>¥
+              <?= number_format((int)$product['Price']) ?>
+            </td>
+          </tr>
+        </table>
+      </section>
 
-        <section class="card">
-          <h2 class="section-title">配送先</h2>
-          <dl class="info-list">
-            <dt>お名前</dt>
-            <dd><?= h($user['UserName']) ?></dd>
+      <section class="card">
+        <h2 class="section-title">配送先</h2>
+        <dl class="info-list">
+          <dt>お名前</dt>
+          <dd>
+            <?= h($user['UserName']) ?>
+          </dd>
 
-            <dt>郵便番号</dt>
-            <dd>〒<?= h($user['ZipCode']) ?></dd>
+          <dt>郵便番号</dt>
+          <dd>〒
+            <?= h($user['ZipCode']) ?>
+          </dd>
 
-            <dt>住所</dt>
-            <dd><?= h($user['Address']) ?></dd>
+          <dt>住所</dt>
+          <dd>
+            <?= h($user['Address']) ?>
+          </dd>
 
-            <dt>電話番号</dt>
-            <dd><?= h($user['TEL']) ?></dd>
-          </dl>
-        </section>
+          <dt>電話番号</dt>
+          <dd>
+            <?= h($user['TEL']) ?>
+          </dd>
+        </dl>
+      </section>
 
-        <form method="post" action="purchase_confirm.php" id="confirm-form">
-          <!-- セッション切れ時の戻り先に使う -->
-          <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
-          <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+      <form method="post" action="purchase_confirm.php" id="confirm-form">
+        <!-- セッション切れ時の戻り先に使う -->
+        <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
+        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
-          <div class="actions">
-            <button type="submit" name="action" value="cancel" class="btn btn--secondary">キャンセル</button>
-            <button type="submit" name="action" value="confirm" class="btn btn--primary">購入を確定する</button>
-          </div>
-        </form>
+        <div class="actions">
+          <button type="submit" name="action" value="cancel" class="btn btn--secondary">キャンセル</button>
+          <button type="submit" name="action" value="confirm" class="btn btn--primary">購入を確定する</button>
+        </div>
+      </form>
       <?php endif; ?>
     </main>
 
     <script src="assets/js/common.js"></script>
     <script src="assets/js/purchase_confirm.js"></script>
   </div>
+
+  <!-- フッター読み込み -->
+  <?php require __DIR__ . '/../public/footer.php'; ?>
+
 </body>
 
 </html>

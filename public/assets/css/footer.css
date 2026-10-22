@@ -1,0 +1,14 @@
+footer {
+    background-color: #8c8bc7;
+    text-align: center;
+    padding: 20px 0;
+    width: 100%;
+    margin-top: auto;
+}
+
+.copyright {
+    color: #ffffff;
+    font-size: 14px;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
