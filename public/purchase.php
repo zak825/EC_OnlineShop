@@ -10,6 +10,8 @@
 //   BuyerUserid が入っている … 売り切れ
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
+// 商品画像のパスを取る関数（販売担当の src/lib/product_image.php）
+require_once __DIR__ . '/../src/lib/product_image.php';
 
 // ===== 開発用：ログインをスキップする =====
 // 0 以外の Userid を入れると、その人としてログインした扱いになる
@@ -51,6 +53,9 @@ if (!$product) {
     redirect(URL_MAIN);
 }
 
+// 商品画像（無ければ空配列）
+$imageUrls = product_image_urls((int)$product['ProductID']);
+
 // ---- 3. 売り切れチェック / 4. 出品者チェック ---------------------
 $canBuy       = true;
 $blockMessage = '';
@@ -84,6 +89,7 @@ view('purchase', [
     'flash'        => get_flash(),
     'token'        => csrf_token(),
     'product'      => $product,
+    'imageUrls'    => $imageUrls,
     'canBuy'       => $canBuy,
     'blockMessage' => $blockMessage,
     'error'        => $error,

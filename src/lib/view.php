@@ -48,8 +48,7 @@ function name_label(string $name, int $limit = 10): string
     $short = mb_substr($name, 0, $limit, 'UTF-8') . '…';
     return '<span class="name-ellipsis" title="' . h($name) . '">' . h($short) . '</span>';
 }
-/**
- * 商品名などから丸アイコンのHTMLを作る
+    /** 商品名などから丸アイコンのHTMLを作る
  * 背景色は名前ごとに決まり、文字色は背景の明るさで白/黒に振る（必ず読める）
  */
 

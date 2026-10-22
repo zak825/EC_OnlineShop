@@ -13,21 +13,6 @@ body {
 
 * { box-sizing: border-box; }
 
-/* ---------- ヘッダー ---------- */
-.site-header {
-  background: #fff;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 14px 24px;
-}
-
-.site-logo {
-  color: #8c52ff;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-}
-
 /* ---------- レイアウト ---------- */
 .container {
   max-width: 640px;
@@ -227,18 +212,6 @@ body {
   color: #8c52ff;
 }
 
-/* ---------- ヘッダーロゴ（画像） ---------- */
-.site-logo {
-  display: inline-flex;
-  align-items: center;
-}
-
-.site-logo__img {
-  height: 32px;
-  width: auto;
-  display: block;
-}
-
 /* ---------- 完了メッセージに緑チェックを付ける ---------- */
 .message--success {
   display: flex;
@@ -292,4 +265,39 @@ body {
 .complete-card .btn {
   flex: 0 0 auto;
   min-width: 220px;
+}
+
+/* ---------- 商品画像ギャラリー ---------- */
+.product-gallery {
+  margin: 0 0 20px;
+}
+
+.product-gallery__main {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.product-gallery__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.product-gallery__thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+}
+
+.product-gallery__thumb:hover,
+.product-gallery__thumb.is-active {
+  border-color: #8c52ff;
 }
