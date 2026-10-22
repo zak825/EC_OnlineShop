@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * DB接続を返す（1リクエスト中は同じ接続を使い回す）
  */
@@ -14,12 +14,7 @@ function db(): PDO
         if (defined('PDO::SQLSRV_ATTR_ENCODING')) {
             $options[PDO::SQLSRV_ATTR_ENCODING] = PDO::SQLSRV_ENCODING_UTF8;
         }
-        $pdo = new PDO(
-            'sqlsrv:Server=localhost\\SQLEXPRESS;Database=CSE_EC',
-            'sa',
-            'p@ssw0rd',
-            $options
-        );
+        $pdo = new PDO(DB_DSN, DB_USER, DB_PASS, $options);
     }
     return $pdo;
 }
