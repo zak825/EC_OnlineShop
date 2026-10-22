@@ -1,4 +1,4 @@
-/* ---------- 未ログイン(セッション切れ) ---------- */
+﻿/* ---------- 未ログイン(セッション切れ) ---------- */
 .card-login-prompt {
     margin: 0px auto;
     align-items: center;
@@ -8,7 +8,7 @@
 /* ---------- プロフィール（名前・アイコン・評価） ---------- */
 .profile {
     display: flex;
-    max-width: 800px;
+    max-width: 700px;
     align-items: center;
     margin: 0px auto 24px auto;
 }
@@ -93,4 +93,106 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+#openIconModal {
+    display: inline-block;
+    padding: 0.5em 1em;
+    border: none;
+    text-decoration: none;
+    background: #fff;
+    color: #8c52ff;
+    /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
+    border: 2px solid;
+    border-radius: 10px;
+}
+    #openIconModal:hover {
+        background: #8c52ff;
+        color: #fff;
+        transition: 0.3s;
+    }
+/* ---------- アイコン変更モーダル ---------- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.is-open {
+  display: flex;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 24px;
+  height: 500px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.modal-title {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+}
+
+.modal-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.modal-preview [hidden] {
+  display: none;
+}
+
+
+.modal-filename {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: #808080;
+  word-break: break-all;
+}
+
+.modal-error {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: #d32f2f;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile__icon__md {
+    width: 200px;
+    margin-bottom: 20px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+}
+
+/* ファイル選択のinput本体は見えなくする（ラベルで操作する） */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }

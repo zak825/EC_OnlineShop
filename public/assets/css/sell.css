@@ -1,38 +1,215 @@
-/* エラーメッセージ */
-.error {
-  color: #d00;
-  margin: 4px 0;
+/* ============================================================
+   出品画面
+   ログイン/登録系の世界観（紫アクセント・シャープ）に合わせる
+   ヘッダーは header.php / header.css
+   ============================================================ */
+
+body {
+  margin: 0;
+  color: #0f172a;
+  background: #f1f5f9;
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  line-height: 1.6;
 }
 
-/* エラーがないときは表示しない */
+* { box-sizing: border-box; }
+
+/* フォーム全体をカードにして中央に置く */
+main {
+  width: 100%;
+  max-width: 560px;
+  margin: 32px auto;
+  padding: 36px 36px 32px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+}
+
+main h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  position: relative;
+  margin: 0 0 24px;
+  padding-bottom: 12px;
+}
+
+main h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 2px;
+  background: #8c52ff;
+}
+
+/* ラベル（<p><label> で囲まれている） */
+#sell_form > p {
+  margin: 16px 0 6px;
+}
+
+#sell_form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  letter-spacing: 0.02em;
+}
+
+/* 入力欄・セレクト */
+.Form-Item-Input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  font-size: 15px;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.Form-Item-Input:focus {
+  border-color: #8c52ff;
+  box-shadow: 0 0 0 1px #8c52ff;
+  outline: none;
+}
+
+/* セレクトに矢印を付ける */
+select.Form-Item-Input {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.41 0L6 4.58L10.59 0L12 1.41l-6 6l-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+/* 値段は「円」を横に出したいので幅を抑える */
+#price {
+  width: 180px;
+  display: inline-block;
+}
+
+/* 入力エラー（sell.js が is-invalid / is-valid を付け外し） */
+.Form-Item-Input.is-invalid {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.Form-Item-Input.is-valid {
+  border-color: #22c55e;
+  background: #f8fff8;
+}
+
+/* エラーメッセージ（空のときは出さない） */
+.error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #ef4444;
+}
+
 .error:empty {
   display: none;
 }
 
-/* エラーが発生したときは赤くする（sell.js が付け外しする） */
-.Form-Item-Input.is-invalid {
-  border-color: #e74c3c;
-  background-color: #fdf2f2;
+/* フォーム上部のまとめエラー */
+main > .error {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  font-size: 13px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 3px solid #ef4444;
+  color: #991b1b;
 }
 
-/* 正しく入力できたときは緑にする */
-.Form-Item-Input.is-valid {
-  border-color: #27ae60;
-  background-color: #f8fff8;
+/* ファイル選択 */
+input[type="file"] {
+  font-size: 13px;
+  color: #475569;
 }
 
-/* 商品画像の一覧（サムネイル） */
+/* 画像プレビュー */
+#image_preview_label {
+  margin: 14px 0 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* 画像プレビュー：新しい画像が左から入り、押し出された画像は右へ。
+   枠を超えたら横スクロール。DOM で後に追加された画像ほど左に来る（row-reverse） */
 .image-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row-reverse;   /* 後から入った画像を左に置く */
+  justify-content: flex-end;     /* row-reverse では flex-end が「左詰め」 */
+  flex-wrap: nowrap;             /* 折り返さず1列 */
   gap: 8px;
-  margin: 8px 0;
+  margin: 8px 0 0;
+  overflow-x: auto;              /* 枠を超えたら横スクロール */
+  padding-bottom: 8px;           /* スクロールバーのぶんの余白 */
+  scrollbar-width: thin;
 }
 
 .image-list__item {
   width: 100px;
   height: 100px;
-  flex: none;          /* 横並びのとき縮んだり伸びたりしないようにする */
-  object-fit: cover;   /* 縦横比を保ったまま、はみ出た部分を切り取る */
-  border: 1px solid #ccc;
+  flex: none;                    /* 縮まない（スクロールさせる） */
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  animation: imageSlideIn 0.25s ease;   /* 左からスライドインで登場 */
+}
+
+/* 新しい画像が左から入ってくる動き */
+@keyframes imageSlideIn {
+  from { transform: translateX(-28px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* ボタン行 */
+#sell_form > p:last-of-type {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+#sell_form button {
+  flex: 1;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 0;
+  cursor: pointer;
+  background: #fff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+#sell_form button:hover {
+  background: #f8fafc;
+  color: #8c52ff;
+  border-color: #8c52ff;
+}
+
+/* 販売（メインの操作）だけ紫で強調 */
+#sell_form button[value="sell"] {
+  flex: 2;
+  background: #8c52ff;
+  color: #fff;
+  border-color: #8c52ff;
+}
+
+#sell_form button[value="sell"]:hover {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
+
+@media (max-width: 480px) {
+  main { padding: 24px 20px; }
+  #price { width: 140px; }
 }
