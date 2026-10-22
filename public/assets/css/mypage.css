@@ -1,9 +1,16 @@
-﻿/* ---------- プロフィール（名前・アイコン・評価） ---------- */
+/* ---------- 未ログイン(セッション切れ) ---------- */
+.card-login-prompt {
+    margin: 0px auto;
+    align-items: center;
+    text-align: center;
+    color: #808080;
+}
+/* ---------- プロフィール（名前・アイコン・評価） ---------- */
 .profile {
-  display: flex;
-  max-width: 800px;
-  align-items: center;
-  margin: 0px auto 24px auto;
+    display: flex;
+    max-width: 800px;
+    align-items: center;
+    margin: 0px auto 24px auto;
 }
 
 .profile__stars {
@@ -30,9 +37,10 @@
 }
 
 .profile__name {
-  margin: 0;
-  font-size: 1.7rem;
-  font-weight: bold;
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: #0f172a;
 }
 
 .profile__icon {
