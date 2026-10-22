@@ -7,22 +7,22 @@
     <meta name="description" content="ユーザーIDと秘密の質問でご本人確認を行い、ログインパスワードを再設定します。">
     <title>e shop | パスワード再設定</title>
     <link rel="stylesheet" href="assets/css/common.css">
-    <link rel="stylesheet" href="assets/css/passreset.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
 <body>
     <div id="wrap">
         <?php $currentStep = $step ?? 'verify'; ?>
-        <div class="passreset-wrapper">
+        <div class="auth-container">
             <!-- data-step の値に応じて passreset.js が表示するブロックを切り替える -->
-            <div id="passreset-container" class="passreset-card" data-step="<?= h($currentStep) ?>"
+            <div id="passreset-card" class="auth-card" data-step="<?= h($currentStep) ?>"
                 data-pass-min-length="<?= h($passwordMinLength ?? 8) ?>"
                 data-pass-max-length="<?= h($passwordMaxLength ?? 50) ?>">
 
                 <!-- フォーム上部にロゴとh1（パスワード再設定）を真ん中に配置 -->
-                <div class="passreset-header">
-                    <img src="assets/images/logo.png" alt="CSE_EC ロゴ" class="passreset-logo">
-                    <h1 class="passreset-title">パスワード再設定</h1>
+                <div class="auth-header">
+                    <img src="assets/images/logo.png" alt="CSE_EC ロゴ" class="auth-logo">
+                    <h1 class="auth-title">パスワード再設定</h1>
                 </div>
 
                 <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
@@ -66,12 +66,12 @@
                         </div>
 
                         <div class="btn-row">
-                            <button type="submit" id="verify-btn" class="btn-primary">照合する</button>
+                            <button type="submit" id="verify-btn" class="btn-main">照合する</button>
                         </div>
                     </form>
 
                     <div class="link-row">
-                        <a href="login.php" id="verify-back-link" class="back-link">ログイン画面へ戻る</a>
+                        <a href="login.php" id="verify-back-link" class="btn-link">ログイン画面へ戻る</a>
                     </div>
                 </section>
 
@@ -103,12 +103,12 @@
                         </div>
 
                         <div class="btn-row">
-                            <button type="submit" id="reset-btn" class="btn-primary">パスワードを再設定する</button>
+                            <button type="submit" id="reset-btn" class="btn-main">パスワードを再設定する</button>
                         </div>
                     </form>
 
                     <div class="link-row">
-                        <a href="login.php" id="reset-back-link" class="back-link">ログイン画面へ戻る</a>
+                        <a href="login.php" id="reset-back-link" class="btn-sub">ログイン画面へ戻る</a>
                     </div>
                 </section>
 
@@ -122,7 +122,7 @@
                         <p class="complete-sub">新しいパスワードでログインしてください。</p>
                     </div>
                     <div class="btn-row">
-                        <button type="button" id="login-page-btn" class="btn-primary"
+                        <button type="button" id="login-page-btn" class="btn-main"
                             onclick="location.href='login.php'">ログイン画面へ</button>
                     </div>
                 </section>
