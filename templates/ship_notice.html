@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -9,28 +9,28 @@
 </head>
 
 <body>
-  <div id="wrap">
     <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
-    <main>
-      <h1>発送通知送信</h1>
+    <div id="wrap">
+        <main>
+            <h1>発送通知送信</h1>
 
-      <?php if ($error !== ''): ?>
-      <p class="error">
-        <?= h($error) ?>
-      </p>
-      <p><a href="<?= h(URL_STATUS) ?>">マイページへ戻る</a></p>
-      <?php else: ?>
-      <p>発送通知を送りますか？</p>
-      <form action="ship_notice.php" method="post">
-        <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-        <input type="hidden" name="product_id" value="<?= h($product_id) ?>">
-        <button type="submit" name="action" value="ship">はい</button>
-        <button type="submit" name="action" value="cancel">キャンセル</button>
-      </form>
-      <?php endif; ?>
-    </main>
-  </div>
+            <?php if ($error !== ''): ?>
+            <p class="error">
+                <?= h($error) ?>
+            </p>
+            <p><a href="<?= h(URL_STATUS) ?>">マイページへ戻る</a></p>
+            <?php else: ?>
+            <p>発送通知を送りますか？</p>
+            <form action="ship_notice.php" method="post">
+                <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+                <input type="hidden" name="product_id" value="<?= h($product_id) ?>">
+                <button type="submit" name="action" value="ship">はい</button>
+                <button type="submit" name="action" value="cancel">キャンセル</button>
+            </form>
+            <?php endif; ?>
+        </main>
+    </div>
 </body>
 
 </html>
