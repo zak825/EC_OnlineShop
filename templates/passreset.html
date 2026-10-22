@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="ユーザーIDと秘密の質問でご本人確認を行い、ログインパスワードを再設定します。">
-    <title>パスワード再設定画面</title>
+    <title>e shop | パスワード再設定</title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/passreset.css">
 </head>
@@ -26,7 +26,8 @@
                 </div>
 
                 <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-                <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : '' ?>>
+                <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : ''
+                    ?>>
                     <?= h($errorMessage ?? '') ?>
                 </p>
 
@@ -60,8 +61,8 @@
 
                         <div class="form-group">
                             <label for="secret_answer">回答</label>
-                            <input type="text" id="secret_answer" name="secret_answer" maxlength="100" autocomplete="off"
-                                placeholder="登録時の回答を入力">
+                            <input type="text" id="secret_answer" name="secret_answer" maxlength="100"
+                                autocomplete="off" placeholder="登録時の回答を入力">
                         </div>
 
                         <div class="btn-row">
@@ -112,7 +113,8 @@
                 </section>
 
                 <!-- フェーズ3：再設定完了 -->
-                <section id="complete-section" class="step-section<?= $currentStep === 'complete' ? '' : ' is-hidden' ?>"
+                <section id="complete-section"
+                    class="step-section<?= $currentStep === 'complete' ? '' : ' is-hidden' ?>"
                     data-step-block="complete">
                     <div class="complete-box">
                         <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">

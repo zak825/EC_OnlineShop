@@ -40,7 +40,7 @@
 .register-check-title {
     font-size: 20px;
     font-weight: 700;
-    color: #0f172a;
+    color: #606060;
     letter-spacing: 0.06em;
     margin: 0;
     position: relative;
@@ -130,8 +130,8 @@
     margin-top: 24px;
 }
 
-/* プライマリボタン（はい：login.cssの.btn-loginに準拠） */
-.btn-primary {
+/* プライマリボタン */
+.btn-main {
     flex: 2;
     height: 44px;
     background-color: #8c52ff;
@@ -145,27 +145,27 @@
     transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
-.btn-primary:hover {
+.btn-main:hover {
     background-color: #4f23a0;
     border-color: #4f23a0;
 }
 
-.btn-primary:active {
+.btn-main:active {
     transform: translateY(1px);
 }
 
-.btn-primary:disabled {
+.btn-main:disabled {
     cursor: not-allowed;
     opacity: 0.6;
     transform: none;
 }
 
 /* セカンダリボタン（キャンセル：login.cssの.btn-clearに準拠） */
-.btn-secondary {
+.btn-sub {
     flex: 1;
     height: 44px;
     background-color: #ffffff;
-    color: #475569;
+    color: #737373;
     border: 1px solid #cbd5e1;
     border-radius: 0;
     font-size: 13px;
@@ -174,13 +174,13 @@
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.btn-secondary:hover {
+.btn-sub:hover {
     background-color: #f8fafc;
-    color: #8c52ff;
+    color: #6639c0;
     border-color: #8c52ff;
 }
 
-.btn-secondary:active {
+.btn-sub:active {
     transform: translateY(1px);
 }
 
