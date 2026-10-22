@@ -45,7 +45,7 @@ if ($headerLoggedIn) {
                 </form>
             </div>
         <?php else: ?>
-            <a href="<?= URL_LOGIN ?>" class="btn-login">ログイン</a>
+            <a href="<?= URL_LOGIN ?>" class="btn-login" id="login-btn">ログイン</a>
         <?php endif; ?>
     </nav>
 </header>

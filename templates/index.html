@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -14,8 +14,6 @@
     <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
 
-
-
     <main class="container container--grid">
       <h1 class="page-title">商品一覧</h1>
 
@@ -30,11 +28,16 @@
         <ul class="product-list">
           <?php foreach ($products as $item): ?>
             <li class="product">
+              <?php if (!empty($item['image_url'])): ?>
+                <!-- 商品画像（1枚目をカードのサムネイルにする） -->
+                <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>" class="product__image product__image--photo">
+              <?php else: ?>
+                <!-- 画像が無い商品はジャンル名を枠に出す -->
+                <div class="product__image" aria-hidden="true"><?= h($item['GenreName']) ?></div>
+              <?php endif; ?>
+
               <div class="product__body">
-                <div class="product__title">
-                  <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
-                  <?= product_icon($item['ProductName'], $item['image_url'] ?? null) ?>
-                </div>
+                <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
                 <p class="product__price">¥<?= number_format((int)$item['Price']) ?></p>
                 <p class="product__meta">
                   <span class="product__genre"><?= h($item['GenreName']) ?></span>
@@ -54,6 +57,7 @@
       <?php endif; ?>
     </main>
   </div>
+
   <script src="assets/js/common.js"></script>
   <script src="assets/js/index.js"></script>
 </body>
