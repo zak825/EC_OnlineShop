@@ -11,6 +11,8 @@
 
 <body>
   <div id="wrap">
+    <!--ヘッダー読み込み-->
+    <?php require __DIR__ . '/../public/header.php'; ?>
 
     <main class="container container--wide">
       <?php if (!empty($flash)): ?>
@@ -260,6 +262,9 @@
 
       <?php endif; ?>
     </main>
+
+    <!-- フッター読み込み -->
+    <?php require __DIR__ . '/../public/footer.php'; ?>
 
     <script src="assets/js/common.js"></script>
     <script src="assets/js/mypage.js"></script>
