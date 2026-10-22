@@ -10,52 +10,52 @@
 </head>
 
 <body>
-  <div id="wrap">
-    <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
+    
+    <div id="wrap">
+        <!--ヘッダー読み込み-->
 
 
+        <main class="container container--grid">
+            <h1 class="page-title">商品一覧</h1>
 
-    <main class="container container--grid">
-      <h1 class="page-title">商品一覧</h1>
+            <?php if (!empty($flash)): ?>
+            <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
+            <?php endif; ?>
 
-      <?php if (!empty($flash)): ?>
-        <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
-      <?php endif; ?>
+            <?php if (!$products): ?>
+            <p class="empty">販売中の商品はありません。</p>
+            <?php else: ?>
+            <!-- ===== 商品一覧 ===== -->
+            <ul class="product-list">
+                <?php foreach ($products as $item): ?>
+                <li class="product">
+                    <div class="product__body">
+                        <div class="product__title">
+                            <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
+                            <?= product_icon($item['ProductName'], $item['image_url'] ?? null) ?>
+                        </div>
+                        <p class="product__price">¥<?= number_format((int)$item['Price']) ?></p>
+                        <p class="product__meta">
+                            <span class="product__genre"><?= h($item['GenreName']) ?></span>
+                            出品者：<?= name_label($item['SellerName']) ?>
+                        </p>
 
-      <?php if (!$products): ?>
-        <p class="empty">販売中の商品はありません。</p>
-      <?php else: ?>
-        <!-- ===== 商品一覧 ===== -->
-        <ul class="product-list">
-          <?php foreach ($products as $item): ?>
-            <li class="product">
-              <div class="product__body">
-                <div class="product__title">
-                  <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
-                  <?= product_icon($item['ProductName'], $item['image_url'] ?? null) ?>
-                </div>
-                <p class="product__price">¥<?= number_format((int)$item['Price']) ?></p>
-                <p class="product__meta">
-                  <span class="product__genre"><?= h($item['GenreName']) ?></span>
-                  出品者：<?= name_label($item['SellerName']) ?>
-                </p>
-
-                <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
-                  <!-- 自分の出品は購入できないのでボタンを出さない -->
-                  <span class="product__own">自分の出品</span>
-                <?php else: ?>
-                  <a href="purchase.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary product__buy">購入</a>
-                <?php endif; ?>
-              </div>
-            </li>
-          <?php endforeach; ?>
-        </ul>
-      <?php endif; ?>
-    </main>
-  </div>
-  <script src="assets/js/common.js"></script>
-  <script src="assets/js/index.js"></script>
+                        <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
+                        <!-- 自分の出品は購入できないのでボタンを出さない -->
+                        <span class="product__own">自分の出品</span>
+                        <?php else: ?>
+                        <a href="purchase.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary product__buy">購入</a>
+                        <?php endif; ?>
+                    </div>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+            <?php endif; ?>
+        </main>
+    </div>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/index.js"></script>
 </body>
 
 </html>
