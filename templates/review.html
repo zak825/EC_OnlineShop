@@ -9,9 +9,7 @@
 </head>
 <body>
   <div id="wrap">
-    <header class="site-header">
-      <a href="<?= h(URL_MAIN) ?>" class="site-logo">CSE_EC</a>
-    </header>
+    <?php require __DIR__ . '/../public/header.php'; ?>
 
     <main class="container">
       <h1 class="page-title"><?= $mode === 'form' ? '受け取り完了・レビュー' : 'レビュー' ?></h1>
