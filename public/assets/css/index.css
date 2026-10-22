@@ -6,7 +6,6 @@
 body {
   margin: 0;
   color: #0f172a;
-  background: #f1f5f9;
   font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   line-height: 1.6;
 }
@@ -47,11 +46,44 @@ body {
   border-left-width: 3px;
 }
 
-.message--success { background: #f0fdf4; border-color: #bbf7d0; border-left-color: #22c55e; color: #166534; display: flex; align-items: center; gap: 10px; }
-.message--success::before { content: ''; flex: none; width: 20px; height: 20px; background: url("assets/images/checkpoint.png") no-repeat center / contain; }
-.message--error   { background: #fef2f2; border-color: #fecaca; border-left-color: #ef4444; color: #991b1b; }
-.message--warning { background: #fffbeb; border-color: #fde68a; border-left-color: #f59e0b; color: #92400e; }
-.message--info    { background: #eff6ff; border-color: #bfdbfe; border-left-color: #3b82f6; color: #1e40af; }
+.message--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  border-left-color: #22c55e;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.message--success::before {
+  content: '';
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: url("assets/images/checkpoint.png") no-repeat center / contain;
+}
+
+.message--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  border-left-color: #ef4444;
+  color: #991b1b;
+}
+
+.message--warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
+
+.message--info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  border-left-color: #3b82f6;
+  color: #1e40af;
+}
 
 /* ---------- 商品一覧（カードを並べる） ---------- */
 .product-list {
@@ -182,9 +214,14 @@ div.product__image {
   .product {
     flex-direction: column;
   }
+
   .product__image {
     width: 100%;
   }
+
   .product__buy,
-  .product__own { align-self: stretch; text-align: center; }
+  .product__own {
+    align-self: stretch;
+    text-align: center;
+  }
 }
