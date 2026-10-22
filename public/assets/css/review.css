@@ -7,11 +7,12 @@ body {
   margin: 0;
   font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   color: #0f172a;
-  background: #f1f5f9;
   line-height: 1.6;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 
 /* ---------- レイアウト ---------- */
@@ -92,13 +93,41 @@ body {
   word-break: break-all;
 }
 
-.message--error   { background: #fef2f2; border-color: #fecaca; border-left-color: #ef4444; color: #991b1b; }
-.message--warning { background: #fffbeb; border-color: #fde68a; border-left-color: #f59e0b; color: #92400e; }
-.message--success { background: #f0fdf4; border-color: #bbf7d0; border-left-color: #22c55e; color: #166534; }
-.message--info    { background: #eff6ff; border-color: #bfdbfe; border-left-color: #3b82f6; color: #1e40af; }
+.message--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  border-left-color: #ef4444;
+  color: #991b1b;
+}
 
-.message__line { margin: 0; }
-.message__line + .message__line { margin-top: 4px; }
+.message--warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
+
+.message--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  border-left-color: #22c55e;
+  color: #166534;
+}
+
+.message--info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  border-left-color: #3b82f6;
+  color: #1e40af;
+}
+
+.message__line {
+  margin: 0;
+}
+
+.message__line+.message__line {
+  margin-top: 4px;
+}
 
 /* ---------- ボタン ---------- */
 .actions {
@@ -130,7 +159,10 @@ body {
   border-color: #8c52ff;
 }
 
-.btn--primary:hover { background: #4f23a0; border-color: #4f23a0; }
+.btn--primary:hover {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
 
 .btn--secondary {
   background: #fff;
@@ -138,9 +170,15 @@ body {
   border-color: #cbd5e1;
 }
 
-.btn--secondary:hover { background: #f8fafc; color: #8c52ff; border-color: #8c52ff; }
+.btn--secondary:hover {
+  background: #f8fafc;
+  color: #8c52ff;
+  border-color: #8c52ff;
+}
 
-.btn:active { transform: translateY(1px); }
+.btn:active {
+  transform: translateY(1px);
+}
 
 /* ---------- スマホ ---------- */
 @media (max-width: 480px) {
@@ -148,7 +186,10 @@ body {
     grid-template-columns: 1fr;
     gap: 2px;
   }
-  .info-list dd { margin-bottom: 8px; }
+
+  .info-list dd {
+    margin-bottom: 8px;
+  }
 }
 
 /* ============================================================
@@ -175,8 +216,17 @@ body {
   vertical-align: middle;
 }
 
-.required { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-.optional { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+.required {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.optional {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
 
 /* ---------- 星の評価入力（ラジオボタン） ---------- */
 .rating {
@@ -210,12 +260,12 @@ body {
 
 /* ホバー中の星と、その右（＝数字が小さい側）を点灯 */
 .rating__stars label:hover,
-.rating__stars label:hover ~ label {
+.rating__stars label:hover~label {
   color: #f59e0b;
 }
 
 /* 選択済みの星と、その右を点灯 */
-.rating__stars input:checked ~ label {
+.rating__stars input:checked~label {
   color: #f59e0b;
 }
 
@@ -274,8 +324,17 @@ body {
   border-radius: 0;
 }
 
-.badge--done { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
-.badge--wait { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+.badge--done {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.badge--wait {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
 
 /* ---------- 書かれたレビュー ---------- */
 .review-body {

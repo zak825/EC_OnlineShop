@@ -7,11 +7,12 @@ body {
   margin: 0;
   font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   color: #0f172a;
-  background: #f1f5f9;
   line-height: 1.6;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 /* ---------- レイアウト ---------- */
 .container {
@@ -91,13 +92,41 @@ body {
   word-break: break-all;
 }
 
-.message--error   { background: #fef2f2; border-color: #fecaca; border-left-color: #ef4444; color: #991b1b; }
-.message--warning { background: #fffbeb; border-color: #fde68a; border-left-color: #f59e0b; color: #92400e; }
-.message--success { background: #f0fdf4; border-color: #bbf7d0; border-left-color: #22c55e; color: #166534; }
-.message--info    { background: #eff6ff; border-color: #bfdbfe; border-left-color: #3b82f6; color: #1e40af; }
+.message--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  border-left-color: #ef4444;
+  color: #991b1b;
+}
 
-.message__line { margin: 0; }
-.message__line + .message__line { margin-top: 4px; }
+.message--warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
+
+.message--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  border-left-color: #22c55e;
+  color: #166534;
+}
+
+.message--info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  border-left-color: #3b82f6;
+  color: #1e40af;
+}
+
+.message__line {
+  margin: 0;
+}
+
+.message__line+.message__line {
+  margin-top: 4px;
+}
 
 /* ---------- ボタン ---------- */
 .actions {
@@ -129,7 +158,10 @@ body {
   border-color: #8c52ff;
 }
 
-.btn--primary:hover { background: #4f23a0; border-color: #4f23a0; }
+.btn--primary:hover {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
 
 .btn--secondary {
   background: #fff;
@@ -137,9 +169,15 @@ body {
   border-color: #cbd5e1;
 }
 
-.btn--secondary:hover { background: #f8fafc; color: #8c52ff; border-color: #8c52ff; }
+.btn--secondary:hover {
+  background: #f8fafc;
+  color: #8c52ff;
+  border-color: #8c52ff;
+}
 
-.btn:active { transform: translateY(1px); }
+.btn:active {
+  transform: translateY(1px);
+}
 
 /* ---------- スマホ ---------- */
 @media (max-width: 480px) {
@@ -147,7 +185,10 @@ body {
     grid-template-columns: 1fr;
     gap: 2px;
   }
-  .info-list dd { margin-bottom: 8px; }
+
+  .info-list dd {
+    margin-bottom: 8px;
+  }
 }
 
 /* ============================================================
