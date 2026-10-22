@@ -1,28 +1,22 @@
 // ============================================================
 // 購入確認画面
-//   確定ボタンの二重押し対策（押したらボタンを無効にする）
-//   ※ サーバ側でもワンタイムトークンで二重送信を防いでいる
 // ============================================================
-document.addEventListener('DOMContentLoaded', function () {
-  var form = document.getElementById('confirm-form');
-  if (!form) {
-    return;
-  }
 
-  form.addEventListener('submit', function (e) {
-    var button = e.submitter;
-    if (!button || button.value !== 'confirm') {
-      return;
+// 二重送信防止：確定ボタンを押したら一度だけ送信できるようにする
+const confirmForm = document.getElementById('confirm-form');
+if (confirmForm) {
+  confirmForm.addEventListener('submit', (e) => {
+    const btn = confirmForm.querySelector('button[value="confirm"]');
+    // 確定ボタンのときだけ無効化（キャンセルは普通に動かす）
+    if (e.submitter && e.submitter.value === 'confirm' && btn) {
+      btn.disabled = true;
+      btn.textContent = '処理中…';
     }
-
-    // disabled にすると action の値が送られないので hidden で補う
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'action';
-    input.value = 'confirm';
-    form.appendChild(input);
-
-    button.disabled = true;
-    button.textContent = '処理中…';
   });
-});
+}
+
+// 購入完了画面なら、3秒後にメイン画面へ自動で移動する
+const mainLink = document.getElementById('main_link');
+if (mainLink) {
+  setTimeout(() => { location.href = mainLink.href; }, 3000);
+}
