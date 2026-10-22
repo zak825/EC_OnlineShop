@@ -9,13 +9,8 @@
 </head>
 <body>
   <div id="wrap">
-    <header class="site-header">
-      <a href="<?= h(URL_MAIN) ?>" class="site-logo">CSE_EC</a>
-      <!-- マイページへのリンク（どの画面からでも行けるようにヘッダーに置く） -->
-      <nav class="site-nav">
-        <a href="<?= h(URL_STATUS) ?>" class="site-nav__link">マイページ</a>
-      </nav>
-    </header>
+      <!--ヘッダー読み込み-->
+      <?php require __DIR__ . '/../public/header.php'; ?>
 
     <main class="container">
       <h1 class="page-title">購入内容の確認</h1>
