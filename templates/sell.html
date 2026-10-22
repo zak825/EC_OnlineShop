@@ -2,20 +2,19 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e shop | 販売</title>
-    <link rel="stylesheet" href="assets/css/common.css">
-    <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
-    <link rel="stylesheet" href="assets/css/sell.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell.css') ?>">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e shop | 出品</title>
+  <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
+  <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/sell.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell.css') ?>">
 </head>
 
 <body>
     <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
-    <div id="wrap">
-        <main>
-            <h1>販売画面</h1>
+    <main>
+      <h1>出品画面</h1>
 
             <?php if ($error_db !== ''): ?>
             <p class="error">
