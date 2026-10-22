@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ログイン画面</title>
+    <title>e shop | ログイン</title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/login.css">
 </head>
@@ -12,9 +12,11 @@
     <div id="wrap">
         <div class="login-container">
             <div class="login-card">
-                <!-- フォーム上部にロゴとh1（ログイン）を真ん中に配置 -->
+                <div class="top-link">
+                    <a href="index.php" class="btn-link">&#x2190;トップへ戻る</a>
+                </div>
                 <div class="login-header">
-                    <img src="assets/images/logo.png" alt="ロゴ" class="login-logo">
+                    <img src="assets/images/logo.png" alt="Logo" class="login-logo">
                     <h1 class="login-title">ログイン</h1>
                 </div>
 
@@ -39,14 +41,14 @@
                     </div>
 
                     <div class="btn-row">
-                        <button type="submit" id="login-btn" class="btn-login">ログイン</button>
-                        <button type="button" id="clear-btn" class="btn-clear">クリア</button>
+                        <button type="submit" id="login-btn" class="btn-main">ログイン</button>
+                        <button type="button" id="clear-btn" class="btn-sub">クリア</button>
                     </div>
                 </form>
 
                 <!-- パスワード再設定画面への導線 -->
                 <div class="login-links">
-                    <a href="passreset.php" class="btn-passreset-link">パスワードをお忘れの方はこちら</a>
+                    <a href="passreset.php" class="btn-link">パスワードをお忘れの方はこちら</a>
                 </div>
 
                 <div class="login-divider">
