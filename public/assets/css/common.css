@@ -1,7 +1,24 @@
+﻿body {
+  margin: 0px auto;
+}
+
+#wrap {
+  width: 100%;
+  margin: 0px auto;
+}
+
+main {
+  width: 80%;
+  margin: auto;
+  padding: 10px;
+}
+
+
 /* 省略された名前（ホバーで全文が出る） */
 .name-ellipsis {
   cursor: help;
 }
+
 /* ---------- 丸アイコン（商品名などの頭文字・色は PHP が付ける） ---------- */
 .initial-icon {
   display: inline-flex;
@@ -13,8 +30,10 @@
   font-size: 0.85rem;
   font-weight: bold;
   line-height: 1;
-  flex: none;        /* 縮まない・伸びない */
-  overflow: hidden;  /* はみ出し防止 */
+  flex: none;
+  /* 縮まない・伸びない */
+  overflow: hidden;
+  /* はみ出し防止 */
 }
 
 /* アイコンが写真のとき：丸い枠に収める */
