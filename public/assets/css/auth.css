@@ -8,11 +8,7 @@
 /* --------------------------------------------------------------------------
    1. レイアウト・コンテナ共通
    -------------------------------------------------------------------------- */
-.auth-container,
-.login-container,
-.register-wrapper,
-.register-check-wrapper,
-.passreset-wrapper {
+.auth-container {
     display: flex;
     justify-content: center;
     align-items: center;
