@@ -9,13 +9,14 @@ nav {
     align-items: center;
 }
 
+
 nav form {
     margin: 0px;
 }
 
-nav a {
-    margin: 0px 20px;
 
+nav a {
+    margin: 0px;
 }
 
 .logo {
@@ -28,8 +29,17 @@ nav a {
     margin: 0px 20px 10px 20px;
 }
 
+.profile__icon__hd {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+}
+
 .UserName {
-    margin-right: 20px;
+    margin: 0px 40px 0px 10px;
     font-size: 30px;
     font-weight: 500;
     text-decoration: none;
