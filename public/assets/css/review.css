@@ -13,20 +13,6 @@ body {
 
 * { box-sizing: border-box; }
 
-/* ---------- ヘッダー ---------- */
-.site-header {
-  background: #fff;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 14px 24px;
-}
-
-.site-logo {
-  color: #8c52ff;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-}
 
 /* ---------- レイアウト ---------- */
 .container {
@@ -322,17 +308,6 @@ body {
   padding: 24px 0;
 }
 
-/* ---------- ヘッダーロゴ（画像） ---------- */
-.site-logo {
-  display: inline-flex;
-  align-items: center;
-}
-
-.site-logo__img {
-  height: 32px;
-  width: auto;
-  display: block;
-}
 
 /* ---------- 完了メッセージに緑チェックを付ける ---------- */
 .message--success {
