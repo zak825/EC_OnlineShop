@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -7,6 +7,8 @@
   <title>e-shop | マイページ</title>
   <link rel="stylesheet" href="assets/css/common.css">
   <link rel="stylesheet" href="assets/css/mypage.css">
+  <link rel="icon" href="assets/icons/favicon.ico">
+
 </head>
 
 <body>
@@ -86,7 +88,8 @@
             <div class="modal-preview">
               <?php if ($iconPath !== null && $iconPath !== ''): ?>
               <img src="<?= h($iconPath) ?>" alt="" class="profile__icon__md" id="iconPreviewImg">
-              <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" hidden aria-hidden="true"></span>
+              <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" hidden
+                aria-hidden="true"></span>
               <?php else: ?>
               <img src="" alt="" class="profile__icon" id="iconPreviewImg" hidden>
               <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" aria-hidden="true">
@@ -105,7 +108,7 @@
             <div class="modal-actions">
               <button type="submit" class="btn btn--primary btn--small" id="iconSubmit" disabled>決定</button>
               <button type="button" class="btn btn--small" id="closeIconModal">キャンセル</button>
-              
+
             </div>
           </form>
         </div>
@@ -132,35 +135,60 @@
 
       <?php foreach ($bought as $item): ?>
       <article class="card item">
-        <div class="item__head">
-          <h2 class="item__name">
-            <?= h($item['ProductName']) ?>
-          </h2>
-          <span class="item__price">¥
-            <?= number_format((int)$item['Price']) ?>
-          </span>
-        </div>
-        <dl class="item__meta">
-          <dt>出品者</dt>
-          <dd>
-            <?= h($item['SellerName']) ?>
-          </dd>
-          <dt>購入日時</dt>
-          <dd>
-            <?= h(format_datetime($item['SoldDate'])) ?>
-          </dd>
-        </dl>
+        <div class="item__row">
+          <!-- 左：商品画像 -->
+          <div class="item__col item__col--image">
+            <div class="item__image">
+              <?php if (!empty($item['image_url'])): ?>
+              <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
+              <?php else: ?>
+              <div class="item__image--noimage" aria-hidden="true">
+                <?= h($item['GenreName']) ?>
+              </div>
+              <?php endif; ?>
+            </div>
+          </div>
 
-        <div class="item__status">
-          <?php if ($item['sucre'] !== null): ?>
-          <span class="badge badge--done">取引完了</span>
-          <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
-          <span class="badge badge--wait">発送済み</span>
-          <a href="review.php?productId=<?= (int)$item['ProductID'] ?>"
-            class="btn btn--primary btn--small">取引完了（レビューを書く）</a>
-          <?php else: ?>
-          <span class="badge">未発送</span>
-          <?php endif; ?>
+          <!-- 中央：商品名・価格・出品者・購入日時 -->
+          <div class="item__col item__col--center">
+            <h2 class="item__name">
+              <?= h($item['ProductName']) ?>
+            </h2>
+            <p class="item__price">¥
+              <?= number_format((int)$item['Price']) ?>
+            </p>
+            <dl class="item__meta">
+              <dt>出品者：</dt>
+              <dd>
+                <?= h($item['SellerName']) ?>
+              </dd>
+              <dt>購入日時：</dt>
+              <dd>
+                <?= h(format_datetime($item['SoldDate'])) ?>
+              </dd>
+            </dl>
+          </div>
+
+          <!-- 右：商品ステータス -->
+          <div class="item__col item__col--right">
+            <div class="item__status-block">
+              <div class="item__status-header">
+                <p class="item__label">ステータス：</p>
+                <?php if ($item['sucre'] !== null): ?>
+                <span class="badge badge--done">取引完了</span>
+                <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
+                <span class="badge badge--wait">発送済み</span>
+                <?php else: ?>
+                <span class="badge">未発送</span>
+                <?php endif; ?>
+              </div>
+
+              <?php if ($item['sucre'] === null && (int)$item['ShippingFlag'] === 1): ?>
+              <a href="review.php?productId=<?= (int)$item['ProductID'] ?>"
+                class="btn btn--primary btn--small item__action-btn">取引完了（レビューを書く）</a>
+              <?php endif; ?>
+            </div>
+          </div>
         </div>
 
         <?php if ($item['sucre'] !== null): ?>
@@ -186,10 +214,13 @@
         <input type="hidden" name="tab" value="sold">
         <label for="sold-status" class="sold-filter__label">ステータス</label>
         <select name="status" id="sold-status" class="sold-filter__select">
-          <option value="">すべて（<?= (int)$soldTotal ?>）</option>
+          <option value="">すべて（
+            <?= (int)$soldTotal ?>）
+          </option>
           <?php foreach ($soldStatuses as $key => $label): ?>
-          <option value="<?= h($key) ?>"<?= $soldFilter === $key ? ' selected' : '' ?>>
-            <?= h($label) ?>（<?= (int)$soldCounts[$key] ?>）
+          <option value="<?= h($key) ?>" <?=$soldFilter===$key ? ' selected' : '' ?>>
+            <?= h($label) ?>（
+            <?= (int)$soldCounts[$key] ?>）
           </option>
           <?php endforeach; ?>
         </select>
@@ -198,69 +229,98 @@
       <?php endif; ?>
 
       <?php if (!$sold): ?>
-      <p class="empty"><?= $soldTotal > 0 ? '該当する商品はありません' : '履歴なし' ?></p>
+      <p class="empty">
+        <?= $soldTotal > 0 ? '該当する商品はありません' : '履歴なし' ?>
+      </p>
       <?php endif; ?>
 
       <?php foreach ($sold as $item): ?>
       <article class="card item">
-        <div class="item__head">
-          <h2 class="item__name">
-            <?= h($item['ProductName']) ?>
-          </h2>
-          <span class="item__price">¥
-            <?= number_format((int)$item['Price']) ?>
-          </span>
-        </div>
+        <div class="item__row">
+          <!-- 左：商品画像 -->
+          <div class="item__col item__col--image">
+            <div class="item__image">
+              <?php if (!empty($item['image_url'])): ?>
+              <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
+              <?php else: ?>
+              <div class="item__image--noimage" aria-hidden="true">
+                <?= h($item['GenreName']) ?>
+              </div>
+              <?php endif; ?>
+            </div>
+          </div>
 
-        <?php if ($item['BuyerUserid'] === null): ?>
-        <div class="item__status">
-          <span class="badge">販売中</span>
-        </div>
-        <?php else: ?>
-        <dl class="item__meta">
-          <dt>購入者</dt>
-          <dd>
-            <?= h($item['BuyerUserName'] ?? '不明') ?>
-          </dd>
-          <dt>購入日時</dt>
-          <dd>
-            <?= h(format_datetime($item['SoldDate'])) ?>
-          </dd>
-          <?php if ((int)$item['ShippingFlag'] !== 1): ?>
-          <!-- 配送先は発送に必要なので、未発送のあいだだけ表示する -->
-          <dt>配送先</dt>
-          <dd>
-            <?php if ($item['BuyerUserName'] !== null): ?>
-            〒
-            <?= h($item['ZipCode']) ?>
-            <?= h($item['Address']) ?><br>
-            TEL
-            <?= h($item['TEL']) ?>
-            <?php else: ?>
-            不明
+          <!-- 中央：商品名・価格・購入者・購入日時 -->
+          <div class="item__col item__col--center">
+            <h2 class="item__name">
+              <?= h($item['ProductName']) ?>
+            </h2>
+            <p class="item__price">¥
+              <?= number_format((int)$item['Price']) ?>
+            </p>
+
+            <?php if ($item['BuyerUserid'] !== null): ?>
+            <dl class="item__meta">
+              <dt>購入者：</dt>
+              <dd>
+                <?= h($item['BuyerUserName'] ?? '不明') ?>
+              </dd>
+              <dt>購入日時：</dt>
+              <dd>
+                <?= h(format_datetime($item['SoldDate'])) ?>
+              </dd>
+            </dl>
             <?php endif; ?>
-          </dd>
-          <?php endif; ?>
-        </dl>
+          </div>
 
-        <div class="item__status">
-          <?php if ($item['sucre'] !== null): ?>
-          <span class="badge badge--done">取引完了</span>
-          <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
-          <span class="badge badge--wait">発送済み</span>
-          <?php else: ?>
-          <span class="badge badge--alert">未発送</span>
-          <!-- 発送ボタン：発送通知送信画面へ POST で商品IDを渡す -->
-          <form action="<?= h(URL_SHIPPING) ?>" method="post" class="inline-form">
-            <input type="hidden" name="action" value="open">
-            <input type="hidden" name="product_id" value="<?= (int)$item['ProductID'] ?>">
-            <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-            <button type="submit" class="btn btn--primary btn--small">発送</button>
-          </form>
-          <?php endif; ?>
+          <!-- 右：商品ステータス・配送先 -->
+          <div class="item__col item__col--right">
+            <div class="item__status-block">
+              <div class="item__status-header">
+                <p class="item__label">ステータス：</p>
+                <?php if ($item['BuyerUserid'] === null): ?>
+                <span class="badge">販売中</span>
+                <?php elseif ($item['sucre'] !== null): ?>
+                <span class="badge badge--done">取引完了</span>
+                <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
+                <span class="badge badge--wait">発送済み</span>
+                <?php else: ?>
+                <span class="badge badge--alert">未発送</span>
+                <?php endif; ?>
+              </div>
+
+              <?php if ($item['BuyerUserid'] !== null && (int)$item['ShippingFlag'] !== 1 && $item['sucre'] === null): ?>
+              <!-- 発送ボタン：発送通知送信画面へ POST で商品IDを渡す -->
+              <form action="<?= h(URL_SHIPPING) ?>" method="post" class="inline-form item__action-btn">
+                <input type="hidden" name="action" value="open">
+                <input type="hidden" name="product_id" value="<?= (int)$item['ProductID'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+                <button type="submit" class="btn btn--primary btn--small">発送</button>
+              </form>
+              <?php endif; ?>
+            </div>
+
+            <?php if ($item['BuyerUserid'] !== null && (int)$item['ShippingFlag'] !== 1): ?>
+            <!-- 配送先は発送に必要なので、未発送のあいだだけ表示する -->
+            <div class="item__shipping-block">
+              <p class="item__label">配送先：</p>
+              <div class="item__shipping">
+                <?php if ($item['BuyerUserName'] !== null): ?>
+                〒
+                <?= h($item['ZipCode']) ?><br>
+                <?= h($item['Address']) ?><br>
+                TEL
+                <?= h($item['TEL']) ?>
+                <?php else: ?>
+                不明
+                <?php endif; ?>
+              </div>
+            </div>
+            <?php endif; ?>
+          </div>
         </div>
 
-        <?php if ($item['sucre'] !== null): ?>
+        <?php if ($item['BuyerUserid'] !== null && $item['sucre'] !== null): ?>
         <div class="review-body">
           <p class="review-body__label">購入者からのレビュー</p>
           <p class="review-body__stars" aria-label="評価<?= (int)$item['sucre'] ?>">
@@ -272,7 +332,6 @@
           </p>
           <?php endif; ?>
         </div>
-        <?php endif; ?>
         <?php endif; ?>
       </article>
       <?php endforeach; ?>

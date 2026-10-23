@@ -12,6 +12,11 @@ const URL_SELL_CONFIRM = 'sell_confirm.php';
 // SystemConfiguration に正しく登録されていないときに使う仮の値
 const DEFAULT_PRICE_MIN = 300;
 const DEFAULT_PRICE_MAX = 9999999;
+const DEFAULT_PRODUCT_NAME_MAX = 50;
+
+// 商品名の列（Sales.ProductName NVARCHAR(50)）に入る最大文字数
+// SystemConfiguration の設定がこれより大きくても、これを超えないようにする（超えると登録時に DB エラーになる）
+const PRODUCT_NAME_COLUMN_MAX = 50;
 
 const MSG_DB_ERROR   = '処理に失敗しました。時間をおいて再度お試しください';
 const MSG_CSRF_ERROR = '不正な操作です。もう一度やり直してください。';
@@ -89,11 +94,12 @@ if ($action === 'clear') {
 }
 
 // ------------------------------------------------------------
-// DB からジャンル一覧と値段の下限・上限を取得する
+// DB からジャンル一覧と、値段の下限・上限、商品名の最大文字数を取得する
 // ------------------------------------------------------------
 $genres    = [];   // [GenreCode => GenreName]
 $price_min = DEFAULT_PRICE_MIN;
 $price_max = DEFAULT_PRICE_MAX;
+$name_max  = DEFAULT_PRODUCT_NAME_MAX;
 
 try {
   $pdo = db();
@@ -106,9 +112,10 @@ try {
     $genres[$row['GenreCode']] = $row['GenreName'];
   }
 
-  // 値段の下限・上限（SystemConfiguration の Category = 'Sales'）
-  $setting_min = '';
-  $setting_max = '';
+  // 値段の下限・上限、商品名の最大文字数（SystemConfiguration の Category = 'Sales'）
+  $setting_min      = '';
+  $setting_max      = '';
+  $setting_name_max = '';
   $stmt = $pdo->prepare('SELECT [Key], Value FROM SystemConfiguration WHERE Category = :category');
   $stmt->execute([':category' => 'Sales']);
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -119,6 +126,9 @@ try {
     if ($row['Key'] === 'PriceMax') {
       $setting_max = trim($row['Value']);
     }
+    if ($row['Key'] === 'ProductNameMaxLength') {
+      $setting_name_max = trim($row['Value']);
+    }
   }
 
   // 半角数字のときだけ DB の値を使う
@@ -127,6 +137,9 @@ try {
   }
   if (preg_match('/^[0-9]+$/', $setting_max)) {
     $price_max = (int)$setting_max;
+  }
+  if (preg_match('/^[0-9]+$/', $setting_name_max) && (int)$setting_name_max > 0) {
+    $name_max = min((int)$setting_name_max, PRODUCT_NAME_COLUMN_MAX);
   }
 
   // 下限 > 上限 の設定ミスなら両方とも仮の値に戻す
@@ -177,8 +190,8 @@ if ($action === 'sell' && $error_db === '') {
   // 商品名
   if ($form_product_name === '') {
     $error_product_name = '商品名を入力してください';
-  } elseif (mb_strlen($form_product_name, 'UTF-8') > 50) {
-    $error_product_name = '商品名は50文字以内で入力してください';
+  } elseif (mb_strlen($form_product_name, 'UTF-8') > $name_max) {
+    $error_product_name = '商品名は' . $name_max . '文字以内で入力してください';
   }
 
   // ジャンル
@@ -252,6 +265,7 @@ view('sell', [
   'form_price'         => $form_price,
   'price_min'          => $price_min,
   'price_max'          => $price_max,
+  'name_max'           => $name_max,
   'error_db'           => $error_db,
   'error_product_name' => $error_product_name,
   'error_genre_code'   => $error_genre_code,

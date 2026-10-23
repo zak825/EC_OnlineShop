@@ -10,6 +10,9 @@ var price       = document.getElementById('price');
 var priceMin = Number(price.dataset.priceMin);
 var priceMax = Number(price.dataset.priceMax);
 
+// 商品名の最大文字数（sell.php が DB から取得した値）
+var nameMax = Number(productName.dataset.nameMax);
+
 // 前後の空白（全角スペースを含む）を取り除く
 function trimAll(value) {
   return value.replace(/^[\s　]+|[\s　]+$/g, '');
@@ -22,8 +25,8 @@ function checkProductName() {
     return '商品名を入力してください';
   }
   // 絵文字なども1文字として数える（PHP の mb_strlen と同じ）
-  if (Array.from(value).length > 50) {
-    return '商品名は50文字以内で入力してください';
+  if (Array.from(value).length > nameMax) {
+    return '商品名は' + nameMax + '文字以内で入力してください';
   }
   return '';
 }

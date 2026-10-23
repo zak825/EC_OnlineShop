@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e-shop | 発送通知</title>
   <link rel="stylesheet" href="assets/css/common.css">
-  <link rel="stylesheet" href="assets/css/ship_notice.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/ship_notice.css') ?>">
+  <link rel="stylesheet"
+    href="assets/css/ship_notice.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/ship_notice.css') ?>">
+  <link rel="icon" href="assets/icons/favicon.ico">
 </head>
 
 <body>
@@ -18,7 +20,9 @@
 
       <?php if ($error !== ''): ?>
       <!-- ===== 発送済みにできなかったとき ===== -->
-      <p class="message message--error"><?= h($error) ?></p>
+      <p class="message message--error">
+        <?= h($error) ?>
+      </p>
       <div class="actions">
         <a href="<?= h(URL_STATUS) ?>" class="btn btn--secondary">マイページへ戻る</a>
       </div>
@@ -29,13 +33,19 @@
         <h2 class="section-title">発送する商品</h2>
         <dl class="info-list">
           <dt>商品名</dt>
-          <dd><?= h($product['ProductName']) ?></dd>
+          <dd>
+            <?= h($product['ProductName']) ?>
+          </dd>
 
           <dt>値段</dt>
-          <dd>¥<?= number_format((int)$product['Price']) ?></dd>
+          <dd>¥
+            <?= number_format((int)$product['Price']) ?>
+          </dd>
 
           <dt>購入日時</dt>
-          <dd><?= h(format_datetime($product['SoldDate'])) ?></dd>
+          <dd>
+            <?= h(format_datetime($product['SoldDate'])) ?>
+          </dd>
         </dl>
       </section>
 
@@ -44,16 +54,24 @@
         <h2 class="section-title">配送先</h2>
         <dl class="info-list">
           <dt>お名前</dt>
-          <dd><?= h($product['BuyerUserName'] ?? '不明') ?></dd>
+          <dd>
+            <?= h($product['BuyerUserName'] ?? '不明') ?>
+          </dd>
 
           <dt>郵便番号</dt>
-          <dd>〒<?= h($product['ZipCode'] ?? '') ?></dd>
+          <dd>〒
+            <?= h($product['ZipCode'] ?? '') ?>
+          </dd>
 
           <dt>住所</dt>
-          <dd><?= h($product['Address'] ?? '') ?></dd>
+          <dd>
+            <?= h($product['Address'] ?? '') ?>
+          </dd>
 
           <dt>電話番号</dt>
-          <dd><?= h($product['TEL'] ?? '') ?></dd>
+          <dd>
+            <?= h($product['TEL'] ?? '') ?>
+          </dd>
         </dl>
       </section>
 

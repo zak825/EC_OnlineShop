@@ -1,16 +1,17 @@
-﻿/* ---------- 未ログイン(セッション切れ) ---------- */
+/* ---------- 未ログイン(セッション切れ) ---------- */
 .card-login-prompt {
-    margin: 0px auto;
-    align-items: center;
-    text-align: center;
-    color: #808080;
+  margin: 0px auto;
+  align-items: center;
+  text-align: center;
+  color: #808080;
 }
+
 /* ---------- プロフィール（名前・アイコン・評価） ---------- */
 .profile {
-    display: flex;
-    max-width: 700px;
-    align-items: center;
-    margin: 0px auto 24px auto;
+  display: flex;
+  max-width: 700px;
+  align-items: center;
+  margin: 0px auto 24px auto;
 }
 
 .profile__stars {
@@ -37,10 +38,10 @@
 }
 
 .profile__name {
-    margin: 0;
-    font-size: 1.7rem;
-    font-weight: bold;
-    color: #0f172a;
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: #0f172a;
 }
 
 .profile__icon {
@@ -84,8 +85,9 @@ main {
 }
 
 .tabs__item.is-active {
-  color: #000;
-  border-bottom: 2px solid #000;
+  color: #8c52ff;
+  font-weight: bold;
+  border-bottom: 2px solid #8c52ff;
 }
 
 /* タイトルと丸アイコンを横並びにする */
@@ -97,29 +99,32 @@ main {
 
 
 #openIconModal {
-    display: inline-block;
-    padding: 0.5em 1em;
-    border: none;
-    text-decoration: none;
-    background: #fff;
-    color: #8c52ff;
-    border: 2px solid;
-    border-radius: 10px;
+  display: inline-block;
+  padding: 0.5em 1em;
+  border: none;
+  text-decoration: none;
+  background: #fff;
+  color: #8c52ff;
+  /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
+  border: 2px solid;
+  border-radius: 10px;
 }
+
 #openIconModal:hover {
-    background: #8c52ff;
-    color: #fff;
-        transition: 0.3s;
+  background: #8c52ff;
+  color: #fff;
+  transition: 0.3s;
 }
+
 /* ---------- アイコン変更モーダル ---------- */
 .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal-overlay.is-open {
@@ -178,13 +183,13 @@ main {
 }
 
 .profile__icon__md {
-    width: 200px;
-    margin-bottom: 20px;
-    height: 200px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid var(--color-border);
+  width: 200px;
+  margin-bottom: 20px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
 }
 
 /* アイコン変更ウィンドウ内ボタン */
@@ -241,4 +246,344 @@ transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ea
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
+}
+
+/* ============================================================
+   出品ステータス絞り込みバー
+   ============================================================ */
+.sold-filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.sold-filter__label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.02em;
+}
+
+.sold-filter__select {
+  height: 40px;
+  min-width: 180px;
+  padding: 0 36px 0 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #0f172a;
+  background-color: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238c52ff' d='M1.41 0L6 4.58L10.59 0L12 1.41l-6 6l-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sold-filter__select:hover {
+  border-color: #8c52ff;
+}
+
+.sold-filter__select:focus {
+  border-color: #8c52ff;
+  box-shadow: 0 0 0 2px rgba(140, 82, 255, 0.2);
+  outline: none;
+}
+
+/* ---------- 履歴・商品なし ---------- */
+.empty {
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  color: #64748b;
+  padding: 80px 16px;
+  margin: 0;
+}
+
+/* ============================================================
+   商品カード（縦3列レイアウト）
+   ============================================================ */
+.card.item {
+  background-color: #fff;
+  border: solid 1px #b3b3b3;
+  border-radius: 4px;
+  padding: 32px 36px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.item__row {
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+}
+
+/* 1列目：商品画像 */
+.item__col--image {
+  flex: 0 0 160px;
+  width: 160px;
+}
+
+.item__image {
+  width: 160px;
+  height: 160px;
+  background: #eef0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.item__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.item__image--noimage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef0ff;
+  color: #8c52ff;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+/* 2列目：商品情報（商品名・価格・購入者/出品者・購入日時） */
+.item__col--center {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.item__name {
+  margin: 0 0 8px 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+.item__price {
+  margin: 0 0 24px 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
+}
+
+.item__meta {
+  margin: 0;
+  padding: 0;
+}
+
+.item__meta dt {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 2px 0;
+  line-height: 1.3;
+}
+
+.item__meta dd {
+  font-size: 1.05rem;
+  color: #000;
+  margin: 0 0 18px 0;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.item__meta dd:last-child {
+  margin-bottom: 0;
+}
+
+/* 3列目：ステータス・配送先 */
+.item__col--right {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.item__label {
+  margin: 0 0 4px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.3;
+}
+
+.item__status-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item__status-header .item__label {
+  margin: 0;
+}
+
+.item__action-btn {
+  margin-top: 10px;
+}
+
+.item__shipping {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #000;
+  word-break: break-all;
+}
+
+/* ---------- 状態バッジ ---------- */
+.badge {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  background: #fff;
+  color: #333;
+  border: 1px solid #777;
+  border-radius: 4px;
+}
+
+.badge--alert {
+  background: #fff;
+  color: #d32f2f;
+  border-color: #d32f2f;
+}
+
+.badge--wait {
+  background: #fff;
+  color: #1976d2;
+  border-color: #1976d2;
+}
+
+.badge--done {
+  background: #fff;
+  color: #2e7d32;
+  border-color: #2e7d32;
+}
+
+/* ---------- ボタン ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.btn--primary {
+  background: #8c52ff;
+  color: #fff;
+  border-color: #8c52ff;
+}
+
+.btn--primary:hover {
+  background: #6f34e0;
+  border-color: #6f34e0;
+}
+
+.btn--secondary {
+  background: #fff;
+  color: #333;
+  border-color: #cbd5e1;
+}
+
+.btn--secondary:hover {
+  background: #f1f5f9;
+}
+
+.btn--small {
+  padding: 5px 14px;
+  font-size: 0.9rem;
+}
+
+.inline-form {
+  display: inline-block;
+  margin: 0;
+}
+
+/* ---------- レビュー表示 ---------- */
+.card.item .review-body {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.card.item .review-body__label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0 0 6px 0;
+  color: #333;
+}
+
+.card.item .review-body__stars {
+  margin: 0;
+  color: #f59e0b;
+  font-size: 1.15rem;
+}
+
+.card.item .review-body__text {
+  margin: 6px 0 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #333;
+  word-break: break-all;
+}
+
+/* ---------- スマホ対応 ---------- */
+@media (max-width: 768px) {
+  .card.item {
+    padding: 20px 16px;
+  }
+
+  .item__row {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .item__col--image {
+    width: 100%;
+    flex: none;
+    display: flex;
+    justify-content: center;
+  }
+
+  .item__image {
+    width: 160px;
+    height: 160px;
+  }
+
+  .sold-filter {
+    justify-content: stretch;
+  }
+
+  .sold-filter__select {
+    flex: 1;
+    min-width: 0;
+  }
 }

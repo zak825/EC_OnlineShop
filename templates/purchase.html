@@ -8,15 +8,16 @@
   <link rel="stylesheet" href="assets/css/common.css">
   <link rel="stylesheet" href="assets/css/purchase.css">
   <link rel="stylesheet" href="assets/css/header.css">
+  <link rel="icon" href="assets/icons/favicon.ico">
 </head>
 
 <body>
-    <!--ヘッダー読み込み-->
-    <?php require __DIR__ . '/../public/header.php'; ?>
-    <div id="wrap">
+  <!--ヘッダー読み込み-->
+  <?php require __DIR__ . '/../public/header.php'; ?>
+  <div id="wrap">
 
-        <main class="container">
-            <h1 class="page-title">商品の購入</h1>
+    <main class="container">
+      <h1 class="page-title">商品の購入</h1>
 
       <?php if (!empty($flash)): ?>
       <p class="message message--<?= h($flash['type']) ?>">
