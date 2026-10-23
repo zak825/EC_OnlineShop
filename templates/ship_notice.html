@@ -4,36 +4,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>e shop | 発送通知</title>
-  <link rel="stylesheet" href="assets/css/ship_notice.css">
+  <title>発送通知 | CSE_EC</title>
+  <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/ship_notice.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/ship_notice.css') ?>">
 </head>
 
 <body>
-    <!--ヘッダー読み込み-->
-    <?php require __DIR__ . '/../public/header.php'; ?>
-    <div id="wrap">
-        <main>
-            <h1>発送通知送信</h1>
+  <!--ヘッダー読み込み-->
+  <?php require __DIR__ . '/../public/header.php'; ?>
+  <div id="wrap">
+    <main class="container">
+      <h1 class="page-title">発送通知の送信</h1>
 
       <?php if ($error !== ''): ?>
-      <p class="error">
-        <?= h($error) ?>
-      </p>
-      <p><a href="<?= h(URL_STATUS) ?>">マイページへ戻る</a></p>
+      <!-- ===== 発送済みにできなかったとき ===== -->
+      <p class="message message--error"><?= h($error) ?></p>
+      <div class="actions">
+        <a href="<?= h(URL_STATUS) ?>" class="btn btn--secondary">マイページへ戻る</a>
+      </div>
+
       <?php else: ?>
-      <p>発送通知を送りますか？</p>
-      <form action="ship_notice.php" method="post">
+      <!-- ===== 発送する商品 ===== -->
+      <section class="card">
+        <h2 class="section-title">発送する商品</h2>
+        <dl class="info-list">
+          <dt>商品名</dt>
+          <dd><?= h($product['ProductName']) ?></dd>
+
+          <dt>値段</dt>
+          <dd>¥<?= number_format((int)$product['Price']) ?></dd>
+
+          <dt>購入日時</dt>
+          <dd><?= h(format_datetime($product['SoldDate'])) ?></dd>
+        </dl>
+      </section>
+
+      <!-- ===== 配送先（購入者） ===== -->
+      <section class="card">
+        <h2 class="section-title">配送先</h2>
+        <dl class="info-list">
+          <dt>お名前</dt>
+          <dd><?= h($product['BuyerUserName'] ?? '不明') ?></dd>
+
+          <dt>郵便番号</dt>
+          <dd>〒<?= h($product['ZipCode'] ?? '') ?></dd>
+
+          <dt>住所</dt>
+          <dd><?= h($product['Address'] ?? '') ?></dd>
+
+          <dt>電話番号</dt>
+          <dd><?= h($product['TEL'] ?? '') ?></dd>
+        </dl>
+      </section>
+
+      <p class="note">発送通知を送ると、購入者のマイページで「発送済み」になります。送った後は取り消せません。</p>
+
+      <form action="ship_notice.php" method="post" id="ship-form">
         <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
         <input type="hidden" name="product_id" value="<?= h($product_id) ?>">
-        <button type="submit" name="action" value="ship">はい</button>
-        <button type="submit" name="action" value="cancel">キャンセル</button>
+        <div class="actions">
+          <button type="submit" name="action" value="cancel" class="btn btn--secondary">キャンセル</button>
+          <button type="submit" name="action" value="ship" class="btn btn--primary">発送通知を送る</button>
+        </div>
       </form>
       <?php endif; ?>
     </main>
 
+    <script src="assets/js/ship_notice.js"></script>
+
     <!-- フッター読み込み -->
     <?php require __DIR__ . '/../public/footer.php'; ?>
-
   </div>
 </body>
 
