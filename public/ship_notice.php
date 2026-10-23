@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // ============================================================
 // 発送通知送信画面
 //   POST ship_notice.php … マイページの発送ボタン（action=open）
@@ -52,7 +52,8 @@ if (!preg_match('/^[0-9]{1,9}$/', $product_id)) {
   redirect(URL_STATUS);
 }
 
-$error = '';
+$error   = '';
+$product = null;   // 画面に出す商品と配送先（購入者）の情報
 
 try {
   $pdo = db();
@@ -61,7 +62,12 @@ try {
   // 発送ボタン（マイページから来たとき）：確認画面を出してよいか調べる
   // ----------------------------------------------------------
   if ($action === 'open') {
-    $stmt = $pdo->prepare('SELECT Userid, BuyerUserid, ShippingFlag FROM Sales WHERE ProductID = :product_id');
+    $sql = 'SELECT s.Userid, s.BuyerUserid, s.ShippingFlag, s.ProductName, s.Price, s.SoldDate, '
+      . 'u.UserName AS BuyerUserName, u.ZipCode, u.Address, u.TEL '
+      . 'FROM Sales s '
+      . 'LEFT JOIN UserData u ON u.Userid = s.BuyerUserid '
+      . 'WHERE s.ProductID = :product_id';
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([':product_id' => (int)$product_id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -81,6 +87,8 @@ try {
     if ((int)$row['ShippingFlag'] === 1) {
       redirect(URL_STATUS);
     }
+
+    $product = $row;
   }
 
   // ----------------------------------------------------------
@@ -119,5 +127,6 @@ try {
 view('ship_notice', [
   'token'      => csrf_token(),
   'product_id' => $product_id,
+  'product'    => $product,
   'error'      => $error,
 ]);

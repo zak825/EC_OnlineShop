@@ -1,5 +1,208 @@
-/* エラーメッセージ */
-.error {
-  color: #d00;
-  margin: 4px 0;
+/* ============================================================
+   共通ベース（login/register 系の世界観：紫アクセント・シャープ）
+   新 common.css にヘッダー等しか無いので、画面で使う部品はここで定義する
+   ============================================================ */
+
+body {
+  margin: 0;
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  color: #0f172a;
+  line-height: 1.6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+/* ---------- レイアウト ---------- */
+.container {
+  max-width: 640px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.04em;
+  position: relative;
+  margin: 0 0 24px;
+  padding-bottom: 12px;
+}
+
+.page-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 2px;
+  background: #8c52ff;
+}
+
+/* ---------- カード ---------- */
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  border-radius: 2px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.03em;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ---------- 項目一覧（ラベル：値） ---------- */
+.info-list {
+  display: grid;
+  grid-template-columns: 7em 1fr;
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.info-list dt {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.info-list dd {
+  margin: 0;
+  color: #0f172a;
+  word-break: break-all;
+}
+
+/* ---------- メッセージ ---------- */
+.message {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  border: 1px solid transparent;
+  border-left-width: 3px;
+  word-break: break-all;
+}
+
+.message--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  border-left-color: #ef4444;
+  color: #991b1b;
+}
+
+.message--warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
+
+.message--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  border-left-color: #22c55e;
+  color: #166534;
+}
+
+.message--info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  border-left-color: #3b82f6;
+  color: #1e40af;
+}
+
+.message__line {
+  margin: 0;
+}
+
+.message__line+.message__line {
+  margin-top: 4px;
+}
+
+/* ---------- ボタン ---------- */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn--primary {
+  flex: 2;
+  background: #8c52ff;
+  color: #fff;
+  border-color: #8c52ff;
+}
+
+.btn--primary:hover {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
+
+.btn--secondary {
+  background: #fff;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.btn--secondary:hover {
+  background: #f8fafc;
+  color: #8c52ff;
+  border-color: #8c52ff;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* ---------- スマホ ---------- */
+@media (max-width: 480px) {
+  .info-list {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .info-list dd {
+    margin-bottom: 8px;
+  }
+}
+
+/* ============================================================
+   発送通知送信画面
+   ============================================================ */
+
+/* 注意書き（送った後は取り消せない） */
+.note {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  background: #f8fafc;
+  border-left: 3px solid #cbd5e1;
+  padding: 10px 14px;
+  margin: 0 0 4px;
 }
