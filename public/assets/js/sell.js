@@ -223,3 +223,57 @@ form.addEventListener('submit', function(event) {
     event.preventDefault();
   }
 });
+// ------------------------------------------------------------
+// 画像プレビューの左右の矢印
+//   押すとその方向に横スクロールする。はみ出していないとき・端まで来たときは、その矢印を隠す
+//   （並びが row-reverse なので、scrollLeft ではなく画像の位置で端かどうかを判断する）
+// ------------------------------------------------------------
+var imagePrev = document.getElementById('image_prev');
+var imageNext = document.getElementById('image_next');
+
+function updateImageArrows() {
+  var items = imagePreview.children;
+  if (items.length === 0) {
+    imagePrev.hidden = true;
+    imageNext.hidden = true;
+    return;
+  }
+
+  // いちばん左の画像の左端・いちばん右の画像の右端を探す
+  var box   = imagePreview.getBoundingClientRect();
+  var left  = Infinity;
+  var right = -Infinity;
+  for (var i = 0; i < items.length; i++) {
+    var r = items[i].getBoundingClientRect();
+    left  = Math.min(left, r.left);
+    right = Math.max(right, r.right);
+  }
+
+  imagePrev.hidden = left >= box.left - 1;     // 左に隠れている画像が無い
+  imageNext.hidden = right <= box.right + 1;   // 右に隠れている画像が無い
+}
+
+// 1回押すと、見えている幅の8割ぶん動かす
+function scrollImages(direction) {
+  imagePreview.scrollBy({ left: direction * imagePreview.clientWidth * 0.8, behavior: 'smooth' });
+}
+
+imagePrev.addEventListener('click', function() { scrollImages(-1); });
+imageNext.addEventListener('click', function() { scrollImages(1); });
+imagePreview.addEventListener('scroll', updateImageArrows);
+window.addEventListener('resize', updateImageArrows);
+
+// いちばん左（新しく選んだ画像）が見える位置に戻す
+// row-reverse ではスクロールの基準が右端なので、左端は scrollLeft がマイナス側になる（大きく引けば左端で止まる）
+function showNewestImages() {
+  imagePreview.scrollLeft = -imagePreview.scrollWidth;
+  updateImageArrows();
+}
+
+// プレビューの画像が入れ替わったら左端に戻して矢印を出し直す（登場の動き 0.25 秒が終わったあとにも、もう一度）
+new MutationObserver(function() {
+  showNewestImages();
+  setTimeout(updateImageArrows, 300);
+}).observe(imagePreview, { childList: true });
+
+showNewestImages();
