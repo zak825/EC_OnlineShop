@@ -42,12 +42,15 @@ nav a {
 }
 
 .profile__icon__hd {
+    display: block;
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid var(--color-border);
+    margin: 0;
+    align-self: center;
 }
 
 .UserName {
