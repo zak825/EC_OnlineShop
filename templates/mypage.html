@@ -118,7 +118,7 @@
         </a>
         <a href="mypage.php?tab=sold" class="tabs__item<?= $tab === 'sold' ? ' is-active' : '' ?>">
           出品した商品（
-          <?= count($sold) ?>）
+          <?= (int)$soldTotal ?>）
         </a>
       </nav>
 
@@ -179,8 +179,25 @@
 
       <?php else: ?>
       <!-- ===== 出品した商品 ===== -->
+      <?php if ($soldTotal > 0): ?>
+      <!-- ステータスで絞り込むプルダウン（選ぶと mypage.js が送信する。JS が無くても「表示」で送れる） -->
+      <form method="get" action="mypage.php" class="sold-filter" id="sold-filter">
+        <input type="hidden" name="tab" value="sold">
+        <label for="sold-status" class="sold-filter__label">ステータス</label>
+        <select name="status" id="sold-status" class="sold-filter__select">
+          <option value="">すべて（<?= (int)$soldTotal ?>）</option>
+          <?php foreach ($soldStatuses as $key => $label): ?>
+          <option value="<?= h($key) ?>"<?= $soldFilter === $key ? ' selected' : '' ?>>
+            <?= h($label) ?>（<?= (int)$soldCounts[$key] ?>）
+          </option>
+          <?php endforeach; ?>
+        </select>
+        <noscript><button type="submit" class="btn btn--secondary btn--small">表示</button></noscript>
+      </form>
+      <?php endif; ?>
+
       <?php if (!$sold): ?>
-      <p class="empty">履歴なし</p>
+      <p class="empty"><?= $soldTotal > 0 ? '該当する商品はありません' : '履歴なし' ?></p>
       <?php endif; ?>
 
       <?php foreach ($sold as $item): ?>
