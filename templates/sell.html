@@ -28,8 +28,9 @@
 
                 <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
                 <p><label for="product_name">商品名</label></p>
-                <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="50"
-                       value="<?= h($form_product_name) ?>">
+                <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
+                <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="<?= h($name_max) ?>"
+                       data-name-max="<?= h($name_max) ?>" value="<?= h($form_product_name) ?>">
                 <p class="error" id="error_product_name">
                     <?= h($error_product_name) ?>
                 </p>
