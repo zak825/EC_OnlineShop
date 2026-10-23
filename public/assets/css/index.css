@@ -220,8 +220,55 @@ div.product__image {
   }
 
   .product__buy,
-  .product__own {
-    align-self: stretch;
-    text-align: center;
+  .product__own { align-self: stretch; text-align: center; }
+}
+
+/* ---------- ジャンル絞り込みバー ---------- */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.filter-bar__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.filter-bar__select {
+  height: 40px;
+  min-width: 160px;
+  padding: 0 36px 0 14px;
+  font-size: 14px;
+  color: #0f172a;
+  background-color: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.41 0L6 4.58L10.59 0L12 1.41l-6 6l-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
   }
+
+.filter-bar__select:focus {
+  border-color: #8c52ff;
+  box-shadow: 0 0 0 1px #8c52ff;
+  outline: none;
+}
+
+.filter-bar__btn {
+  height: 40px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #8c52ff;
+  border: 1px solid #8c52ff;
+  border-radius: 0;
+  cursor: pointer;
 }
