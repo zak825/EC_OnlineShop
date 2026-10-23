@@ -10,59 +10,61 @@
 
 <body>
     <div id="wrap">
-        <div class="auth-container">
-            <div id="login-card" class="auth-card">
-                <div class="top-link">
-                    <a href="index.php" class="btn-link">&#x2190;トップへ戻る</a>
-                </div>
-                <div class="auth-header">
-                    <img src="assets/images/logo.png" alt="Logo" class="auth-logo">
-                    <h1 class="auth-title">ログイン</h1>
-                </div>
-
-                <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-                <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : ''
-                    ?>>
-                    <?= h($errorMessage ?? '') ?>
-                </p>
-
-                <form id="login-form" action="login.php" method="post" novalidate>
-                    <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
-
-                    <div class="form-group">
-                        <label for="user_id">ユーザーID</label>
-                        <input type="text" id="user_id" name="user_id" maxlength="8" inputmode="numeric"
-                            placeholder="例: 1" value="<?= h($userIdInput ?? '') ?>">
+        <main>
+            <div class="auth-container">
+                <div id="login-card" class="auth-card">
+                    <div class="top-link">
+                        <a href="index.php" class="btn-link">&#x2190;トップへ戻る</a>
+                    </div>
+                    <div class="auth-header">
+                        <img src="assets/images/logo.png" alt="Logo" class="auth-logo">
+                        <h1 class="auth-title">ログイン</h1>
                     </div>
 
-                    <div class="form-group">
-                        <label for="password">パスワード</label>
-                        <input type="password" id="password" name="password" maxlength="50" placeholder="パスワードを入力">
+                    <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
+                    <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
+                        : '' ?>>
+                        <?= h($errorMessage ?? '') ?>
+                    </p>
+
+                    <form id="login-form" action="login.php" method="post" novalidate>
+                        <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
+
+                        <div class="form-group">
+                            <label for="user_id">ユーザーID</label>
+                            <input type="text" id="user_id" name="user_id" maxlength="8" inputmode="numeric"
+                                placeholder="例: 1" value="<?= h($userIdInput ?? '') ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">パスワード</label>
+                            <input type="password" id="password" name="password" maxlength="50" placeholder="パスワードを入力">
+                        </div>
+
+                        <div class="btn-row">
+                            <button type="submit" id="login-btn" class="btn-main">ログイン</button>
+                            <button type="button" id="clear-btn" class="btn-sub">クリア</button>
+                        </div>
+                    </form>
+
+                    <!-- パスワード再設定画面への導線 -->
+                    <div class="login-links">
+                        <a href="passreset.php" class="btn-link">パスワードをお忘れの方はこちら</a>
                     </div>
 
-                    <div class="btn-row">
-                        <button type="submit" id="login-btn" class="btn-main">ログイン</button>
-                        <button type="button" id="clear-btn" class="btn-sub">クリア</button>
+                    <div class="login-divider">
+                        <span>または</span>
                     </div>
-                </form>
 
-                <!-- パスワード再設定画面への導線 -->
-                <div class="login-links">
-                    <a href="passreset.php" class="btn-link">パスワードをお忘れの方はこちら</a>
-                </div>
-
-                <div class="login-divider">
-                    <span>または</span>
-                </div>
-
-                <!-- 新規ユーザー登録セクション -->
-                <div class="register-section">
-                    <p class="section-label">アカウントをお持ちでない方</p>
-                    <button type="button" id="register-btn" class="btn-register"
-                        onclick="location.href='register.php'">新規ユーザー登録</button>
+                    <!-- 新規ユーザー登録セクション -->
+                    <div class="register-section">
+                        <p class="section-label">アカウントをお持ちでない方</p>
+                        <button type="button" id="register-btn" class="btn-register"
+                            onclick="location.href='register.php'">新規ユーザー登録</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
 
         <!-- フッター読み込み -->
         <?php require __DIR__ . '/../public/footer.php'; ?>
