@@ -26,8 +26,9 @@
         </p>
         <?php endif; ?>
 
+        <!-- 商品名が長いと値段が埋もれるので、値段は改行して次の行に出す -->
         <p>
-            <?= h($sell['product_name']) ?>
+            <?= h($sell['product_name']) ?><br>
             <?= h(number_format($sell['price'])) ?>円 で販売しますか？
         </p>
         <p>
