@@ -12,128 +12,132 @@
 
 <body>
     <div id="wrap">
-        <?php $currentStep = $step ?? 'verify'; ?>
-        <div class="auth-container">
-            <!-- data-step の値に応じて passreset.js が表示するブロックを切り替える -->
-            <div id="passreset-card" class="auth-card" data-step="<?= h($currentStep) ?>"
-                data-pass-min-length="<?= h($passwordMinLength ?? 8) ?>"
-                data-pass-max-length="<?= h($passwordMaxLength ?? 50) ?>">
+        <main>
+            <?php $currentStep = $step ?? 'verify'; ?>
+            <div class="auth-container">
+                <!-- data-step の値に応じて passreset.js が表示するブロックを切り替える -->
+                <div id="passreset-card" class="auth-card" data-step="<?= h($currentStep) ?>"
+                    data-pass-min-length="<?= h($passwordMinLength ?? 8) ?>"
+                    data-pass-max-length="<?= h($passwordMaxLength ?? 50) ?>">
 
-                <!-- フォーム上部にロゴとh1（パスワード再設定）を真ん中に配置 -->
-                <div class="auth-header">
-                    <img src="assets/images/logo.png" alt="CSE_EC ロゴ" class="auth-logo">
-                    <h1 class="auth-title">パスワード再設定</h1>
+                    <!-- フォーム上部にロゴとh1（パスワード再設定）を真ん中に配置 -->
+                    <div class="auth-header">
+                        <img src="assets/images/logo.png" alt="CSE_EC ロゴ" class="auth-logo">
+                        <h1 class="auth-title">パスワード再設定</h1>
+                    </div>
+
+                    <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
+                    <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
+                        : '' ?>>
+                        <?= h($errorMessage ?? '') ?>
+                    </p>
+
+                    <!-- フェーズ1：ユーザーID・秘密の質問の照合 -->
+                    <section id="verify-section"
+                        class="step-section<?= $currentStep === 'verify' ? '' : ' is-hidden' ?>"
+                        data-step-block="verify">
+                        <p class="step-lead">ユーザーIDと、登録時に設定した秘密の質問・回答を入力してください。</p>
+
+                        <form id="verify-form" action="passreset.php" method="post" novalidate>
+                            <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
+                            <input type="hidden" name="mode" value="verify">
+
+                            <div class="form-group">
+                                <label for="user_id">ユーザーID</label>
+                                <input type="text" id="user_id" name="user_id" maxlength="8" inputmode="numeric"
+                                    placeholder="例: 1" value="<?= h($userIdInput ?? '') ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="secret_question_id">秘密の質問</label>
+                                <select id="secret_question_id" name="secret_question_id">
+                                    <option value="">選択してください</option>
+                                    <?php foreach (($secretQuestions ?? []) as $questionId => $questionText): ?>
+                                    <option value="<?= h($questionId) ?>" <?=(string)($secretQuestionIdInput ?? ''
+                                        )===(string)$questionId ? ' selected' : '' ?>>
+                                        <?= h($questionText) ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="secret_answer">回答</label>
+                                <input type="text" id="secret_answer" name="secret_answer" maxlength="100"
+                                    autocomplete="off" placeholder="登録時の回答を入力">
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="submit" id="verify-btn" class="btn-main">照合する</button>
+                            </div>
+                        </form>
+
+                        <div class="link-row">
+                            <a href="login.php" id="verify-back-link" class="btn-link">ログイン画面へ戻る</a>
+                        </div>
+                    </section>
+
+                    <!-- フェーズ2：新しいパスワードの入力 -->
+                    <section id="reset-section" class="step-section<?= $currentStep === 'reset' ? '' : ' is-hidden' ?>"
+                        data-step-block="reset">
+                        <p class="step-lead">本人確認が完了しました。<br>新しいパスワードを入力してください。</p>
+
+                        <form id="reset-form" action="passreset.php" method="post" novalidate>
+                            <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
+                            <input type="hidden" name="mode" value="reset">
+
+                            <div class="form-group">
+                                <label for="new_password">新しいパスワード</label>
+                                <input type="password" id="new_password" name="new_password"
+                                    maxlength="<?= h($passwordMaxLength ?? 50) ?>" autocomplete="new-password"
+                                    placeholder="新しいパスワードを入力">
+                                <small class="form-note">※
+                                    <?= h($passwordMinLength ?? 8) ?>文字以上
+                                    <?= h($passwordMaxLength ?? 50) ?>文字以内で入力してください。
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new_password_confirm">新しいパスワード（確認用）</label>
+                                <input type="password" id="new_password_confirm" name="new_password_confirm"
+                                    maxlength="<?= h($passwordMaxLength ?? 50) ?>" autocomplete="new-password"
+                                    placeholder="確認のため再度入力">
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="submit" id="reset-btn" class="btn-main">パスワードを再設定する</button>
+                            </div>
+                        </form>
+
+                        <div class="link-row">
+                            <a href="login.php" id="reset-back-link" class="btn-sub">ログイン画面へ戻る</a>
+                        </div>
+                    </section>
+
+                    <!-- フェーズ3：再設定完了 -->
+                    <section id="complete-section"
+                        class="step-section<?= $currentStep === 'complete' ? '' : ' is-hidden' ?>"
+                        data-step-block="complete">
+                        <div class="complete-box">
+                            <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
+                            <p class="complete-message">パスワードの再設定が完了しました。</p>
+                            <p class="complete-sub">新しいパスワードでログインしてください。</p>
+                        </div>
+                        <div class="btn-row">
+                            <button type="button" id="login-page-btn" class="btn-main"
+                                onclick="location.href='login.php'">ログイン画面へ</button>
+                        </div>
+                    </section>
                 </div>
-
-                <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-                <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : ''
-                    ?>>
-                    <?= h($errorMessage ?? '') ?>
-                </p>
-
-                <!-- フェーズ1：ユーザーID・秘密の質問の照合 -->
-                <section id="verify-section" class="step-section<?= $currentStep === 'verify' ? '' : ' is-hidden' ?>"
-                    data-step-block="verify">
-                    <p class="step-lead">ユーザーIDと、登録時に設定した秘密の質問・回答を入力してください。</p>
-
-                    <form id="verify-form" action="passreset.php" method="post" novalidate>
-                        <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
-                        <input type="hidden" name="mode" value="verify">
-
-                        <div class="form-group">
-                            <label for="user_id">ユーザーID</label>
-                            <input type="text" id="user_id" name="user_id" maxlength="8" inputmode="numeric"
-                                placeholder="例: 1" value="<?= h($userIdInput ?? '') ?>">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="secret_question_id">秘密の質問</label>
-                            <select id="secret_question_id" name="secret_question_id">
-                                <option value="">選択してください</option>
-                                <?php foreach (($secretQuestions ?? []) as $questionId => $questionText): ?>
-                                <option value="<?= h($questionId) ?>" <?=(string)($secretQuestionIdInput ?? ''
-                                    )===(string)$questionId ? ' selected' : '' ?>>
-                                    <?= h($questionText) ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="secret_answer">回答</label>
-                            <input type="text" id="secret_answer" name="secret_answer" maxlength="100"
-                                autocomplete="off" placeholder="登録時の回答を入力">
-                        </div>
-
-                        <div class="btn-row">
-                            <button type="submit" id="verify-btn" class="btn-main">照合する</button>
-                        </div>
-                    </form>
-
-                    <div class="link-row">
-                        <a href="login.php" id="verify-back-link" class="btn-link">ログイン画面へ戻る</a>
-                    </div>
-                </section>
-
-                <!-- フェーズ2：新しいパスワードの入力 -->
-                <section id="reset-section" class="step-section<?= $currentStep === 'reset' ? '' : ' is-hidden' ?>"
-                    data-step-block="reset">
-                    <p class="step-lead">本人確認が完了しました。<br>新しいパスワードを入力してください。</p>
-
-                    <form id="reset-form" action="passreset.php" method="post" novalidate>
-                        <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
-                        <input type="hidden" name="mode" value="reset">
-
-                        <div class="form-group">
-                            <label for="new_password">新しいパスワード</label>
-                            <input type="password" id="new_password" name="new_password"
-                                maxlength="<?= h($passwordMaxLength ?? 50) ?>" autocomplete="new-password"
-                                placeholder="新しいパスワードを入力">
-                            <small class="form-note">※
-                                <?= h($passwordMinLength ?? 8) ?>文字以上
-                                <?= h($passwordMaxLength ?? 50) ?>文字以内で入力してください。
-                            </small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="new_password_confirm">新しいパスワード（確認用）</label>
-                            <input type="password" id="new_password_confirm" name="new_password_confirm"
-                                maxlength="<?= h($passwordMaxLength ?? 50) ?>" autocomplete="new-password"
-                                placeholder="確認のため再度入力">
-                        </div>
-
-                        <div class="btn-row">
-                            <button type="submit" id="reset-btn" class="btn-main">パスワードを再設定する</button>
-                        </div>
-                    </form>
-
-                    <div class="link-row">
-                        <a href="login.php" id="reset-back-link" class="btn-sub">ログイン画面へ戻る</a>
-                    </div>
-                </section>
-
-                <!-- フェーズ3：再設定完了 -->
-                <section id="complete-section"
-                    class="step-section<?= $currentStep === 'complete' ? '' : ' is-hidden' ?>"
-                    data-step-block="complete">
-                    <div class="complete-box">
-                        <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
-                        <p class="complete-message">パスワードの再設定が完了しました。</p>
-                        <p class="complete-sub">新しいパスワードでログインしてください。</p>
-                    </div>
-                    <div class="btn-row">
-                        <button type="button" id="login-page-btn" class="btn-main"
-                            onclick="location.href='login.php'">ログイン画面へ</button>
-                    </div>
-                </section>
             </div>
+        </main>
 
-            <script src="assets/js/passreset.js"></script>
+        <script src="assets/js/passreset.js"></script>
 
 
-        </div>
-        <!-- フッター読み込み -->
-        <?php require __DIR__ . '/../public/footer.php'; ?>
+    </div>
+    <!-- フッター読み込み -->
+    <?php require __DIR__ . '/../public/footer.php'; ?>
     </div>
 
 </body>

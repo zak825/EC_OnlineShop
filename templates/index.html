@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,74 +7,68 @@
   <link rel="stylesheet" href="assets/css/common.css">
   <link rel="stylesheet" href="assets/css/index.css">
 </head>
-
 <body>
+  <div id="wrap">
+    <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
 
     <main class="container container--grid">
       <h1 class="page-title">商品一覧</h1>
 
       <?php if (!empty($flash)): ?>
-      <p class="message message--<?= h($flash['type']) ?>">
-        <?= h($flash['message']) ?>
-      </p>
+        <p class="message message--<?= h($flash['type']) ?>"><?= h($flash['message']) ?></p>
       <?php endif; ?>
+
+      <!-- ジャンルで絞り込み（選ぶと自動で送信） -->
+      <form method="get" action="index.php" class="filter-bar">
+        <label for="genre" class="filter-bar__label">ジャンル</label>
+        <select name="genre" id="genre" class="filter-bar__select" onchange="this.form.submit()">
+          <option value="">すべて</option>
+          <?php foreach ($genres as $g): ?>
+            <option value="<?= (int)$g['GenreCode'] ?>" <?= (string)$genreFilter === (string)$g['GenreCode'] ? 'selected' : '' ?>>
+              <?= h($g['GenreName']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <!-- JSが無い環境でも使えるよう、絞り込みボタンも置く -->
+        <noscript><button type="submit" class="filter-bar__btn">絞り込む</button></noscript>
+      </form>
 
       <?php if (!$products): ?>
-      <p class="empty">販売中の商品はありません。</p>
+        <p class="empty"><?= $genreFilter !== null ? 'このジャンルの販売中の商品はありません。' : '販売中の商品はありません。' ?></p>
       <?php else: ?>
-      <!-- ===== 商品一覧 ===== -->
-      <ul class="product-list">
-        <?php foreach ($products as $item): ?>
-        <li class="product">
-          <?php if (!empty($item['image_url'])): ?>
-          <!-- 商品画像（1枚目をカードのサムネイルにする） -->
-          <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>"
-            class="product__image product__image--photo">
-          <?php else: ?>
-          <!-- 画像が無い商品はジャンル名を枠に出す -->
-          <div class="product__image" aria-hidden="true">
-            <?= h($item['GenreName']) ?>
-          </div>
-          <?php endif; ?>
+        <!-- ===== 商品一覧 ===== -->
+        <ul class="product-list">
+          <?php foreach ($products as $item): ?>
+            <li class="product">
+              <?php if (!empty($item['image_url'])): ?>
+                <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>" class="product__image product__image--photo">
+              <?php else: ?>
+                <div class="product__image" aria-hidden="true"><?= h($item['GenreName']) ?></div>
+              <?php endif; ?>
 
-          <div class="product__body">
-            <h2 class="product__name">
-              <?= h($item['ProductName']) ?>
-            </h2>
-            <p class="product__price">¥
-              <?= number_format((int)$item['Price']) ?>
-            </p>
-            <p class="product__meta">
-              <span class="product__genre">
-                <?= h($item['GenreName']) ?>
-              </span>
-              出品者：
-              <?= name_label($item['SellerName']) ?>
-            </p>
+              <div class="product__body">
+                <h2 class="product__name"><?= h($item['ProductName']) ?></h2>
+                <p class="product__price">¥<?= number_format((int)$item['Price']) ?></p>
+                <p class="product__meta">
+                  <span class="product__genre"><?= h($item['GenreName']) ?></span>
+                  出品者：<?= name_label($item['SellerName']) ?>
+                </p>
 
-            <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
-            <!-- 自分の出品は購入できないのでボタンを出さない -->
-            <span class="product__own">自分の出品</span>
-            <?php else: ?>
-            <a href="purchase.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary product__buy">購入</a>
-            <?php endif; ?>
-          </div>
-        </li>
-        <?php endforeach; ?>
-      </ul>
+                <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
+                  <span class="product__own">自分の出品</span>
+                <?php else: ?>
+                  <a href="purchase.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary product__buy">購入</a>
+                <?php endif; ?>
+              </div>
+            </li>
+          <?php endforeach; ?>
+        </ul>
       <?php endif; ?>
     </main>
-
-    <!-- フッター読み込み -->
-    <?php require __DIR__ . '/../public/footer.php'; ?>
-
   </div>
-
-
 
   <script src="assets/js/common.js"></script>
   <script src="assets/js/index.js"></script>
 </body>
-
 </html>

@@ -162,16 +162,55 @@ $stmt = db()->prepare(
      FROM Sales s
      LEFT JOIN UserData buyer ON s.BuyerUserid = buyer.Userid
      WHERE s.Userid = :seller
-     ORDER BY CASE WHEN s.BuyerUserid IS NULL THEN 1 ELSE 0 END, s.SoldDate DESC, s.ProductID DESC'
+     ORDER BY s.ProductID DESC'   // 新しく出品したものが上（ProductID は出品するたびに 1 ずつ増える）
 );
 $stmt->execute([':seller' => $userId]);
-$sold = $stmt->fetchAll();
+$soldAll = $stmt->fetchAll();
 
-foreach ($sold as &$item) {
+// 出品した商品のステータス（プルダウンの絞り込みに使う）
+const SOLD_STATUSES = [
+    'selling'   => '販売中',
+    'unshipped' => '未発送',
+    'shipped'   => '発送済み',
+    'done'      => '取引完了',
+];
+
+/** 出品した商品のステータスを返す（SOLD_STATUSES のキー） */
+function sold_status(array $item): string
+{
+    if ($item['BuyerUserid'] === null) {
+        return 'selling';     // まだ売れていない
+    }
+    if ($item['sucre'] !== null) {
+        return 'done';        // 購入者がレビューした
+    }
+    if ((int)$item['ShippingFlag'] === 1) {
+        return 'shipped';     // 発送したが、まだレビューされていない
+    }
+    return 'unshipped';       // 売れたが、まだ発送していない
+}
+
+// プルダウンで選ばれたステータス（'' = すべて）
+$soldFilter = $_GET['status'] ?? '';
+if (!isset(SOLD_STATUSES[$soldFilter])) {
+    $soldFilter = '';
+}
+
+// ステータスごとの件数（プルダウンに出す）
+$soldCounts = array_fill_keys(array_keys(SOLD_STATUSES), 0);
+
+$sold = [];
+foreach ($soldAll as $item) {
+    $item['status'] = sold_status($item);
+    $soldCounts[$item['status']]++;
+
+    if ($soldFilter !== '' && $item['status'] !== $soldFilter) {
+        continue;
+    }
     $urls = product_image_urls((int)$item['ProductID']);
     $item['image_url'] = $urls[0] ?? null;
+    $sold[] = $item;
 }
-unset($item);
 
 // ---- 4. 情報表示 -------------------------------------------------
 view('mypage', [
@@ -183,6 +222,10 @@ view('mypage', [
     'reviewCount' => $reviewCount,     // 評価の件数
     'tab'         => $tab,             // 表示中のタブ（bought / sold）
     'bought'      => $bought,          // 購入した商品
-    'sold'        => $sold,            // 出品した商品
+    'sold'        => $sold,            // 出品した商品（プルダウンで絞り込んだあと）
+    'soldTotal'   => count($soldAll),  // 出品した商品の件数（絞り込む前）
+    'soldFilter'  => $soldFilter,      // 選ばれたステータス（'' = すべて）
+    'soldCounts'  => $soldCounts,      // ステータスごとの件数
+    'soldStatuses' => SOLD_STATUSES,   // ステータスの一覧（キー => 表示名）
     'token'       => csrf_token(),     // 発送ボタン・アイコン変更用
 ]);
