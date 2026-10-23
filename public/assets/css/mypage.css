@@ -1,16 +1,17 @@
 /* ---------- 未ログイン(セッション切れ) ---------- */
 .card-login-prompt {
-    margin: 0px auto;
-    align-items: center;
-    text-align: center;
-    color: #808080;
+  margin: 0px auto;
+  align-items: center;
+  text-align: center;
+  color: #808080;
 }
+
 /* ---------- プロフィール（名前・アイコン・評価） ---------- */
 .profile {
-    display: flex;
-    max-width: 700px;
-    align-items: center;
-    margin: 0px auto 24px auto;
+  display: flex;
+  max-width: 700px;
+  align-items: center;
+  margin: 0px auto 24px auto;
 }
 
 .profile__stars {
@@ -37,10 +38,10 @@
 }
 
 .profile__name {
-    margin: 0;
-    font-size: 1.7rem;
-    font-weight: bold;
-    color: #0f172a;
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: #0f172a;
 }
 
 .profile__icon {
@@ -84,8 +85,9 @@ main {
 }
 
 .tabs__item.is-active {
-  color: #000;
-  border-bottom: 2px solid #000;
+  color: #8c52ff;
+  font-weight: bold;
+  border-bottom: 2px solid #8c52ff;
 }
 
 /* タイトルと丸アイコンを横並びにする */
@@ -96,30 +98,32 @@ main {
 }
 
 #openIconModal {
-    display: inline-block;
-    padding: 0.5em 1em;
-    border: none;
-    text-decoration: none;
-    background: #fff;
-    color: #8c52ff;
-    /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
-    border: 2px solid;
-    border-radius: 10px;
+  display: inline-block;
+  padding: 0.5em 1em;
+  border: none;
+  text-decoration: none;
+  background: #fff;
+  color: #8c52ff;
+  /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
+  border: 2px solid;
+  border-radius: 10px;
 }
-    #openIconModal:hover {
-        background: #8c52ff;
-        color: #fff;
-        transition: 0.3s;
-    }
+
+#openIconModal:hover {
+  background: #8c52ff;
+  color: #fff;
+  transition: 0.3s;
+}
+
 /* ---------- アイコン変更モーダル ---------- */
 .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal-overlay.is-open {
@@ -178,13 +182,13 @@ main {
 }
 
 .profile__icon__md {
-    width: 200px;
-    margin-bottom: 20px;
-    height: 200px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid var(--color-border);
+  width: 200px;
+  margin-bottom: 20px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
 }
 
 /* ファイル選択のinput本体は見えなくする（ラベルで操作する） */
@@ -198,11 +202,69 @@ main {
 }
 
 /* ============================================================
+   出品ステータス絞り込みバー
+   ============================================================ */
+.sold-filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.sold-filter__label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.02em;
+}
+
+.sold-filter__select {
+  height: 40px;
+  min-width: 180px;
+  padding: 0 36px 0 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #0f172a;
+  background-color: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238c52ff' d='M1.41 0L6 4.58L10.59 0L12 1.41l-6 6l-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sold-filter__select:hover {
+  border-color: #8c52ff;
+}
+
+.sold-filter__select:focus {
+  border-color: #8c52ff;
+  box-shadow: 0 0 0 2px rgba(140, 82, 255, 0.2);
+  outline: none;
+}
+
+/* ---------- 履歴・商品なし ---------- */
+.empty {
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  color: #64748b;
+  padding: 80px 16px;
+  margin: 0;
+}
+
+/* ============================================================
    商品カード（縦3列レイアウト）
    ============================================================ */
 .card.item {
-  background-color: #ded8f6;
-  border: none;
+  background-color: #fff;
+  border: solid 1px #b3b3b3;
   border-radius: 4px;
   padding: 32px 36px;
   margin-bottom: 24px;
@@ -224,8 +286,7 @@ main {
 .item__image {
   width: 160px;
   height: 160px;
-  border: 2px solid #000;
-  background-color: #fff;
+  background: #eef0ff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,10 +302,16 @@ main {
 }
 
 .item__image--noimage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef0ff;
+  color: #8c52ff;
+  font-weight: 700;
+  letter-spacing: 2px;
   font-size: 1.15rem;
-  font-weight: 500;
-  color: #000;
-  letter-spacing: 0.05em;
   text-align: center;
 }
 
@@ -313,11 +380,18 @@ main {
   line-height: 1.3;
 }
 
-.item__status {
+.item__status-header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
+}
+
+.item__status-header .item__label {
+  margin: 0;
+}
+
+.item__action-btn {
+  margin-top: 10px;
 }
 
 .item__shipping {
@@ -456,5 +530,13 @@ main {
     width: 160px;
     height: 160px;
   }
-}
 
+  .sold-filter {
+    justify-content: stretch;
+  }
+
+  .sold-filter__select {
+    flex: 1;
+    min-width: 0;
+  }
+}
