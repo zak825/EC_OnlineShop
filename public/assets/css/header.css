@@ -1,7 +1,12 @@
-﻿header {
+﻿body {
+    margin-top: 0;
+}
+
+header {
     background: #fff;
     display: flex;
     justify-content: space-between;
+    margin: 0;
 }
 
 nav {
@@ -9,6 +14,13 @@ nav {
     align-items: center;
 }
 
+header .logo img {
+    display: block;
+}
+
+hr {
+    margin: 0;
+}
 
 nav form {
     margin: 0px;
@@ -26,7 +38,7 @@ nav a {
 .right {
     display: flex;
     align-items: center;
-    margin: 0px 20px 10px 20px;
+    margin: 0px 20px;
 }
 
 .profile__icon__hd {
