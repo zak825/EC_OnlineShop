@@ -103,14 +103,13 @@ main {
     text-decoration: none;
     background: #fff;
     color: #8c52ff;
-    /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
     border: 2px solid;
     border-radius: 10px;
 }
 #openIconModal:hover {
     background: #8c52ff;
     color: #fff;
-    transition: 0.3s;
+        transition: 0.3s;
 }
 /* ---------- アイコン変更モーダル ---------- */
 .modal-overlay {
@@ -200,8 +199,7 @@ label.btn-btn--secondary.btn--small {
     border-radius: 10px;
 }
 label.btn-btn--secondary.btn--small:hover {
-    background: #0f172a;
-    color: #fff;
+    opacity: 0.7;
     transition: 0.3s;
 }
 
