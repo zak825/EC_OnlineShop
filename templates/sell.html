@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e shop | 出品</title>
+    <title>e-shop | 出品</title>
     <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/sell.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell.css') ?>">
@@ -28,14 +28,15 @@
             <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
 
-                <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
-                <p><label for="product_name">商品名</label></p>
-                <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
-                <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="<?= h($name_max) ?>"
-                       data-name-max="<?= h($name_max) ?>" value="<?= h($form_product_name) ?>">
-                <p class="error" id="error_product_name">
-                    <?= h($error_product_name) ?>
-                </p>
+            <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
+            <p><label for="product_name">商品名</label></p>
+            <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
+            <input type="text" id="product_name" name="product_name" class="Form-Item-Input"
+                maxlength="<?= h($name_max) ?>" data-name-max="<?= h($name_max) ?>"
+                value="<?= h($form_product_name) ?>">
+            <p class="error" id="error_product_name">
+                <?= h($error_product_name) ?>
+            </p>
 
 
             <p><label for="genre_code">ジャンル</label></p>
