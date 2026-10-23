@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e shop | マイページ</title>
   <link rel="stylesheet" href="assets/css/common.css">
-  <link rel="stylesheet" href="assets/css/mypage.css">
+  <link rel="stylesheet" href="assets/css/mypage.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/mypage.css') ?>">
 </head>
 
 <body>
@@ -118,7 +118,7 @@
         </a>
         <a href="mypage.php?tab=sold" class="tabs__item<?= $tab === 'sold' ? ' is-active' : '' ?>">
           出品した商品（
-          <?= count($sold) ?>）
+          <?= (int)$soldTotal ?>）
         </a>
       </nav>
 
@@ -179,12 +179,30 @@
 
       <?php else: ?>
       <!-- ===== 出品した商品 ===== -->
+      <?php if ($soldTotal > 0): ?>
+      <!-- ステータスで絞り込むプルダウン（選ぶと mypage.js が送信する。JS が無くても「表示」で送れる） -->
+      <form method="get" action="mypage.php" class="sold-filter" id="sold-filter">
+        <input type="hidden" name="tab" value="sold">
+        <label for="sold-status" class="sold-filter__label">ステータス</label>
+        <select name="status" id="sold-status" class="sold-filter__select">
+          <option value="">すべて（<?= (int)$soldTotal ?>）</option>
+          <?php foreach ($soldStatuses as $key => $label): ?>
+          <option value="<?= h($key) ?>"<?= $soldFilter === $key ? ' selected' : '' ?>>
+            <?= h($label) ?>（<?= (int)$soldCounts[$key] ?>）
+          </option>
+          <?php endforeach; ?>
+        </select>
+        <noscript><button type="submit" class="btn btn--secondary btn--small">表示</button></noscript>
+      </form>
+      <?php endif; ?>
+
       <?php if (!$sold): ?>
-      <p class="empty">履歴なし</p>
+      <p class="empty"><?= $soldTotal > 0 ? '該当する商品はありません' : '履歴なし' ?></p>
       <?php endif; ?>
 
       <?php foreach ($sold as $item): ?>
-      <article class="card item">
+      <!-- item--{ステータス} で背景色を変える（mypage.css） -->
+      <article class="card item item--<?= h($item['status']) ?>">
         <div class="item__head">
           <h2 class="item__name">
             <?= h($item['ProductName']) ?>
@@ -196,7 +214,7 @@
 
         <?php if ($item['BuyerUserid'] === null): ?>
         <div class="item__status">
-          <span class="badge">販売中</span>
+          <span class="badge badge--selling">販売中</span>
         </div>
         <?php else: ?>
         <dl class="item__meta">
@@ -226,9 +244,9 @@
         </dl>
 
         <div class="item__status">
-          <?php if ($item['sucre'] !== null): ?>
+          <?php if ($item['status'] === 'done'): ?>
           <span class="badge badge--done">取引完了</span>
-          <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
+          <?php elseif ($item['status'] === 'shipped'): ?>
           <span class="badge badge--wait">発送済み</span>
           <?php else: ?>
           <span class="badge badge--alert">未発送</span>
@@ -267,7 +285,7 @@
     <?php require __DIR__ . '/../public/footer.php'; ?>
 
     <script src="assets/js/common.js"></script>
-    <script src="assets/js/mypage.js"></script>
+    <script src="assets/js/mypage.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/mypage.js') ?>"></script>
   </div>
 </body>
 
