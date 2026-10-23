@@ -27,13 +27,16 @@
         <form action="sell.php" method="post" id="sell_form" enctype="multipart/form-data" novalidate>
             <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
-            <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
-            <p><label for="product_name">商品名</label></p>
-            <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="50"
-                value="<?= h($form_product_name) ?>">
-            <p class="error" id="error_product_name">
-                <?= h($error_product_name) ?>
-            </p>
+
+                <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
+                <p><label for="product_name">商品名</label></p>
+                <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
+                <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="<?= h($name_max) ?>"
+                       data-name-max="<?= h($name_max) ?>" value="<?= h($form_product_name) ?>">
+                <p class="error" id="error_product_name">
+                    <?= h($error_product_name) ?>
+                </p>
+
 
             <p><label for="genre_code">ジャンル</label></p>
             <select id="genre_code" name="genre_code" class="Form-Item-Input">
