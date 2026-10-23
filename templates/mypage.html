@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e shop | マイページ</title>
   <link rel="stylesheet" href="assets/css/common.css">
-  <link rel="stylesheet" href="assets/css/mypage.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/mypage.css') ?>">
+  <link rel="stylesheet" href="assets/css/mypage.css">
 </head>
 
 <body>
@@ -201,8 +201,7 @@
       <?php endif; ?>
 
       <?php foreach ($sold as $item): ?>
-      <!-- item--{ステータス} で背景色を変える（mypage.css） -->
-      <article class="card item item--<?= h($item['status']) ?>">
+      <article class="card item">
         <div class="item__head">
           <h2 class="item__name">
             <?= h($item['ProductName']) ?>
@@ -214,7 +213,7 @@
 
         <?php if ($item['BuyerUserid'] === null): ?>
         <div class="item__status">
-          <span class="badge badge--selling">販売中</span>
+          <span class="badge">販売中</span>
         </div>
         <?php else: ?>
         <dl class="item__meta">
@@ -244,9 +243,9 @@
         </dl>
 
         <div class="item__status">
-          <?php if ($item['status'] === 'done'): ?>
+          <?php if ($item['sucre'] !== null): ?>
           <span class="badge badge--done">取引完了</span>
-          <?php elseif ($item['status'] === 'shipped'): ?>
+          <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
           <span class="badge badge--wait">発送済み</span>
           <?php else: ?>
           <span class="badge badge--alert">未発送</span>
@@ -285,7 +284,7 @@
     <?php require __DIR__ . '/../public/footer.php'; ?>
 
     <script src="assets/js/common.js"></script>
-    <script src="assets/js/mypage.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/mypage.js') ?>"></script>
+    <script src="assets/js/mypage.js"></script>
   </div>
 </body>
 

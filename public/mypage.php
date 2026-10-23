@@ -167,7 +167,7 @@ $stmt = db()->prepare(
 $stmt->execute([':seller' => $userId]);
 $soldAll = $stmt->fetchAll();
 
-// 出品した商品のステータス（プルダウンの絞り込み・背景色に使う）
+// 出品した商品のステータス（プルダウンの絞り込みに使う）
 const SOLD_STATUSES = [
     'selling'   => '販売中',
     'unshipped' => '未発送',
