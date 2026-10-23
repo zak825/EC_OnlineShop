@@ -96,15 +96,16 @@
             </div>
 
             <!-- ファイル選択（input本体は隠して、ラベルをボタンとして使う） -->
-            <label for="iconFile" class="btn btn--secondary btn--small">ファイルを選択</label>
+            <label for="iconFile" class="btn-btn--secondary btn--small">ファイルを選択</label>
             <input type="file" id="iconFile" name="icon" class="visually-hidden"
               accept="image/jpeg,image/png,image/gif,image/webp" required>
             <p class="modal-filename" id="iconFileName">ファイルが選択されていません</p>
             <p class="modal-error" id="iconError" hidden></p>
 
             <div class="modal-actions">
-              <button type="button" class="btn btn--small" id="closeIconModal">キャンセル</button>
               <button type="submit" class="btn btn--primary btn--small" id="iconSubmit" disabled>決定</button>
+              <button type="button" class="btn btn--small" id="closeIconModal">キャンセル</button>
+              
             </div>
           </form>
         </div>
