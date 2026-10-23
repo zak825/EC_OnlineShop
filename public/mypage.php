@@ -162,7 +162,7 @@ $stmt = db()->prepare(
      FROM Sales s
      LEFT JOIN UserData buyer ON s.BuyerUserid = buyer.Userid
      WHERE s.Userid = :seller
-     ORDER BY s.ProductID'   // 出品した順（ProductID は出品するたびに 1 ずつ増える）
+     ORDER BY s.ProductID DESC'   // 新しく出品したものが上（ProductID は出品するたびに 1 ずつ増える）
 );
 $stmt->execute([':seller' => $userId]);
 $soldAll = $stmt->fetchAll();
