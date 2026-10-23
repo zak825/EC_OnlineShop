@@ -2,7 +2,7 @@
   margin: 0px;
 }
 
-.logo .btn-logout .btn-login{
+.logo .btn-logout .btn-login {
   margin-top: 0;
 }
 
@@ -13,6 +13,7 @@
 
 main {
   width: 80%;
+  min-height: 80vh;
   margin: auto;
   padding: 10px;
 }
