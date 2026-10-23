@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // ============================================================
 // マイページ画面
 //   GET mypage.php            … 購入した商品の一覧
@@ -65,8 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 入力チェック
         if ($file === null || $file['error'] === UPLOAD_ERR_NO_FILE) {
             $error = '画像を選択してください。';
-        } elseif (in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
-                  || $file['size'] > ICON_MAX_BYTES) {
+        } elseif (
+            in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+            || $file['size'] > ICON_MAX_BYTES
+        ) {
             $error = '画像のサイズは2MBまでです。';
         } elseif ($file['error'] !== UPLOAD_ERR_OK) {
             $error = '画像のアップロードに失敗しました。';
@@ -137,9 +139,11 @@ $avgScore    = $reviewCount > 0 ? round((float)$rating['AvgScore'], 1) : null;  
 $stmt = db()->prepare(
     'SELECT s.ProductID, s.ProductName, s.Price, s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
+            g.GenreName,
             seller.UserName AS SellerName
      FROM Sales s
-     JOIN UserData seller ON s.Userid = seller.Userid
+     LEFT JOIN Genre    g      ON s.GenreCode = g.GenreCode
+     JOIN UserData seller ON s.Userid    = seller.Userid
      WHERE s.BuyerUserid = :buyer
      ORDER BY s.SoldDate DESC'
 );
@@ -158,8 +162,10 @@ unset($item);
 $stmt = db()->prepare(
     'SELECT s.ProductID, s.ProductName, s.Price, s.BuyerUserid, s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
+            g.GenreName,
             buyer.UserName AS BuyerUserName, buyer.ZipCode, buyer.Address, buyer.TEL
      FROM Sales s
+     LEFT JOIN Genre    g     ON s.GenreCode   = g.GenreCode
      LEFT JOIN UserData buyer ON s.BuyerUserid = buyer.Userid
      WHERE s.Userid = :seller
      ORDER BY s.ProductID DESC'   // 新しく出品したものが上（ProductID は出品するたびに 1 ずつ増える）
