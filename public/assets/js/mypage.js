@@ -107,3 +107,17 @@
     submitBtn.disabled = false;   // 画像を選んだら「決定」を押せるようにする
   });
 })();
+
+// ============================================================
+// マイページ：出品した商品をステータスで絞り込む
+//   プルダウンを選んだら、すぐにフォームを送信する（mypage.php?tab=sold&status=…）
+// ============================================================
+(function () {
+  var form   = document.getElementById('sold-filter');
+  var select = document.getElementById('sold-status');
+  if (!form || !select) return;
+
+  select.addEventListener('change', function () {
+    form.submit();
+  });
+})();
