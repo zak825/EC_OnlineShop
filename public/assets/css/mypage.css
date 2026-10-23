@@ -1,4 +1,4 @@
-/* ---------- 未ログイン(セッション切れ) ---------- */
+﻿/* ---------- 未ログイン(セッション切れ) ---------- */
 .card-login-prompt {
   margin: 0px auto;
   align-items: center;
@@ -200,8 +200,8 @@ label.btn-btn--secondary.btn--small {
     text-decoration: none;
     background: #fff;
     color: #0f172a;
-    border: 2px solid;
-    border-radius: 10px;
+    border: 1px solid;
+    border-radius: 5px;
 }
 label.btn-btn--secondary.btn--small:hover {
     opacity: 0.7;
