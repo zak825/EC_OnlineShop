@@ -26,6 +26,111 @@
 .profile__right {
   margin-left: auto;
   margin-right: 0;
+  position: relative;
+}
+
+#settingsToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5em 1.2em;
+  border: 2px solid #8c52ff;
+  border-radius: 10px;
+  background: #fff;
+  color: #8c52ff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#settingsToggleBtn:hover {
+  background: #8c52ff;
+  color: #fff;
+}
+
+.settings-balloon {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 150px;
+  z-index: 100;
+  animation: balloonFadeIn 0.15s ease-out;
+}
+
+.settings-balloon[hidden] {
+  display: none;
+}
+
+/* 吹き出しの三角の矢印（上向き） */
+.settings-balloon::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 18px;
+  border-width: 0 8px 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent #cbd5e1 transparent;
+}
+
+.settings-balloon::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 19px;
+  border-width: 0 7px 7px 7px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+@keyframes balloonFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-balloon__item {
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.settings-balloon__item:hover {
+  background-color: #f1f5f9;
+  color: #8c52ff;
+}
+
+/* ---------- 会員情報変更モーダル用調整 ---------- */
+.modal-auth-card {
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
 }
 
 /* アイコンの右に名前と評価を表示 */
@@ -97,24 +202,6 @@ main {
   gap: 8px;
 }
 
-
-#openIconModal {
-  display: inline-block;
-  padding: 0.5em 1em;
-  border: none;
-  text-decoration: none;
-  background: #fff;
-  color: #8c52ff;
-  /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
-  border: 2px solid;
-  border-radius: 10px;
-}
-
-#openIconModal:hover {
-  background: #8c52ff;
-  color: #fff;
-  transition: 0.3s;
-}
 
 /* ---------- アイコン変更モーダル ---------- */
 .modal-overlay {
@@ -194,58 +281,61 @@ main {
 
 /* アイコン変更ウィンドウ内ボタン */
 label.btn-btn--secondary.btn--small {
-    display: inline-block;
-    padding: 0.1em 0.5em;
-    border: none;
-    text-decoration: none;
-    background: #fff;
-    color: #0f172a;
-    border: 2px solid;
-    border-radius: 10px;
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  border: none;
+  text-decoration: none;
+  background: #fff;
+  color: #0f172a;
+  border: 2px solid;
+  border-radius: 10px;
 }
+
 label.btn-btn--secondary.btn--small:hover {
-    opacity: 0.7;
-    transition: 0.3s;
+  opacity: 0.7;
+  transition: 0.3s;
 }
 
 #iconSubmit {
-    flex: 2;
-    background: #8c52ff;
-    color: #fff;
-    border-color: #8c52ff;
-}
-#iconSubmit:hover {
-    background: #4f23a0;
-    border-color: #4f23a0;
+  flex: 2;
+  background: #8c52ff;
+  color: #fff;
+  border-color: #8c52ff;
 }
 
-#closeIconModal{
-flex: 1;
-height: 44px;
-font-size: 14px;
-font-weight: 600;
-letter-spacing: 0.04em;
-border-radius: 0;
-cursor: pointer;
-background: #fff;
-color: #475569;
-border: 1px solid #cbd5e1;
-transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+#iconSubmit:hover {
+  background: #4f23a0;
+  border-color: #4f23a0;
 }
+
+#closeIconModal {
+  flex: 1;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 0;
+  cursor: pointer;
+  background: #fff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
 #closeIconModal:hover {
-    background: #f8fafc;
-    color: #8c52ff;
-    border-color: #8c52ff;
+  background: #f8fafc;
+  color: #8c52ff;
+  border-color: #8c52ff;
 }
 
 /* ファイル選択のinput本体は見えなくする（ラベルで操作する） */
 .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 /* ============================================================
