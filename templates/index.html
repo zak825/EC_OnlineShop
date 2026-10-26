@@ -76,6 +76,17 @@
               </span>
               出品者：
               <?= name_label($item['SellerName']) ?>
+
+              <?php if ($item['SellerAvgScore'] !== null): ?>
+                <span class="product__seller-rating"
+                  aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
+                  <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
+                </span>
+              <?php else: ?>
+                <span class="product__seller-rating product__seller-rating--none">
+                  [評価無し]
+                </span>
+              <?php endif; ?>
             </p>
 
             <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
