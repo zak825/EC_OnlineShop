@@ -58,9 +58,6 @@ nav a {
 }
 
 
-#login-btn{
-    margin: 0 5px 0 0;
-}
 
 .UserName {
     margin: 0px 40px 0px 10px;
@@ -111,39 +108,30 @@ nav a {
     width: 100%;
 }
 
+
+#login-btn{
+    margin: 0 25px 0 0;   /* ログアウト(.right の 20px)と右端をそろえる */
+}
+
+/* ログイン・ログアウト共通の形（色だけ別） */
+.btn-login,
 .btn-logout {
     display: inline-block;
     padding: 0.5em 1em;
-    border: none;
+    margin: 0 5px 0 0;
+    font: inherit;          /* button 既定のフォントを本文にそろえる */
+    line-height: 1.5;       /* a と行の高さをそろえる */
     text-decoration: none;
     background: #fff;
-    color: #dc143c;
-    /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
-    border: 2px solid;
+    border: 2px solid;      /* 色は文字色（currentColor）になる */
     border-radius: 2px;
+    cursor: pointer;
+    box-sizing: border-box;
+    vertical-align: middle;
 }
 
-.btn-logout:hover {
-    background: #dc143c;
-    color: #fff;
-    transition: 0.3s;
-}
+.btn-login  { color: #8c52ff; }
+.btn-logout { color: #dc143c; }
 
-
-.btn-login {
-    display: inline-block;
-    padding: 0.5em 1em;
-    border: none;
-    text-decoration: none;
-    background: #fff;
-    color: #8c52ff;
-    /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.29); */
-    border: 2px solid;
-    border-radius: 2px;
-}
-
-.btn-login:hover {
-    background: #8c52ff;
-    color: #ffffff;
-    transition: 0.3s;
-}
+.btn-login:hover  { background: #8c52ff; color: #fff; transition: 0.3s; }
+.btn-logout:hover { background: #dc143c; color: #fff; transition: 0.3s; }
