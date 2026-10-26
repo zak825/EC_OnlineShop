@@ -5,6 +5,7 @@
 //   POST sell_confirm.php … 販売する（action=sell）／キャンセル（action=cancel）
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
+require_once SRC_DIR . '/lib/sell_draft.php';
 
 // 遷移先
 const URL_SELL = 'sell.php';
@@ -88,6 +89,13 @@ if ($action === 'sell') {
     // 登録できたら入力値を消す（リロードしても二重登録されない）
     unset($_SESSION['sell'], $_SESSION['sell_images']);
     $done = true;
+
+    // 出品できたので、下書きも削除する（失敗しても出品は完了しているので、ログだけ残す）
+    try {
+      delete_sell_draft($user_id);
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+    }
   } catch (PDOException | RuntimeException $e) {
     // 失敗したら入力値は残したまま、この画面にとどまる
     if ($pdo !== null && $pdo->inTransaction()) {
