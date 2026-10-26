@@ -194,7 +194,7 @@ images.addEventListener('change', function() {
 
 // サーバー側のエラーで画面が戻ってきたときは、その入力欄を最初から赤くする
 [productName, genreCode, price].forEach(function(input) {
-  if (document.getElementById('error_' + input.id).textContent !== '') {
+  if (document.getElementById('error_' + input.id).textContent.trim() !== '') {   // 空白だけなら「エラーなし」
     input.classList.add('is-invalid');
   }
 });
@@ -210,7 +210,7 @@ price.addEventListener('blur', validatePrice);
 // ------------------------------------------------------------
 // 下書き保存のモーダル
 //   「戻る」を押したとき、入力がすべて正しければ「下書き保存しますか？」を出す
-//   保存する → action=save_draft で送信／保存しない → action=back で送信／キャンセル → 閉じて入力に戻る
+//   保存する → action=save_draft で送信／保存しない → action=back_no_save で送信／キャンセル → 閉じて入力に戻る
 // ------------------------------------------------------------
 var draftSaveModal = document.getElementById('draft_save_modal');
 
@@ -238,7 +238,8 @@ document.getElementById('draft_save_yes').addEventListener('click', function() {
   submitWithAction('save_draft');
 });
 document.getElementById('draft_save_no').addEventListener('click', function() {
-  submitWithAction('back');
+  // 「戻る」と区別して送る（下書きを使って入力していたなら、サーバー側で下書きを削除する）
+  submitWithAction('back_no_save');
 });
 document.getElementById('draft_save_cancel').addEventListener('click', closeDraftSaveModal);
 document.addEventListener('keydown', function(event) {
