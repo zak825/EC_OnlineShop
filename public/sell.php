@@ -3,8 +3,11 @@
 // 販売画面
 //   GET  sell.php … 入力フォームを表示
 //   POST sell.php … 販売（action=sell）／クリア（action=clear）／戻る（action=back）
+//                   下書き保存して戻る（action=save_draft）
+//                   下書きを使う（action=load_draft）／下書きを使わない（action=discard_draft）
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
+require_once SRC_DIR . '/lib/sell_draft.php';
 
 // 遷移先
 const URL_SELL_CONFIRM = 'sell_confirm.php';
@@ -52,6 +55,7 @@ if (APP_DEBUG && defined('DEV_LOGIN_USER_ID') && DEV_LOGIN_USER_ID > 0) {
 if (!is_logged_in()) {
   redirect_to_login('sell.php');
 }
+$user_id = login_user_id();
 
 // ------------------------------------------------------------
 // どのボタンが押されたか
@@ -90,6 +94,17 @@ if ($action === 'back') {
 
 // クリアボタン：入力値を消して空のフォームを表示する
 if ($action === 'clear') {
+  clear_sell_input();
+}
+
+// 下書きのモーダルで「いいえ」：下書きを削除して空のフォームを表示する
+if ($action === 'discard_draft') {
+  try {
+    delete_sell_draft($user_id);
+  } catch (PDOException $e) {
+    error_log($e->getMessage());
+    $error_db = MSG_DB_ERROR;
+  }
   clear_sell_input();
 }
 
@@ -173,9 +188,41 @@ if ($action === '' && isset($_SESSION['sell'])) {
 }
 
 // ------------------------------------------------------------
-// 販売ボタン：入力チェック
+// 下書き
 // ------------------------------------------------------------
-if ($action === 'sell' && $error_db === '') {
+$draft = null;   // 「下書きがあります。使用しますか？」のモーダルに出す下書き（出さないときは null）
+
+try {
+  // 下書きのモーダルで「はい」：下書きをフォームに入れる（画像は一時フォルダにコピーして「選択中の画像」にする）
+  if ($action === 'load_draft') {
+    $saved = find_sell_draft($user_id);
+    if ($saved !== null) {
+      clear_sell_input();
+      $form_product_name = $saved['ProductName'];
+      $form_genre_code   = (string)$saved['GenreCode'];
+      $form_price        = (string)$saved['Price'];
+
+      $tmp = copy_sell_draft_images_to_tmp($user_id);
+      if ($tmp !== null) {
+        $_SESSION['sell_images'] = $tmp;
+      }
+    }
+  }
+
+  // 画面を開いたとき（販売確認画面から戻ったとき以外）に下書きがあれば、モーダルで使うか聞く
+  if ($action === '' && !isset($_SESSION['sell']) && $error_db === '') {
+    $draft = find_sell_draft($user_id);
+  }
+} catch (PDOException $e) {
+  error_log($e->getMessage());
+  $error_db = MSG_DB_ERROR;
+}
+
+// ------------------------------------------------------------
+// 販売ボタン・下書き保存：入力チェック
+// （下書きは入力がすべて正しいときだけ保存できる。チェック内容は販売と同じ）
+// ------------------------------------------------------------
+if (($action === 'sell' || $action === 'save_draft') && $error_db === '') {
   // 入力値を受け取り、前後の空白を取り除く
   if (isset($_POST['product_name'])) {
     $form_product_name = trim_all($_POST['product_name']);
@@ -242,8 +289,23 @@ if ($action === 'sell' && $error_db === '') {
     }
   }
 
-  // 4項目ともエラーがなければセッションに保存して販売確認画面へ
-  if ($error_product_name === '' && $error_genre_code === '' && $error_price === '' && $error_images === '') {
+  $all_ok = $error_product_name === '' && $error_genre_code === '' && $error_price === '' && $error_images === '';
+
+  // 下書き保存：4項目ともエラーがなければ下書きに保存してメイン画面へ（今の入力値・一時保存の画像は消す）
+  if ($action === 'save_draft' && $all_ok) {
+    try {
+      save_sell_draft($user_id, (int)$form_genre_code, $form_product_name, (int)$price, $_SESSION['sell_images'] ?? null);
+      clear_sell_input();
+      set_flash('下書きを保存しました。', 'success');
+      redirect(URL_MAIN);
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+      $error_db = MSG_DB_ERROR;
+    }
+  }
+
+  // 販売：4項目ともエラーがなければセッションに保存して販売確認画面へ
+  if ($action === 'sell' && $all_ok) {
     $_SESSION['sell'] = [
       'genre_code'   => (int)$form_genre_code,
       'genre_name'   => $genres[$form_genre_code],
@@ -273,4 +335,7 @@ view('sell', [
   'error_images'       => $error_images,
   'image_urls'         => isset($_SESSION['sell_images']) ? product_image_tmp_urls($_SESSION['sell_images']) : [],
   'image_max'          => PRODUCT_IMAGE_MAX,
+  'draft'              => $draft,
+  'draft_image_count'  => $draft !== null ? count(glob(sell_draft_image_dir($user_id) . '/*') ?: []) : 0,
+  'draft_genre_name'   => $draft !== null ? ($genres[$draft['GenreCode']] ?? '') : '',
 ]);
