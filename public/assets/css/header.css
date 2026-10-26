@@ -50,6 +50,11 @@ nav a {
     border: 1px solid var(--color-border);
 }
 
+
+#login-btn{
+    margin: 0 5px 0 0;
+}
+
 .UserName {
     margin: 0px 40px 0px 10px;
     font-size: 16.5px;
