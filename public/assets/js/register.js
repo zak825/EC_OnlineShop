@@ -25,10 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     registerForm.addEventListener('submit', (e) => {
-        const userName = userNameInput.value.trim();
-        const zipCode = zipCodeInput.value.trim();
-        const address = addressInput.value.trim();
-        const tel = telInput.value.trim();
+        // 氏名・郵便番号・住所・電話番号のチェックは profile_validation.js（サーバー側は src/lib/validation.php）
+        const PV = window.ProfileValidation;
+        const userName = PV.trim(userNameInput.value);
+        const zipCode = PV.normalizeZip(PV.trim(zipCodeInput.value));   // 123-4567 → 1234567
+        const address = PV.trim(addressInput.value);
+        const tel = PV.trim(telInput.value);
         const password = passwordInput.value;
         const secretQuestionId = secretQuestionSelect ? secretQuestionSelect.value : '';
         const secretAnswer = secretAnswerInput ? secretAnswerInput.value.trim() : '';
@@ -41,27 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (userName.length > 50) {
+        const profileError = PV.validate(userName, zipCode, address, tel);
+        if (profileError !== null) {
             e.preventDefault();
-            showError('氏名は50文字以内で入力してください。');
-            return;
-        }
-
-        if (zipCode.length > 8 || !/^\d{3}-?\d{4}$/.test(zipCode)) {
-            e.preventDefault();
-            showError('郵便番号は8桁以内の半角数字（例：1234567 または 123-4567）で入力してください。');
-            return;
-        }
-
-        if (address.length > 256) {
-            e.preventDefault();
-            showError('住所は256文字以内で入力してください。');
-            return;
-        }
-
-        if (tel.length > 15 || !/^[0-9\-]{10,15}$/.test(tel)) {
-            e.preventDefault();
-            showError('電話番号は15桁以内の半角数字（ハイフン可）で入力してください。');
+            showError(profileError);
             return;
         }
 
@@ -82,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
             showError(`パスワードは${minLen}文字以上${maxLen}文字以内で入力してください。`);
             return;
         }
+
+        // 郵便番号はハイフンなしの形に直してから送信する
+        zipCodeInput.value = zipCode;
 
         hideError();
     });

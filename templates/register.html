@@ -42,7 +42,8 @@
                         <div class="form-group">
                             <label for="zip_code">郵便番号</label>
                             <input type="text" id="zip_code" name="zip_code" maxlength="8"
-                                value="<?= h($zipCodeInput ?? '') ?>" placeholder="例：1234567 または 123-4567">
+                                value="<?= h($zipCodeInput ?? '') ?>" placeholder="例：1234567（ハイフンなし）"
+                                inputmode="numeric" autocomplete="postal-code">
                         </div>
 
                         <div class="form-group">
@@ -97,6 +98,7 @@
                     </form>
                 </div>
 
+                <script src="assets/js/profile_validation.js"></script>
                 <script src="assets/js/register.js"></script>
 
             </div>

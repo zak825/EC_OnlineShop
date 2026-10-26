@@ -39,9 +39,8 @@ $errorMessage = '';
 
 // 【「はい」ボタン押下】POST送信時の登録処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
-        || (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false)
-        || (isset($_POST['ajax']) && $_POST['ajax'] === '1');
+    // register_check.js の fetch（X-Requested-With: XMLHttpRequest）のときは JSON で返す
+    $isAjax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest';
 
     if (!check_csrf_token()) {
         $errorMessage = '不正なリクエストです（CSRFトークンエラー）。画面を開き直して再度お試しください。';

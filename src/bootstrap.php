@@ -29,4 +29,5 @@ header('Content-Type: text/html; charset=UTF-8');
 require_once SRC_DIR . '/lib/db.php';
 require_once SRC_DIR . '/lib/auth.php';
 require_once SRC_DIR . '/lib/view.php';
+require_once SRC_DIR . '/lib/validation.php';
 require_once SRC_DIR . '/lib/product_image.php';
