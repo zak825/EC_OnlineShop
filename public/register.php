@@ -99,8 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errorMessage = "パスワードは{$passwordMinLength}文字以上{$passwordMaxLength}文字以内で入力してください。";
             } else {
                 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+                // 秘密の質問の回答もパスワードと同様にハッシュ化してから保存する
+                $secretAnswerHash = password_hash($secretAnswerInput, PASSWORD_DEFAULT);
                 if ($passwordHash === false) {
                     $errorMessage = 'パスワードの処理に失敗しました。';
+                } elseif ($secretAnswerHash === false) {
+                    $errorMessage = '秘密の質問の回答の処理に失敗しました。';
                 } else {
                     // 3. SQLインジェクション・XSS対策を行う
                     // プレースホルダおよびサニタイズ処理を行い、不正な入力を回避する
@@ -130,8 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'password'      => $passwordHash,
                             'SecretQuestionId'   => (int)$secretQuestionIdInput,
                             'secret_question_id' => (int)$secretQuestionIdInput,
-                            'SecretAnswer'       => $secretAnswerInput,
-                            'secret_answer'      => $secretAnswerInput,
+                            'SecretAnswer'       => $secretAnswerHash,
+                            'secret_answer'      => $secretAnswerHash,
                         ];
 
                         // 5. 画面遷移：ユーザーID発行（登録確認）画面へ遷移する

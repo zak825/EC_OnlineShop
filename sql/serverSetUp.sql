@@ -60,7 +60,7 @@ CREATE TABLE UserData (
     LoginPassword VARCHAR(255)  NOT NULL,
     IconPath      NVARCHAR(256),           -- プロフィールアイコンの画像パス（NULL = 未設定）
     SecretQuestionId INT           NOT NULL CONSTRAINT DF_UserData_SecretQuestionId DEFAULT (1),          -- 秘密の質問ID（1〜5）
-    SecretAnswer     NVARCHAR(100) NOT NULL CONSTRAINT DF_UserData_SecretAnswer     DEFAULT (N'初期回答') -- 秘密の質問の回答
+    SecretAnswer     VARCHAR(255)  NOT NULL CONSTRAINT DF_UserData_SecretAnswer     DEFAULT ('$2y$10$wCYGp7jFrtgpfosV6EY.Re8PAVgU8mVKpnIQ4W8GyudYVu3ds8gh6') -- 秘密の質問の回答（password_hash のハッシュ値）
 );
 
 -- 商品ジャンル
@@ -110,9 +110,9 @@ GO
 -- ユーザー（Userid は IDENTITY なので、番号を指定するときだけ ON にする）
 SET IDENTITY_INSERT UserData ON;
 INSERT INTO UserData (Userid, UserName, ZipCode, Address, TEL, LoginPassword, SecretQuestionId, SecretAnswer) VALUES
-    (1, N'出品 太郎', '1000001', N'東京都千代田区千代田1-1',  '0312345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 1, N'千代田小学校'),
-    (2, N'購入 花子', '5300001', N'大阪府大阪市北区梅田1-1',  '0612345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 2, N'ポチ'),
-    (3, N'閲覧 次郎', '4600001', N'愛知県名古屋市中区三の丸1-1', '0521234567', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 4, N'カレー');
+    (1, N'出品 太郎', '1000001', N'東京都千代田区千代田1-1',  '0312345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 1, '$2y$10$oDHIqXypG55YwMZCMbuCEedxsj0wyRsqlsVcMxRWpHzoNA5OAeuWm'),  -- 回答: 千代田小学校
+    (2, N'購入 花子', '5300001', N'大阪府大阪市北区梅田1-1',  '0612345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 2, '$2y$10$.IcB6WLODnzHxy1zBN0Yh.n3eqKd8ZcpEbFnoNJlFjNnr6qqsZbW.'),  -- 回答: ポチ
+    (3, N'閲覧 次郎', '4600001', N'愛知県名古屋市中区三の丸1-1', '0521234567', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 4, '$2y$10$bVgjw0C3TpWOE7PWOpFgguxRxVLBHfivgxyQoYIsymTesZ4oL3PJO');  -- 回答: カレー
 SET IDENTITY_INSERT UserData OFF;
 
 -- ジャンル
