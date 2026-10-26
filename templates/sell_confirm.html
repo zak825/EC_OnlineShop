@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e shop | 出品確認</title>
+    <title>e-shop | 出品確認</title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/index.css">
     <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
@@ -26,8 +26,9 @@
         </p>
         <?php endif; ?>
 
+        <!-- 商品名が長いと値段が埋もれるので、値段は改行して次の行に出す -->
         <p>
-            <?= h($sell['product_name']) ?>
+            <?= h($sell['product_name']) ?><br>
             <?= h(number_format($sell['price'])) ?>円 で販売しますか？
         </p>
         <p>

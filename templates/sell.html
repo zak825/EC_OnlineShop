@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e shop | 出品</title>
+    <title>e-shop | 出品</title>
     <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/sell.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell.css') ?>">
@@ -27,9 +27,12 @@
         <form action="sell.php" method="post" id="sell_form" enctype="multipart/form-data" novalidate>
             <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
+
             <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
             <p><label for="product_name">商品名</label></p>
-            <input type="text" id="product_name" name="product_name" class="Form-Item-Input" maxlength="50"
+            <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
+            <input type="text" id="product_name" name="product_name" class="Form-Item-Input"
+                maxlength="<?= h($name_max) ?>" data-name-max="<?= h($name_max) ?>"
                 value="<?= h($form_product_name) ?>">
             <p class="error" id="error_product_name">
                 <?= h($error_product_name) ?>
@@ -78,10 +81,17 @@
             <!-- 選択中の画像のプレビュー
                      最初は前に選んだ画像（販売確認画面から戻ったとき）を出し、画像を選ぶと sell.js が入れ替える -->
             <p id="image_preview_label" <?=$image_urls ? '' : ' hidden' ?>>選択中の画像（選び直すと入れ替わります）</p>
-            <div class="image-list" id="image_preview">
-                <?php foreach ($image_urls as $url): ?>
-                <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
-                <?php endforeach; ?>
+            <!-- 左右の矢印で横にスクロールする（はみ出していないとき・端まで来たときは sell.js が矢印を隠す） -->
+            <div class="image-slider">
+                <button type="button" class="image-slider__arrow image-slider__arrow--prev" id="image_prev"
+                    aria-label="前の画像を表示" hidden>&lsaquo;</button>
+                <div class="image-list" id="image_preview">
+                    <?php foreach ($image_urls as $url): ?>
+                    <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="image-slider__arrow image-slider__arrow--next" id="image_next"
+                    aria-label="次の画像を表示" hidden>&rsaquo;</button>
             </div>
 
             <p>

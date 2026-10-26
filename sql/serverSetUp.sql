@@ -73,7 +73,7 @@ CREATE TABLE Genre (
 CREATE TABLE Sales (
     ProductID    INT           NOT NULL PRIMARY KEY,
     GenreCode    INT           NOT NULL REFERENCES Genre(GenreCode),
-    ProductName  VARCHAR(50)   NOT NULL,
+    ProductName  NVARCHAR(50)  NOT NULL,                      -- NVARCHAR … 日本語でも50文字入る（VARCHAR だと50バイト＝日本語25文字まで）
     Price        INT           NOT NULL,
     Userid       INT           NOT NULL REFERENCES UserData(Userid),
     BuyerUserid  INT           REFERENCES UserData(Userid),  -- 購入者のユーザーID（NULL = 販売中）
@@ -148,8 +148,11 @@ INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, BuyerUserid
 
 -- システム設定
 INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment) VALUES
-    (1, 'Password', 'PasswordMinLength', '8',  'int', N'パスワードの最小文字数'),
-    (2, 'Session',  'SessionTimeout',    '30', 'int', N'セッションの有効時間（分）');
+    (1, 'Password', 'PasswordMinLength',    '8',       'int', N'パスワードの最小文字数'),
+    (2, 'Session',  'SessionTimeout',       '30',      'int', N'セッションの有効時間（分）'),
+    (3, 'Sales',    'PriceMin',             '300',     'int', N'出品価格の下限（円）'),
+    (4, 'Sales',    'PriceMax',             '9999999', 'int', N'出品価格の上限（円）'),
+    (5, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）');
 GO
 
 -- ------------------------------------------------------------
