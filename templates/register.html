@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e shop | 新規登録</title>
+    <title>e-shop | 新規登録</title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/auth.css">
     <link rel="icon" href="assets/icons/favicon.ico">
@@ -42,7 +42,8 @@
                         <div class="form-group">
                             <label for="zip_code">郵便番号</label>
                             <input type="text" id="zip_code" name="zip_code" maxlength="8"
-                                value="<?= h($zipCodeInput ?? '') ?>" placeholder="例：1234567 または 123-4567">
+                                value="<?= h($zipCodeInput ?? '') ?>" placeholder="例：1234567（ハイフンなし）"
+                                inputmode="numeric" autocomplete="postal-code">
                         </div>
 
                         <div class="form-group">
@@ -97,6 +98,7 @@
                     </form>
                 </div>
 
+                <script src="assets/js/profile_validation.js"></script>
                 <script src="assets/js/register.js"></script>
 
             </div>

@@ -64,34 +64,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = '不正なリクエストです（CSRFトークンエラー）。画面を開き直して再度お試しください。';
     } else {
         // 入力された文字列の取得および前後の空白除去（サニタイズ処理）
-        $userNameInput = trim($_POST['user_name'] ?? '');
-        $zipCodeInput  = trim($_POST['zip_code'] ?? '');
-        $addressInput  = trim($_POST['address'] ?? '');
-        $telInput      = trim($_POST['tel'] ?? '');
+        // 会員情報4項目は共通関数（src/lib/validation.php）で整形する（郵便番号はハイフンなし7桁にそろえる）
+        $profileInput  = sanitize_profile_input($_POST);
+        $userNameInput = $profileInput['user_name'];
+        $zipCodeInput  = $profileInput['zip_code'];
+        $addressInput  = $profileInput['address'];
+        $telInput      = $profileInput['tel'];
         $password      = $_POST['password'] ?? '';
         $secretQuestionIdInput = trim($_POST['secret_question_id'] ?? '');
         $secretAnswerInput     = trim($_POST['secret_answer'] ?? '');
 
         // 1. 未入力・桁数チェックを行う
         // すべての項目が入力されているか、また各項目（氏名、郵便番号、住所、電話番号）がUserDataテーブル定義の桁数・形式内であるかチェックする
-        $userNameLen = mb_strlen($userNameInput, 'UTF-8');
-        $addressLen  = mb_strlen($addressInput, 'UTF-8');
-        $zipCodeLen  = strlen($zipCodeInput);
-        $telLen      = strlen($telInput);
+        $profileError = validate_profile_fields($userNameInput, $zipCodeInput, $addressInput, $telInput);
 
         if (
             $userNameInput === '' || $zipCodeInput === '' || $addressInput === '' || $telInput === '' || $password === ''
             || $secretQuestionIdInput === '' || $secretAnswerInput === ''
         ) {
             $errorMessage = 'すべての項目を入力してください。';
-        } elseif ($userNameLen > 50) {
-            $errorMessage = '氏名は50文字以内で入力してください。';
-        } elseif ($zipCodeLen > 8 || !preg_match('/^\d{3}-?\d{4}$/', $zipCodeInput)) {
-            $errorMessage = '郵便番号は8桁以内の半角数字（例：1234567 または 123-4567）で入力してください。';
-        } elseif ($addressLen > 256) {
-            $errorMessage = '住所は256文字以内で入力してください。';
-        } elseif ($telLen > 15 || !preg_match('/^[0-9\-]{10,15}$/', $telInput)) {
-            $errorMessage = '電話番号は15桁以内の半角数字（ハイフン可）で入力してください。';
+        } elseif ($profileError !== null) {
+            // 氏名・郵便番号・住所・電話番号の桁数・形式（src/lib/validation.php）
+            $errorMessage = $profileError;
         } elseif (!ctype_digit($secretQuestionIdInput) || !isset($secretQuestions[(int)$secretQuestionIdInput])) {
             // 秘密の質問は定義済みの質問ID（1〜5）であること
             $errorMessage = '秘密の質問を選択してください。';

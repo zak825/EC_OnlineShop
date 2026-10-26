@@ -3,10 +3,14 @@
 }
 
 header {
+    position: sticky;   /* スクロールで上に貼り付く */
+    top: 0;
+    z-index: 100;       /* 商品カードより前面に */
     background: #fff;
     display: flex;
     justify-content: space-between;
     margin: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 nav {
@@ -51,6 +55,11 @@ nav a {
     border: 1px solid var(--color-border);
     margin: 0;
     align-self: center;
+}
+
+
+#login-btn{
+    margin: 0 5px 0 0;
 }
 
 .UserName {

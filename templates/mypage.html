@@ -4,8 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>e shop | マイページ</title>
+  <title>e-shop | マイページ</title>
   <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/auth.css">
   <link rel="stylesheet" href="assets/css/mypage.css">
   <link rel="icon" href="assets/icons/favicon.ico">
 
@@ -69,9 +70,13 @@
           </div>
         </div>
 
-        <!-- ===== アイコン変更ボタン（押すとモーダルが開く） ===== -->
+        <!-- ===== 設定ボタン（吹き出しポップアップ） ===== -->
         <div class="profile__right">
-          <button type="button" class="btn btn--secondary btn--small" id="openIconModal">アイコンを変更</button>
+          <button type="button" class="btn btn--secondary btn--small" id="settingsToggleBtn" aria-expanded="false" aria-haspopup="true">設定</button>
+          <div class="settings-balloon" id="settingsBalloon" hidden>
+            <button type="button" class="settings-balloon__item" id="openProfileModal">会員情報編集</button>
+            <button type="button" class="settings-balloon__item" id="openIconModal">アイコン変更</button>
+          </div>
         </div>
       </section>
 
@@ -111,6 +116,97 @@
 
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- ===== 会員情報変更モーダル ===== -->
+      <div class="modal-overlay" id="profileModal" aria-hidden="true">
+        <div class="auth-card modal-auth-card" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+          <div class="auth-header">
+            <h2 id="profileModalTitle" class="auth-title">会員情報編集</h2>
+          </div>
+
+          <!-- エラーメッセージ表示領域 -->
+          <p id="profileErrorMsg" class="error-msg" style="display: none;"></p>
+
+          <!-- 入力セクション -->
+          <div id="profileEditSection">
+            <form id="profileEditForm" novalidate>
+              <div class="form-group">
+                <label for="edit_user_name">氏名</label>
+                <input type="text" id="edit_user_name" name="user_name" maxlength="50"
+                  value="<?= h($userProfile['UserName'] ?? '') ?>" placeholder="例：山田 太郎">
+              </div>
+
+              <div class="form-group">
+                <label for="edit_zip_code">郵便番号</label>
+                <input type="text" id="edit_zip_code" name="zip_code" maxlength="8"
+                  value="<?= h($userProfile['ZipCode'] ?? '') ?>" placeholder="例：1234567（ハイフンなし）"
+                  inputmode="numeric" autocomplete="postal-code">
+              </div>
+
+              <div class="form-group">
+                <label for="edit_address">住所</label>
+                <input type="text" id="edit_address" name="address" maxlength="256"
+                  value="<?= h($userProfile['Address'] ?? '') ?>" placeholder="例：東京都千代田区1-1-1">
+              </div>
+
+              <div class="form-group">
+                <label for="edit_tel">電話番号</label>
+                <input type="tel" id="edit_tel" name="tel" maxlength="15"
+                  value="<?= h($userProfile['TEL'] ?? '') ?>" placeholder="例：09012345678">
+              </div>
+
+              <div class="btn-row">
+                <button type="button" id="profileToConfirmBtn" class="btn-main">変更</button>
+                <button type="button" id="closeProfileModal" class="btn-sub">キャンセル</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 確認セクション -->
+          <div id="profileConfirmSection" style="display: none;">
+            <p class="confirm-lead">以下の内容で変更します。よろしいですか？</p>
+
+            <div class="confirm-list">
+              <div class="confirm-item">
+                <span class="confirm-label">氏名</span>
+                <span class="confirm-value" id="confirm_user_name"></span>
+              </div>
+              <div class="confirm-item">
+                <span class="confirm-label">郵便番号</span>
+                <span class="confirm-value" id="confirm_zip_code"></span>
+              </div>
+              <div class="confirm-item">
+                <span class="confirm-label">住所</span>
+                <span class="confirm-value" id="confirm_address"></span>
+              </div>
+              <div class="confirm-item">
+                <span class="confirm-label">電話番号</span>
+                <span class="confirm-value" id="confirm_tel"></span>
+              </div>
+            </div>
+
+            <form id="profileConfirmForm">
+              <input type="hidden" name="csrf_token" id="profileCsrfToken" value="<?= h($token ?? csrf_token()) ?>">
+              <div class="btn-row">
+                <button type="button" id="profileSubmitBtn" class="btn-main">はい（変更する）</button>
+                <button type="button" id="profileBackToEditBtn" class="btn-sub">キャンセル</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 完了セクション -->
+          <div id="profileCompleteSection" class="complete-section" style="display: none;">
+            <div class="complete-box">
+              <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
+              <p class="complete-message">会員情報の変更が完了しました！</p>
+              <div class="btn-row">
+                <button type="button" id="profileFinishBtn" class="btn-main">閉じる</button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -344,6 +440,7 @@
     <?php require __DIR__ . '/../public/footer.php'; ?>
 
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/profile_validation.js"></script>
     <script src="assets/js/mypage.js"></script>
   </div>
 </body>

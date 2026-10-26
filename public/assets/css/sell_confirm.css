@@ -50,6 +50,9 @@ main h1::after {
 main>p {
   margin: 0 0 10px;
   color: #334155;
+  /* 空白の無い長い商品名（例：50文字の英数字）でもカードからはみ出さないよう、途中で折り返す */
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 
 /* 商品名＋金額の確認文は少し強調 */
