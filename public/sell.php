@@ -3,7 +3,7 @@
 // 販売画面
 //   GET  sell.php … 入力フォームを表示
 //   POST sell.php … 販売（action=sell）／クリア（action=clear）／戻る（action=back）
-//                   下書き保存して戻る（action=save_draft）
+//                   下書き保存して戻る（action=save_draft）／下書き保存しないで戻る（action=back_no_save）
 //                   下書きを使う（action=load_draft）／下書きを使わない（action=discard_draft）
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
@@ -79,11 +79,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 入力値と一時保存した画像を消す
 function clear_sell_input()
 {
-  unset($_SESSION['sell']);
+  unset($_SESSION['sell'], $_SESSION['sell_draft_loaded']);
   if (isset($_SESSION['sell_images'])) {
     delete_product_images_tmp($_SESSION['sell_images']);
     unset($_SESSION['sell_images']);
   }
+}
+
+// 下書き保存のモーダルで「保存しない」：下書きを使って入力していたなら、その下書きも削除する
+// （「使う」を選んだ下書きを保存し直さなかった＝もう要らない、と考える）
+if ($action === 'back_no_save') {
+  if (!empty($_SESSION['sell_draft_loaded'])) {
+    try {
+      delete_sell_draft($user_id);
+    } catch (PDOException $e) {
+      error_log($e->getMessage());
+    }
+  }
+  $action = 'back';   // あとは「戻る」と同じ
 }
 
 // 戻るボタン：入力値を消してメイン画面へ
@@ -206,6 +219,9 @@ try {
       if ($tmp !== null) {
         $_SESSION['sell_images'] = $tmp;
       }
+
+      // 下書きを使って入力中であることを覚えておく（「保存しない」で戻ったら下書きを削除するため）
+      $_SESSION['sell_draft_loaded'] = true;
     }
   }
 
