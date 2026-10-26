@@ -49,4 +49,3 @@ if ($headerLoggedIn) {
         <?php endif; ?>
     </nav>
 </header>
-<hr>
