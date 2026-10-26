@@ -32,10 +32,17 @@ $keyword = trim($_GET['q'] ?? '');
 $sql =
     'SELECT s.ProductID, s.ProductName, s.Price, s.Userid,
             g.GenreName,
-            u.UserName AS SellerName
+            u.UserName AS SellerName,
+            seller_rating.AvgScore AS SellerAvgScore
      FROM Sales s
      JOIN Genre    g ON s.GenreCode = g.GenreCode
      JOIN UserData u ON s.Userid    = u.Userid
+     LEFT JOIN (
+         SELECT Userid, AVG(CAST(sucre AS FLOAT)) AS AvgScore
+         FROM Sales
+         WHERE sucre IS NOT NULL
+         GROUP BY Userid
+     ) seller_rating ON seller_rating.Userid = s.Userid
      WHERE s.BuyerUserid IS NULL';
 
 $params = [];
