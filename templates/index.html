@@ -24,25 +24,30 @@
       </p>
       <?php endif; ?>
 
-      <!-- ジャンルで絞り込み（選ぶと自動で送信） -->
-      <form method="get" action="index.php" class="filter-bar">
-        <label for="genre" class="filter-bar__label">ジャンル</label>
-        <select name="genre" id="genre" class="filter-bar__select" onchange="this.form.submit()">
-          <option value="">すべて</option>
+      <!-- 検索＋ジャンル絞り込み（ジャンルは選ぶと自動送信） -->
+      <form method="get" action="index.php" class="search-bar">
+        <input type="text" name="q" value="<?= h($keyword) ?>" placeholder="商品名で検索" class="search-bar__input">
+        <select name="genre" class="search-bar__select" onchange="this.form.submit()">
+          <option value="">すべてのジャンル</option>
           <?php foreach ($genres as $g): ?>
-          <option value="<?= (int)$g['GenreCode'] ?>" <?=(string)$genreFilter===(string)$g['GenreCode'] ? 'selected'
-            : '' ?>>
+          <option value="<?= (int)$g['GenreCode'] ?>" <?= (string)$genreFilter === (string)$g['GenreCode'] ? 'selected' : '' ?>>
             <?= h($g['GenreName']) ?>
           </option>
           <?php endforeach; ?>
         </select>
-        <!-- JSが無い環境でも使えるよう、絞り込みボタンも置く -->
-        <noscript><button type="submit" class="filter-bar__btn">絞り込む</button></noscript>
+        <button type="submit" class="search-bar__btn">検索</button>
       </form>
+
+      <?php if ($keyword !== '' || $genreFilter !== null): ?>
+      <p class="search-result">
+        <?php if ($keyword !== ''): ?>「<?= h($keyword) ?>」<?php endif; ?>の検索結果：<?= count($products) ?>件
+        <a href="index.php" class="search-clear">条件をクリア</a>
+      </p>
+      <?php endif; ?>
 
       <?php if (!$products): ?>
       <p class="empty">
-        <?= $genreFilter !== null ? 'このジャンルの販売中の商品はありません。' : '販売中の商品はありません。' ?>
+        該当する販売中の商品はありません。
       </p>
       <?php else: ?>
       <!-- ===== 商品一覧 ===== -->
