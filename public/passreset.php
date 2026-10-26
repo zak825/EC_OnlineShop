@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (
                     $user
                     && (int)$user['SecretQuestionId'] === (int)$secretQuestionIdInput
-                    && hash_equals(trim((string)$user['SecretAnswer']), $secretAnswerInput)
+                    && password_verify($secretAnswerInput, (string)$user['SecretAnswer'])
                 ) {
                     // 8. 照合済みセッションの保存（セッション固定攻撃対策としてIDを再生成）
                     session_regenerate_id(true);

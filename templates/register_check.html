@@ -70,7 +70,8 @@
                             <div class="confirm-item">
                                 <span class="confirm-label">回答</span>
                                 <span class="confirm-value">
-                                    <?= h($user['SecretAnswer'] ?? $user['secret_answer'] ?? '') ?>
+                                    <?php /* 回答はハッシュ化済みのため、内容は表示しない */ ?>
+                                    （非表示）
                                 </span>
                             </div>
                         </div>
