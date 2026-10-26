@@ -158,6 +158,11 @@ div.product__image {
   color: #64748b;
 }
 
+.product__seller-rating {
+  color: #d59b00;
+  white-space: nowrap;
+}
+
 .product__genre {
   display: inline-block;
   margin-right: 6px;
