@@ -147,8 +147,8 @@ input[type="file"] {
   display: flex;
   flex-direction: row-reverse;
   /* 後から入った画像を左に置く */
-  justify-content: flex-end;
-  /* row-reverse では flex-end が「左詰め」 */
+  /* 左に寄せるのは下の :first-child の margin-right: auto で行う
+     （justify-content: flex-end で寄せると、はみ出した画像がスクロールで見られなくなる） */
   flex-wrap: nowrap;
   /* 折り返さず1列 */
   gap: 8px;
@@ -158,6 +158,12 @@ input[type="file"] {
   padding-bottom: 8px;
   /* スクロールバーのぶんの余白 */
   scrollbar-width: thin;
+}
+
+/* row-reverse でいちばん右に来る画像（DOM の最初）の右側を空けて、全体を左に寄せる
+   はみ出したときは auto の余白が 0 になり、左側にはみ出した画像はスクロールで見られる */
+.image-list>:first-child {
+  margin-right: auto;
 }
 
 .image-list__item {
@@ -182,6 +188,50 @@ input[type="file"] {
     transform: translateX(0);
     opacity: 1;
   }
+}
+
+/* 画像プレビューの左右の矢印（はみ出していないとき・端まで来たときは sell.js が hidden にする）
+   フォーム内のボタン（#sell_form button）の指定より強くするため、#sell_form を付ける */
+.image-slider {
+  position: relative;
+}
+
+#sell_form .image-slider__arrow {
+  flex: none;
+  letter-spacing: 0;
+  position: absolute;
+  top: 58px;
+  /* 画像（高さ100px）の真ん中あたり。image-list の上の余白 8px も足す */
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 22px;
+  line-height: 1;
+  color: #8c52ff;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #8c52ff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+  cursor: pointer;
+}
+
+#sell_form .image-slider__arrow:hover {
+  color: #fff;
+  background: #8c52ff;
+}
+
+#sell_form .image-slider__arrow[hidden] {
+  display: none;
+}
+
+#sell_form .image-slider__arrow--prev {
+  left: -12px;
+}
+
+#sell_form .image-slider__arrow--next {
+  right: -12px;
 }
 
 /* ボタン行 */
@@ -232,4 +282,164 @@ input[type="file"] {
   #price {
     width: 140px;
   }
+}
+/* ============================================================
+   下書きのモーダル（「下書き保存しますか？」「下書きがあります」）
+   ============================================================ */
+.draft-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.draft-modal[hidden] {
+  display: none;
+}
+
+.draft-modal__card {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px 28px 24px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  box-shadow: 0 20px 40px -8px rgba(15, 23, 42, 0.25);
+}
+
+.draft-modal__title {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.draft-modal__text {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #475569;
+}
+
+/* 下書きの内容 */
+.draft-modal__summary {
+  display: grid;
+  grid-template-columns: 5em 1fr;
+  gap: 6px 12px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background: #f8fafc;
+  border-left: 3px solid #8c52ff;
+}
+
+.draft-modal__summary dt {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.draft-modal__summary dd {
+  margin: 0;
+  color: #0f172a;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.draft-modal__actions {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+}
+
+.draft-modal__btn {
+  flex: 1;
+  height: 42px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #475569;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.draft-modal__btn:hover {
+  color: #8c52ff;
+  border-color: #8c52ff;
+}
+
+.draft-modal__btn--primary {
+  color: #fff;
+  background: #8c52ff;
+  border-color: #8c52ff;
+}
+
+.draft-modal__btn--primary:hover {
+  color: #fff;
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
+
+/* ===== 画像プレビュー：枠・×ボタン・ドラッグ ===== */
+.image-list__cell {
+  position: relative;
+  flex: none;
+  width: 100px;
+  height: 100px;
+  animation: imageSlideIn 0.25s ease;
+  cursor: grab;
+}
+
+/* 枠と中の img の二重アニメーションを防ぐ */
+.image-list__cell .image-list__item {
+  animation: none;
+  display: block;
+}
+
+/* #sell_form button の指定に勝つため #sell_form を付ける */
+#sell_form .image-list__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  flex: none;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.7);
+  border:1px solid #fff;
+  border-radius: 50%;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#sell_form .image-list__remove:hover {
+  color: #fff;
+  background: #ef4444;
+}
+
+#sell_form .image-list__remove:focus-visible {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #8c52ff;
+}
+
+/* ドラッグ中・ドロップ先の見た目 */
+.image-list__cell.is-dragging {
+  opacity: 0.4;
+}
+
+.image-list__cell.is-dragover {
+  outline: 2px solid #8c52ff;
+  outline-offset: -2px;
 }

@@ -6,7 +6,6 @@
 body {
   margin: 0;
   color: #0f172a;
-  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   line-height: 1.6;
 }
 
@@ -159,6 +158,11 @@ div.product__image {
   color: #64748b;
 }
 
+.product__seller-rating {
+  color: #d59b00;
+  white-space: nowrap;
+}
+
 .product__genre {
   display: inline-block;
   margin-right: 6px;
@@ -220,8 +224,118 @@ div.product__image {
   }
 
   .product__buy,
-  .product__own {
-    align-self: stretch;
-    text-align: center;
+  .product__own { align-self: stretch; text-align: center; }
+}
+
+/* ---------- 検索＋ジャンル絞り込みバー（一体型） ---------- */
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin: 0 0 20px;
+  padding: 6px 6px 6px 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* フォーカス中は全体が紫に光る */
+.search-bar:focus-within {
+  border-color: #8c52ff;
+  box-shadow: 0 0 0 3px rgba(140, 82, 255, 0.15);
+}
+
+/* 虫めがねアイコン */
+.search-bar::before {
+  content: '';
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* 入力欄：枠なしで一体化 */
+.search-bar__input {
+  flex: 1;
+  min-width: 120px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.search-bar__input::placeholder {
+  color: #94a3b8;
+}
+
+/* ジャンル：左に細い仕切り線、枠なし */
+.search-bar__select {
+  height: 28px;
+  border: none;
+  border-left: 1px solid #e2e8f0;
+  background-color: transparent;
+  outline: none;
+  color: #475569;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 30px 0 14px;
+  margin-left: 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.41 0L6 4.58L10.59 0L12 1.41l-6 6l-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* 検索ボタン：丸みのある紫ボタン */
+.search-bar__btn {
+  flex: none;
+  height: 40px;
+  padding: 0 22px;
+  margin-left: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #8c52ff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.search-bar__btn:hover {
+  background: #4f23a0;
+}
+
+/* 検索結果の件数・クリア */
+.search-result {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 16px;
+}
+
+.search-clear {
+  margin-left: 10px;
+  color: #8c52ff;
+  text-decoration: none;
+}
+
+.search-clear:hover {
+  text-decoration: underline;
+}
+
+/* スマホ：縦積みにする */
+@media (max-width: 520px) {
+  .search-bar {
+    flex-wrap: wrap;
+    border-radius: 10px;
   }
+  .search-bar__input { min-width: 100%; order: 1; }
+  .search-bar__select { border-left: none; margin-left: 0; order: 2; flex: 1; }
+  .search-bar__btn { order: 3; }
 }

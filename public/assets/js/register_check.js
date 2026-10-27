@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = new FormData();
                 formData.append('csrf_token', token);
-                formData.append('ajax', '1');
 
                 const response = await fetch('register_check.php', {
                     method: 'POST',

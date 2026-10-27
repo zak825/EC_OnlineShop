@@ -10,6 +10,9 @@ var price       = document.getElementById('price');
 var priceMin = Number(price.dataset.priceMin);
 var priceMax = Number(price.dataset.priceMax);
 
+// 商品名の最大文字数（sell.php が DB から取得した値）
+var nameMax = Number(productName.dataset.nameMax);
+
 // 前後の空白（全角スペースを含む）を取り除く
 function trimAll(value) {
   return value.replace(/^[\s　]+|[\s　]+$/g, '');
@@ -22,8 +25,8 @@ function checkProductName() {
     return '商品名を入力してください';
   }
   // 絵文字なども1文字として数える（PHP の mb_strlen と同じ）
-  if (Array.from(value).length > 50) {
-    return '商品名は50文字以内で入力してください';
+  if (Array.from(value).length > nameMax) {
+    return '商品名は' + nameMax + '文字以内で入力してください';
   }
   return '';
 }
@@ -145,7 +148,23 @@ function renderImagePreview() {
     img.className = 'image-list__item';
     img.width     = 100;
     img.height    = 100;
-    imagePreview.appendChild(img);
+    img.draggable = false;   // 画像ではなく枠ごとドラッグさせる
+
+    // ×ボタンと、ドラッグ用の枠で包む（i は picked.files の何番目か）
+    var cell = document.createElement('div');
+    cell.className     = 'image-list__cell';
+    cell.dataset.index = i;
+    cell.draggable     = true;
+
+    var remove = document.createElement('button');
+    remove.type      = 'button';
+    remove.className = 'image-list__remove';
+    remove.setAttribute('aria-label', 'この画像を削除');
+    remove.innerHTML = '&times;';
+
+    cell.appendChild(img);
+    cell.appendChild(remove);
+    imagePreview.appendChild(cell);
   }
   imagePreviewLabel.hidden = imagePreview.children.length === 0;
 }
@@ -160,6 +179,113 @@ function isAlreadyPicked(file) {
   }
   return false;
 }
+
+// ×ボタン：選んだ画像を1枚だけ外す（サーバーに保存済みの画像には×を付けないので影響しない）
+imagePreview.addEventListener('click', function(event) {
+  var button = event.target.closest('.image-list__remove');
+  if (!button) {
+    return;
+  }
+  var index = Number(button.parentNode.dataset.index);
+
+  picked.items.remove(index);     // ためている画像から1枚外す
+  images.files = picked.files;    // 送信される内容も合わせる
+
+  validateImages();               // 「10枚まで」などのエラー表示を更新
+  renderImagePreview();           // 0枚になったら保存済み画像の表示に戻る
+});
+
+// ------------------------------------------------------------
+// ドラッグ&ドロップで画像の順番を入れ替える（選んだ画像だけ。保存済みの画像は対象外）
+//   ドラッグした画像を、ドロップした画像の位置に移す
+//   画像のない空きスペースで離したときは、カーソルの位置に合わせて入れる
+//   （空きスペースは1枚目の右側なので、そこで離すと1枚目になる）
+// ------------------------------------------------------------
+var dragIndex = null;   // ドラッグ中の画像が picked の何番目か
+
+function clearDragClasses() {
+  imagePreview.querySelectorAll('.is-dragging, .is-dragover').forEach(function(el) {
+    el.classList.remove('is-dragging', 'is-dragover');
+  });
+}
+
+// picked の from 番目を to 番目の位置に移す
+function movePicked(from, to) {
+  var list  = Array.from(picked.files);
+  var moved = list.splice(from, 1)[0];
+  list.splice(to, 0, moved);
+
+  picked = new DataTransfer();
+  list.forEach(function(file) {
+    picked.items.add(file);
+  });
+  images.files = picked.files;   // 送信される順番も合わせる
+  renderImagePreview();
+}
+
+// 空きスペースで離したとき、入れる位置を決める（カーソルより右にある、ほかの画像の数）
+function indexFromX(x, from) {
+  var count = 0;
+  Array.from(imagePreview.children).forEach(function(c, i) {
+    if (i === from) {
+      return;
+    }
+    var r = c.getBoundingClientRect();
+    if (r.left + r.width / 2 > x) {
+      count++;
+    }
+  });
+  return count;
+}
+
+imagePreview.addEventListener('dragstart', function(event) {
+  var cell = event.target.closest('.image-list__cell');
+  if (!cell) {
+    return;
+  }
+  dragIndex = Number(cell.dataset.index);
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', String(dragIndex));   // Firefox は何か入れないとドラッグが始まらない
+  cell.classList.add('is-dragging');
+});
+
+imagePreview.addEventListener('dragover', function(event) {
+  if (dragIndex === null) {
+    return;
+  }
+  event.preventDefault();   // これがないとドロップできない
+  event.dataTransfer.dropEffect = 'move';
+  imagePreview.querySelectorAll('.is-dragover').forEach(function(el) {
+    el.classList.remove('is-dragover');
+  });
+  var cell = event.target.closest('.image-list__cell');
+  if (cell) {
+    cell.classList.add('is-dragover');
+  }
+});
+
+imagePreview.addEventListener('drop', function(event) {
+  if (dragIndex === null) {
+    return;
+  }
+  event.preventDefault();
+  var from = dragIndex;
+  dragIndex = null;
+
+  var cell = event.target.closest('.image-list__cell');
+  var to   = cell ? Number(cell.dataset.index) : indexFromX(event.clientX, from);
+
+  if (from !== to) {
+    movePicked(from, to);
+  } else {
+    clearDragClasses();
+  }
+});
+
+imagePreview.addEventListener('dragend', function() {
+  dragIndex = null;
+  clearDragClasses();
+});
 
 images.addEventListener('change', function() {
   // 今回ダイアログで選ばれた分を、ためているリストに足していく
@@ -191,7 +317,7 @@ images.addEventListener('change', function() {
 
 // サーバー側のエラーで画面が戻ってきたときは、その入力欄を最初から赤くする
 [productName, genreCode, price].forEach(function(input) {
-  if (document.getElementById('error_' + input.id).textContent !== '') {
+  if (document.getElementById('error_' + input.id).textContent.trim() !== '') {   // 空白だけなら「エラーなし」
     input.classList.add('is-invalid');
   }
 });
@@ -204,8 +330,60 @@ genreCode.addEventListener('blur', validateGenreCode);
 price.addEventListener('input', validatePrice);
 price.addEventListener('blur', validatePrice);
 
-// 販売ボタン：エラーがあれば送信しない（クリア・戻るはそのまま送信する）
+// ------------------------------------------------------------
+// 下書き保存のモーダル
+//   「戻る」を押したとき、入力がすべて正しければ「下書き保存しますか？」を出す
+//   保存する → action=save_draft で送信／保存しない → action=back_no_save で送信／キャンセル → 閉じて入力に戻る
+// ------------------------------------------------------------
+var draftSaveModal = document.getElementById('draft_save_modal');
+
+// 入力がすべて正しいか（エラーメッセージは出さずに調べる）
+function isAllValid() {
+  return checkProductName() === '' && checkGenreCode() === '' && checkPrice() === '' && checkImages() === '';
+}
+
+// action を hidden で付けてフォームを送信する（form.submit() は押したボタンの値を送らないため）
+function submitWithAction(action) {
+  var hidden = document.createElement('input');
+  hidden.type  = 'hidden';
+  hidden.name  = 'action';
+  hidden.value = action;
+  form.appendChild(hidden);
+  form.submit();
+}
+
+function closeDraftSaveModal() {
+  draftSaveModal.hidden = true;
+}
+
+document.getElementById('draft_save_yes').addEventListener('click', function() {
+  this.disabled = true;   // 二重送信防止
+  submitWithAction('save_draft');
+});
+document.getElementById('draft_save_no').addEventListener('click', function() {
+  // 「戻る」と区別して送る（下書きを使って入力していたなら、サーバー側で下書きを削除する）
+  submitWithAction('back_no_save');
+});
+document.getElementById('draft_save_cancel').addEventListener('click', closeDraftSaveModal);
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && !draftSaveModal.hidden) {
+    closeDraftSaveModal();
+  }
+});
+
+// 販売ボタン：エラーがあれば送信しない
+// 戻るボタン：入力がすべて正しければ、下書き保存のモーダルを出す（正しくなければそのまま戻る）
+// クリアボタン：そのまま送信する
 form.addEventListener('submit', function(event) {
+  if (event.submitter && event.submitter.value === 'back') {
+    if (isAllValid()) {
+      event.preventDefault();
+      draftSaveModal.hidden = false;
+      document.getElementById('draft_save_yes').focus();
+    }
+    return;
+  }
+
   if (!event.submitter || event.submitter.value !== 'sell') {
     return;
   }
@@ -220,3 +398,60 @@ form.addEventListener('submit', function(event) {
     event.preventDefault();
   }
 });
+// ------------------------------------------------------------
+// 画像プレビューの左右の矢印
+//   押すとその方向に横スクロールする。はみ出していないとき・端まで来たときは、その矢印を隠す
+//   （並びが row-reverse なので、scrollLeft ではなく画像の位置で端かどうかを判断する）
+// ------------------------------------------------------------
+var imagePrev = document.getElementById('image_prev');
+var imageNext = document.getElementById('image_next');
+
+function updateImageArrows() {
+  var items = imagePreview.children;
+  if (items.length === 0) {
+    imagePrev.hidden = true;
+    imageNext.hidden = true;
+    return;
+  }
+
+  // いちばん左の画像の左端・いちばん右の画像の右端を探す
+  var box   = imagePreview.getBoundingClientRect();
+  var left  = Infinity;
+  var right = -Infinity;
+  for (var i = 0; i < items.length; i++) {
+    var r = items[i].getBoundingClientRect();
+    left  = Math.min(left, r.left);
+    right = Math.max(right, r.right);
+  }
+
+  imagePrev.hidden = left >= box.left - 1;     // 左に隠れている画像が無い
+  imageNext.hidden = right <= box.right + 1;   // 右に隠れている画像が無い
+}
+
+// 1回押すと、見えている幅の8割ぶん動かす
+function scrollImages(direction) {
+  imagePreview.scrollBy({ left: direction * imagePreview.clientWidth * 0.8, behavior: 'smooth' });
+}
+
+imagePrev.addEventListener('click', function() { scrollImages(-1); });
+imageNext.addEventListener('click', function() { scrollImages(1); });
+imagePreview.addEventListener('scroll', updateImageArrows);
+window.addEventListener('resize', updateImageArrows);
+
+// いちばん左（新しく選んだ画像）が見える位置に戻す
+// row-reverse ではスクロールの基準が右端なので、左端は scrollLeft がマイナス側になる（大きく引けば左端で止まる）
+function showNewestImages() {
+  imagePreview.scrollLeft = -imagePreview.scrollWidth;
+  updateImageArrows();
+}
+
+// プレビューの画像が入れ替わったら左端に戻して矢印を出し直す（登場の動き 0.25 秒が終わったあとにも、もう一度）
+new MutationObserver(function() {
+  showNewestImages();
+  setTimeout(updateImageArrows, 300);
+}).observe(imagePreview, { childList: true });
+
+showNewestImages();
+
+
+

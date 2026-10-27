@@ -36,6 +36,8 @@ GO
 -- ------------------------------------------------------------
 -- 既存テーブルの削除（外部キーで参照している側から消す）
 -- ------------------------------------------------------------
+DROP TABLE IF EXISTS UserSession;
+DROP TABLE IF EXISTS SalesDraft;
 DROP TABLE IF EXISTS Common;
 DROP TABLE IF EXISTS Sales;
 DROP TABLE IF EXISTS SystemConfiguration;
@@ -60,7 +62,7 @@ CREATE TABLE UserData (
     LoginPassword VARCHAR(255)  NOT NULL,
     IconPath      NVARCHAR(256),           -- プロフィールアイコンの画像パス（NULL = 未設定）
     SecretQuestionId INT           NOT NULL CONSTRAINT DF_UserData_SecretQuestionId DEFAULT (1),          -- 秘密の質問ID（1〜5）
-    SecretAnswer     NVARCHAR(100) NOT NULL CONSTRAINT DF_UserData_SecretAnswer     DEFAULT (N'初期回答') -- 秘密の質問の回答
+    SecretAnswer     VARCHAR(255)  NOT NULL CONSTRAINT DF_UserData_SecretAnswer     DEFAULT ('$2y$10$wCYGp7jFrtgpfosV6EY.Re8PAVgU8mVKpnIQ4W8GyudYVu3ds8gh6') -- 秘密の質問の回答（password_hash のハッシュ値）
 );
 
 -- 商品ジャンル
@@ -73,7 +75,7 @@ CREATE TABLE Genre (
 CREATE TABLE Sales (
     ProductID    INT           NOT NULL PRIMARY KEY,
     GenreCode    INT           NOT NULL REFERENCES Genre(GenreCode),
-    ProductName  VARCHAR(50)   NOT NULL,
+    ProductName  NVARCHAR(50)  NOT NULL,                      -- NVARCHAR … 日本語でも50文字入る（VARCHAR だと50バイト＝日本語25文字まで）
     Price        INT           NOT NULL,
     Userid       INT           NOT NULL REFERENCES UserData(Userid),
     BuyerUserid  INT           REFERENCES UserData(Userid),  -- 購入者のユーザーID（NULL = 販売中）
@@ -82,6 +84,23 @@ CREATE TABLE Sales (
     SoldDate     DATETIME,
     sucre        INT,
     revwe        NVARCHAR(100)
+);
+
+-- 出品の下書き（1人1件。画像は public/uploads/products/draft_{Userid}/ に保存する）
+CREATE TABLE SalesDraft (
+    Userid         INT           NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    GenreCode      INT           NOT NULL,
+    ProductName    NVARCHAR(50)  NOT NULL,
+    Price          INT           NOT NULL,
+    UpdateDateTime DATETIME      NOT NULL
+);
+
+-- ログイン中セッション（同時ログイン禁止用。1ユーザー1行。行があり最終操作がタイムアウト内なら「ログイン中」）
+CREATE TABLE UserSession (
+    Userid           INT       NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    SessionToken     CHAR(64)  NOT NULL,   -- ログイン成功時に発行するランダム値（このセッションの持ち主の証明）
+    LoginDateTime    DATETIME  NOT NULL,
+    LastActivityTime DATETIME  NOT NULL    -- 最終操作時刻（有効なセッションかの判定用）
 );
 
 -- システム設定
@@ -110,9 +129,9 @@ GO
 -- ユーザー（Userid は IDENTITY なので、番号を指定するときだけ ON にする）
 SET IDENTITY_INSERT UserData ON;
 INSERT INTO UserData (Userid, UserName, ZipCode, Address, TEL, LoginPassword, SecretQuestionId, SecretAnswer) VALUES
-    (1, N'出品 太郎', '1000001', N'東京都千代田区千代田1-1',  '0312345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 1, N'千代田小学校'),
-    (2, N'購入 花子', '5300001', N'大阪府大阪市北区梅田1-1',  '0612345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 2, N'ポチ'),
-    (3, N'閲覧 次郎', '4600001', N'愛知県名古屋市中区三の丸1-1', '0521234567', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 4, N'カレー');
+    (1, N'出品 太郎', '1000001', N'東京都千代田区千代田1-1',  '0312345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 1, '$2y$10$oDHIqXypG55YwMZCMbuCEedxsj0wyRsqlsVcMxRWpHzoNA5OAeuWm'),  -- 回答: 千代田小学校
+    (2, N'購入 花子', '5300001', N'大阪府大阪市北区梅田1-1',  '0612345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 2, '$2y$10$.IcB6WLODnzHxy1zBN0Yh.n3eqKd8ZcpEbFnoNJlFjNnr6qqsZbW.'),  -- 回答: ポチ
+    (3, N'閲覧 次郎', '4600001', N'愛知県名古屋市中区三の丸1-1', '0521234567', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 4, '$2y$10$bVgjw0C3TpWOE7PWOpFgguxRxVLBHfivgxyQoYIsymTesZ4oL3PJO');  -- 回答: カレー
 SET IDENTITY_INSERT UserData OFF;
 
 -- ジャンル
@@ -148,8 +167,11 @@ INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, BuyerUserid
 
 -- システム設定
 INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment) VALUES
-    (1, 'Password', 'PasswordMinLength', '8',  'int', N'パスワードの最小文字数'),
-    (2, 'Session',  'SessionTimeout',    '30', 'int', N'セッションの有効時間（分）');
+    (1, 'Password', 'PasswordMinLength',    '8',       'int', N'パスワードの最小文字数'),
+    (2, 'Session',  'SessionTimeout',       '30',      'int', N'セッションの有効時間（分）'),
+    (3, 'Sales',    'PriceMin',             '300',     'int', N'出品価格の下限（円）'),
+    (4, 'Sales',    'PriceMax',             '9999999', 'int', N'出品価格の上限（円）'),
+    (5, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）');
 GO
 
 -- ------------------------------------------------------------
@@ -158,5 +180,6 @@ GO
 SELECT 'UserData' AS TableName, COUNT(*) AS RecordCount FROM UserData
 UNION ALL SELECT 'Genre',               COUNT(*) FROM Genre
 UNION ALL SELECT 'Sales',               COUNT(*) FROM Sales
-UNION ALL SELECT 'SystemConfiguration', COUNT(*) FROM SystemConfiguration;
+UNION ALL SELECT 'SystemConfiguration', COUNT(*) FROM SystemConfiguration
+UNION ALL SELECT 'SalesDraft',          COUNT(*) FROM SalesDraft;
 GO

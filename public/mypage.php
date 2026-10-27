@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // ============================================================
 // マイページ画面
 //   GET mypage.php            … 購入した商品の一覧
@@ -52,7 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('mypage.php');
     }
 
-    if (($_POST['action'] ?? '') === 'upload_icon') {
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'upload_icon') {
         if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
             set_flash('不正な操作です。もう一度やり直してください。', 'error');
             redirect('mypage.php');
@@ -65,8 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 入力チェック
         if ($file === null || $file['error'] === UPLOAD_ERR_NO_FILE) {
             $error = '画像を選択してください。';
-        } elseif (in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
-                  || $file['size'] > ICON_MAX_BYTES) {
+        } elseif (
+            in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+            || $file['size'] > ICON_MAX_BYTES
+        ) {
             $error = '画像のサイズは2MBまでです。';
         } elseif ($file['error'] !== UPLOAD_ERR_OK) {
             $error = '画像のアップロードに失敗しました。';
@@ -112,15 +116,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         set_flash('', 'success');
         redirect('mypage.php');
+    } elseif ($action === 'update_profile') {
+        // ---- 会員情報の変更 -------------------------------------------
+        // mypage.js の fetch（X-Requested-With: XMLHttpRequest）のときは JSON で返す。
+        // それ以外はフラッシュメッセージを出してマイページへ戻る。
+        $isAjax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest';
+
+        /**
+         * JSON を返して終了する。
+         * CSRF トークンは検証のたびに破棄されるので、次の送信用の新しいトークンを必ず一緒に返す。
+         */
+        $respondJson = static function (array $payload): void {
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode($payload + ['csrf_token' => csrf_token()]);
+            exit;
+        };
+
+        $errorMessage = '';
+        $updated      = false;
+
+        if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
+            $errorMessage = '不正なリクエストです（CSRFトークンエラー）。画面を開き直して再度お試しください。';
+        } else {
+            // 入力された文字列の取得・前後の空白除去・郵便番号のハイフン除去（src/lib/validation.php、register.php と共通）
+            $profileInput  = sanitize_profile_input($_POST);
+            $userNameInput = $profileInput['user_name'];
+            $zipCodeInput  = $profileInput['zip_code'];
+            $addressInput  = $profileInput['address'];
+            $telInput      = $profileInput['tel'];
+
+            // 1. 未入力・桁数・形式チェックを行う（register.php と共通）
+            $errorMessage = validate_profile_fields($userNameInput, $zipCodeInput, $addressInput, $telInput) ?? '';
+
+            if ($errorMessage === '') {
+                try {
+                    // 2. register_check.php と概ね同一のDB更新処理
+                    $pdo = db();
+                    $pdo->beginTransaction();
+
+                    // ユーザー情報をUserDataで更新（対象カラムはIDで指定）
+                    $sql = "UPDATE dbo.UserData
+                            SET UserName = :user_name,
+                                ZipCode  = :zip_code,
+                                Address  = :address,
+                                TEL      = :tel
+                            WHERE UserId = :user_id";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ':user_name' => $userNameInput,
+                        ':zip_code'  => $zipCodeInput,
+                        ':address'   => $addressInput,
+                        ':tel'       => $telInput,
+                        ':user_id'   => (int)$userId,
+                    ]);
+
+                    // 更新対象が1件でなければ（ユーザーが存在しない等）失敗として取り消す
+                    if ($stmt->rowCount() !== 1) {
+                        throw new RuntimeException('Target user not found. UserId=' . (int)$userId);
+                    }
+
+                    // 共通項目（Commonテーブル）に更新ログを記録
+                    $commonSql = "UPDATE dbo.Common
+                                  SET UpdateUserId = :update_user_id,
+                                      UpdateDateTime = GETDATE()
+                                  WHERE InsertUserId = :insert_user_id";
+                    $commonStmt = $pdo->prepare($commonSql);
+                    $commonStmt->execute([
+                        ':update_user_id' => (int)$userId,
+                        ':insert_user_id' => (int)$userId,
+                    ]);
+
+                    // 更新ログの行が無いときは、会員情報の更新自体は止めずに記録だけ残す
+                    if ($commonStmt->rowCount() < 1) {
+                        error_log('Common row not found for profile update. UserId=' . (int)$userId);
+                    }
+
+                    $pdo->commit();
+                    $updated = true;
+                } catch (Throwable $e) {
+                    if (isset($pdo) && $pdo->inTransaction()) {
+                        $pdo->rollBack();
+                    }
+                    $errorMessage = '会員情報の更新に失敗しました。';
+                    error_log('User profile update error: ' . $e->getMessage());
+                }
+            }
+        }
+
+        // 3. 結果を返す（コミット後の処理は try の外に出して、更新済みなのに失敗と返さないようにする）
+        if ($updated) {
+            // セッションのユーザー名も更新
+            $_SESSION['user_name'] = $userNameInput;
+
+            if ($isAjax) {
+                $respondJson([
+                    'success' => true,
+                    'message' => '会員情報を変更しました。',
+                ]);
+            }
+            set_flash('会員情報を変更しました。', 'success');
+            redirect('mypage.php');
+        }
+
+        if ($isAjax) {
+            $respondJson(['success' => false, 'message' => $errorMessage]);
+        }
+        set_flash($errorMessage, 'error');
+        redirect('mypage.php');
     }
 }
 
-// ---- プロフィール（名前・アイコン）を取得 ------------------------
-$stmt = db()->prepare('SELECT UserName, IconPath FROM UserData WHERE Userid = :userId');
+// ---- プロフィール（名前・住所・連絡先・アイコン）を取得 ------------------------
+$stmt = db()->prepare('SELECT UserName, ZipCode, Address, TEL, IconPath FROM UserData WHERE Userid = :userId');
 $stmt->execute([':userId' => $userId]);
 $profile  = $stmt->fetch() ?: [];
 $userName = $profile['UserName'] ?? '';
 $iconPath = $profile['IconPath'] ?? null;   // 未設定（NULL）のときは名前の頭文字を表示する
+$userProfile = [
+    'UserName' => $userName,
+    // 編集フォームに入れる値。過去にハイフンありで登録された郵便番号も、ハイフンなしにして表示する
+    'ZipCode'  => normalize_zip_code(trim_input($profile['ZipCode'] ?? '')),
+    'Address'  => (string)($profile['Address'] ?? ''),
+    'TEL'      => (string)($profile['TEL'] ?? ''),
+];
 
 // ---- 評価の平均（自分が出品して、購入者からレビューされた商品） ------
 $stmt = db()->prepare(
@@ -137,9 +255,11 @@ $avgScore    = $reviewCount > 0 ? round((float)$rating['AvgScore'], 1) : null;  
 $stmt = db()->prepare(
     'SELECT s.ProductID, s.ProductName, s.Price, s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
+            g.GenreName,
             seller.UserName AS SellerName
      FROM Sales s
-     JOIN UserData seller ON s.Userid = seller.Userid
+     LEFT JOIN Genre    g      ON s.GenreCode = g.GenreCode
+     JOIN UserData seller ON s.Userid    = seller.Userid
      WHERE s.BuyerUserid = :buyer
      ORDER BY s.SoldDate DESC'
 );
@@ -158,31 +278,77 @@ unset($item);
 $stmt = db()->prepare(
     'SELECT s.ProductID, s.ProductName, s.Price, s.BuyerUserid, s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
+            g.GenreName,
             buyer.UserName AS BuyerUserName, buyer.ZipCode, buyer.Address, buyer.TEL
      FROM Sales s
+     LEFT JOIN Genre    g     ON s.GenreCode   = g.GenreCode
      LEFT JOIN UserData buyer ON s.BuyerUserid = buyer.Userid
      WHERE s.Userid = :seller
-     ORDER BY CASE WHEN s.BuyerUserid IS NULL THEN 1 ELSE 0 END, s.SoldDate DESC, s.ProductID DESC'
+     ORDER BY s.ProductID DESC'   // 新しく出品したものが上（ProductID は出品するたびに 1 ずつ増える）
 );
 $stmt->execute([':seller' => $userId]);
-$sold = $stmt->fetchAll();
+$soldAll = $stmt->fetchAll();
 
-foreach ($sold as &$item) {
+// 出品した商品のステータス（プルダウンの絞り込みに使う）
+const SOLD_STATUSES = [
+    'selling'   => '販売中',
+    'unshipped' => '未発送',
+    'shipped'   => '発送済み',
+    'done'      => '取引完了',
+];
+
+/** 出品した商品のステータスを返す（SOLD_STATUSES のキー） */
+function sold_status(array $item): string
+{
+    if ($item['BuyerUserid'] === null) {
+        return 'selling';     // まだ売れていない
+    }
+    if ($item['sucre'] !== null) {
+        return 'done';        // 購入者がレビューした
+    }
+    if ((int)$item['ShippingFlag'] === 1) {
+        return 'shipped';     // 発送したが、まだレビューされていない
+    }
+    return 'unshipped';       // 売れたが、まだ発送していない
+}
+
+// プルダウンで選ばれたステータス（'' = すべて）
+$soldFilter = $_GET['status'] ?? '';
+if (!isset(SOLD_STATUSES[$soldFilter])) {
+    $soldFilter = '';
+}
+
+// ステータスごとの件数（プルダウンに出す）
+$soldCounts = array_fill_keys(array_keys(SOLD_STATUSES), 0);
+
+$sold = [];
+foreach ($soldAll as $item) {
+    $item['status'] = sold_status($item);
+    $soldCounts[$item['status']]++;
+
+    if ($soldFilter !== '' && $item['status'] !== $soldFilter) {
+        continue;
+    }
     $urls = product_image_urls((int)$item['ProductID']);
     $item['image_url'] = $urls[0] ?? null;
+    $sold[] = $item;
 }
-unset($item);
 
 // ---- 4. 情報表示 -------------------------------------------------
 view('mypage', [
     'flash'       => get_flash(),      // メッセージ（アイコンを変更しました 等）
     'loggedIn'    => true,             // ログイン済み
     'userName'    => $userName,        // ユーザー名
+    'userProfile' => $userProfile,     // 会員情報（名前・郵便番号・住所・電話番号）
     'iconPath'    => $iconPath,        // アイコン画像のパス（NULL = 未設定）
     'avgScore'    => $avgScore,        // 評価の平均（NULL = 評価なし）
     'reviewCount' => $reviewCount,     // 評価の件数
     'tab'         => $tab,             // 表示中のタブ（bought / sold）
     'bought'      => $bought,          // 購入した商品
-    'sold'        => $sold,            // 出品した商品
+    'sold'        => $sold,            // 出品した商品（プルダウンで絞り込んだあと）
+    'soldTotal'   => count($soldAll),  // 出品した商品の件数（絞り込む前）
+    'soldFilter'  => $soldFilter,      // 選ばれたステータス（'' = すべて）
+    'soldCounts'  => $soldCounts,      // ステータスごとの件数
+    'soldStatuses' => SOLD_STATUSES,   // ステータスの一覧（キー => 表示名）
     'token'       => csrf_token(),     // 発送ボタン・アイコン変更用
 ]);

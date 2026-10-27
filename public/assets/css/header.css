@@ -1,12 +1,16 @@
-﻿body {
+body {
     margin-top: 0;
 }
 
 header {
+    position: sticky;   /* スクロールで上に貼り付く */
+    top: 0;
+    z-index: 100;       /* 商品カードより前面に */
     background: #fff;
     display: flex;
     justify-content: space-between;
     margin: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 nav {
@@ -18,9 +22,6 @@ header .logo img {
     display: block;
 }
 
-hr {
-    margin: 0;
-}
 
 nav form {
     margin: 0px;
@@ -42,12 +43,30 @@ nav a {
 }
 
 .profile__icon__hd {
+    display: block;
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid var(--color-border);
+    margin: 0;
+    align-self: center;
+}
+
+
+#login-btn{
+    margin: 0 5px 0 0;
+}
+
+
+#login-btn{
+    margin: 0 5px 0 0;
+}
+
+
+#login-btn{
+    margin: 0 5px 0 0;
 }
 
 .UserName {
@@ -134,4 +153,20 @@ nav a {
     background: #8c52ff;
     color: #ffffff;
     transition: 0.3s;
+}
+/* ヘッダーのアイコン未設定時（頭文字）。
+   .profile__icon は mypage.css で 100px に化けて崩れるため、header 専用クラスで小さく出す */
+.profile__icon__hd--initial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #eef0ff;
+    color: #8c52ff;
+    font-size: 1rem;
+    font-weight: bold;
+    line-height: 1;
+    box-sizing: border-box;
 }

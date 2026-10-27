@@ -4,18 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>購入画面 | CSE_EC</title>
+  <title>e-shop | 購入</title>
   <link rel="stylesheet" href="assets/css/common.css">
   <link rel="stylesheet" href="assets/css/purchase.css">
 </head>
 
 <body>
-    <!--ヘッダー読み込み-->
-    <?php require __DIR__ . '/../public/header.php'; ?>
-    <div id="wrap">
 
-        <main class="container">
-            <h1 class="page-title">商品の購入</h1>
+  <div id="wrap">
+  <!--ヘッダー読み込み-->
+  <?php require __DIR__ . '/../public/header.php'; ?>
+
+
+    <main class="container">
+      <h1 class="page-title">商品の購入</h1>
 
       <?php if (!empty($flash)): ?>
       <p class="message message--<?= h($flash['type']) ?>">

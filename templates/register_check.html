@@ -3,99 +3,104 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>e shop | 登録確認</title>
+    <title>e-shop | 登録確認</title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="icon" href="assets/icons/favicon.ico">
 </head>
 
 <body>
     <div id="wrap">
-        <div class="auth-container">
-            <div id="register-check-card" class="auth-card">
-                <!-- フォーム上部にロゴとh1（登録確認）を真ん中に配置 -->
-                <div class="auth-header">
-                    <img src="assets/images/logo.png" alt="CSE_EC ロゴ" class="auth-logo">
-                    <h1 class="auth-title">登録確認</h1>
-                </div>
-
-                <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-                <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"' : ''
-                    ?>>
-                    <?= h($errorMessage ?? '') ?>
-                </p>
-
-                <!-- 確認画面領域 -->
-                <div id="confirm-section" class="confirm-section">
-                    <p class="confirm-lead">以下の内容で登録します。よろしいですか？</p>
-
-                    <div class="confirm-list">
-                        <div class="confirm-item">
-                            <span class="confirm-label">ユーザーID</span>
-                            <span class="confirm-value">
-                                <?= h($user['UserId'] ?? $user['user_id'] ?? '') ?>
-                            </span>
-                        </div>
-                        <div class="confirm-item">
-                            <span class="confirm-label">名前</span>
-                            <span class="confirm-value">
-                                <?= h($user['UserName'] ?? $user['user_name'] ?? '') ?>
-                            </span>
-                        </div>
-                        <div class="confirm-item">
-                            <span class="confirm-label">郵便番号</span>
-                            <span class="confirm-value">
-                                <?= h($user['ZipCode'] ?? $user['zip_code'] ?? '') ?>
-                            </span>
-                        </div>
-                        <div class="confirm-item">
-                            <span class="confirm-label">住所</span>
-                            <span class="confirm-value">
-                                <?= h($user['Address'] ?? $user['address'] ?? '') ?>
-                            </span>
-                        </div>
-                        <div class="confirm-item">
-                            <span class="confirm-label">電話番号</span>
-                            <span class="confirm-value">
-                                <?= h($user['TEL'] ?? $user['tel'] ?? '') ?>
-                            </span>
-                        </div>
-                        <div class="confirm-item">
-                            <span class="confirm-label">秘密の質問</span>
-                            <span class="confirm-value">
-                                <?= h($secretQuestionText ?? '') ?>
-                            </span>
-                        </div>
-                        <div class="confirm-item">
-                            <span class="confirm-label">回答</span>
-                            <span class="confirm-value">
-                                <?= h($user['SecretAnswer'] ?? $user['secret_answer'] ?? '') ?>
-                            </span>
-                        </div>
+        <main>
+            <div class="auth-container">
+                <div id="register-check-card" class="auth-card">
+                    <!-- フォーム上部にロゴとh1（登録確認）を真ん中に配置 -->
+                    <div class="auth-header">
+                        <img src="assets/images/logo.png" alt="CSE_EC ロゴ" class="auth-logo">
+                        <h1 class="auth-title">登録確認</h1>
                     </div>
 
-                    <form id="check-form" action="register_check.php" method="post">
-                        <input type="hidden" name="csrf_token" id="csrf-token" value="<?= h($token ?? csrf_token()) ?>">
-                        <div class="btn-row">
-                            <button type="button" id="submit-btn" class="btn-main">はい（登録する）</button>
-                            <button type="button" id="cancel-btn" class="btn-sub"
-                                onclick="location.href='register.php'">キャンセル</button>
-                        </div>
-                    </form>
-                </div>
+                    <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
+                    <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
+                        : '' ?>>
+                        <?= h($errorMessage ?? '') ?>
+                    </p>
 
-                <!-- 完了画面領域（初期状態は非表示、JSで完了時に表示） -->
-                <div id="complete-section" class="complete-section" style="display: none;">
-                    <div class="complete-box">
-                        <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
-                        <p class="complete-message">登録が完了しました！</p>
-                        <div class="btn-row">
-                            <button type="button" id="login-page-btn" class="btn-main"
-                                onclick="location.href='login.php'">ログインページへ</button>
+                    <!-- 確認画面領域 -->
+                    <div id="confirm-section" class="confirm-section">
+                        <p class="confirm-lead">以下の内容で登録します。よろしいですか？</p>
+
+                        <div class="confirm-list">
+                            <div class="confirm-item">
+                                <span class="confirm-label">ユーザーID</span>
+                                <span class="confirm-value">
+                                    <?= h($user['UserId'] ?? $user['user_id'] ?? '') ?>
+                                </span>
+                            </div>
+                            <div class="confirm-item">
+                                <span class="confirm-label">名前</span>
+                                <span class="confirm-value">
+                                    <?= h($user['UserName'] ?? $user['user_name'] ?? '') ?>
+                                </span>
+                            </div>
+                            <div class="confirm-item">
+                                <span class="confirm-label">郵便番号</span>
+                                <span class="confirm-value">
+                                    <?= h($user['ZipCode'] ?? $user['zip_code'] ?? '') ?>
+                                </span>
+                            </div>
+                            <div class="confirm-item">
+                                <span class="confirm-label">住所</span>
+                                <span class="confirm-value">
+                                    <?= h($user['Address'] ?? $user['address'] ?? '') ?>
+                                </span>
+                            </div>
+                            <div class="confirm-item">
+                                <span class="confirm-label">電話番号</span>
+                                <span class="confirm-value">
+                                    <?= h($user['TEL'] ?? $user['tel'] ?? '') ?>
+                                </span>
+                            </div>
+                            <div class="confirm-item">
+                                <span class="confirm-label">秘密の質問</span>
+                                <span class="confirm-value">
+                                    <?= h($secretQuestionText ?? '') ?>
+                                </span>
+                            </div>
+                            <div class="confirm-item">
+                                <span class="confirm-label">回答</span>
+                                <span class="confirm-value">
+                                    <?php /* 回答はハッシュ化済みのため、内容は表示しない */ ?>
+                                    （非表示）
+                                </span>
+                            </div>
+                        </div>
+
+                        <form id="check-form" action="register_check.php" method="post">
+                            <input type="hidden" name="csrf_token" id="csrf-token"
+                                value="<?= h($token ?? csrf_token()) ?>">
+                            <div class="btn-row">
+                                <button type="button" id="submit-btn" class="btn-main">はい（登録する）</button>
+                                <button type="button" id="cancel-btn" class="btn-sub"
+                                    onclick="location.href='register.php'">キャンセル</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- 完了画面領域（初期状態は非表示、JSで完了時に表示） -->
+                    <div id="complete-section" class="complete-section" style="display: none;">
+                        <div class="complete-box">
+                            <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
+                            <p class="complete-message">登録が完了しました！</p>
+                            <div class="btn-row">
+                                <button type="button" id="login-page-btn" class="btn-main"
+                                    onclick="location.href='login.php'">ログインページへ</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
 
         <script src="assets/js/register_check.js"></script>
 
