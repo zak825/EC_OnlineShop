@@ -194,7 +194,7 @@ images.addEventListener('change', function() {
 
 // サーバー側のエラーで画面が戻ってきたときは、その入力欄を最初から赤くする
 [productName, genreCode, price].forEach(function(input) {
-  if (document.getElementById('error_' + input.id).textContent !== '') {
+  if (document.getElementById('error_' + input.id).textContent.trim() !== '') {   // 空白だけなら「エラーなし」
     input.classList.add('is-invalid');
   }
 });
@@ -207,8 +207,60 @@ genreCode.addEventListener('blur', validateGenreCode);
 price.addEventListener('input', validatePrice);
 price.addEventListener('blur', validatePrice);
 
-// 販売ボタン：エラーがあれば送信しない（クリア・戻るはそのまま送信する）
+// ------------------------------------------------------------
+// 下書き保存のモーダル
+//   「戻る」を押したとき、入力がすべて正しければ「下書き保存しますか？」を出す
+//   保存する → action=save_draft で送信／保存しない → action=back_no_save で送信／キャンセル → 閉じて入力に戻る
+// ------------------------------------------------------------
+var draftSaveModal = document.getElementById('draft_save_modal');
+
+// 入力がすべて正しいか（エラーメッセージは出さずに調べる）
+function isAllValid() {
+  return checkProductName() === '' && checkGenreCode() === '' && checkPrice() === '' && checkImages() === '';
+}
+
+// action を hidden で付けてフォームを送信する（form.submit() は押したボタンの値を送らないため）
+function submitWithAction(action) {
+  var hidden = document.createElement('input');
+  hidden.type  = 'hidden';
+  hidden.name  = 'action';
+  hidden.value = action;
+  form.appendChild(hidden);
+  form.submit();
+}
+
+function closeDraftSaveModal() {
+  draftSaveModal.hidden = true;
+}
+
+document.getElementById('draft_save_yes').addEventListener('click', function() {
+  this.disabled = true;   // 二重送信防止
+  submitWithAction('save_draft');
+});
+document.getElementById('draft_save_no').addEventListener('click', function() {
+  // 「戻る」と区別して送る（下書きを使って入力していたなら、サーバー側で下書きを削除する）
+  submitWithAction('back_no_save');
+});
+document.getElementById('draft_save_cancel').addEventListener('click', closeDraftSaveModal);
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && !draftSaveModal.hidden) {
+    closeDraftSaveModal();
+  }
+});
+
+// 販売ボタン：エラーがあれば送信しない
+// 戻るボタン：入力がすべて正しければ、下書き保存のモーダルを出す（正しくなければそのまま戻る）
+// クリアボタン：そのまま送信する
 form.addEventListener('submit', function(event) {
+  if (event.submitter && event.submitter.value === 'back') {
+    if (isAllValid()) {
+      event.preventDefault();
+      draftSaveModal.hidden = false;
+      document.getElementById('draft_save_yes').focus();
+    }
+    return;
+  }
+
   if (!event.submitter || event.submitter.value !== 'sell') {
     return;
   }

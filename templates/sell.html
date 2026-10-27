@@ -12,103 +12,139 @@
 </head>
 
 <body>
+    <div id="wrap">
     <!--ヘッダー読み込み-->
-    <?php require __DIR__ . '/../public/header.php'; ?>
-    <main>
-        <h1>出品画面</h1>
+        <?php require __DIR__ . '/../public/header.php'; ?>
+        <main>
+            <h1>出品画面</h1>
 
-        <?php if ($error_db !== ''): ?>
-        <p class="error">
-            <?= h($error_db) ?>
-        </p>
+            <?php if ($error_db !== ''): ?>
+            <p class="error">
+                <?= h($error_db) ?>
+            </p>
+            <?php endif; ?>
+
+            <!-- 画像を送るので enctype="multipart/form-data" -->
+            <form action="sell.php" method="post" id="sell_form" enctype="multipart/form-data" novalidate>
+                <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+
+
+                <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく
+                     （中に改行や空白を入れない。空でなくなり、入力欄が最初から赤くなってしまう） -->
+                <p><label for="product_name">商品名</label></p>
+                <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
+                <input type="text" id="product_name" name="product_name" class="Form-Item-Input"
+                    maxlength="<?= h($name_max) ?>" data-name-max="<?= h($name_max) ?>"
+                    value="<?= h($form_product_name) ?>">
+                <p class="error" id="error_product_name"><?= h($error_product_name) ?></p>
+
+                <p><label for="genre_code">ジャンル</label></p>
+                <select id="genre_code" name="genre_code" class="Form-Item-Input">
+                    <option value="">選択してください</option>
+                    <?php foreach ($genres as $genre_code => $genre_name): ?>
+                    <?php if ((string)$genre_code === $form_genre_code): ?>
+                    <option value="<?= h($genre_code) ?>" selected>
+                        <?= h($genre_name) ?>
+                    </option>
+                    <?php else: ?>
+                    <option value="<?= h($genre_code) ?>">
+                        <?= h($genre_name) ?>
+                    </option>
+                    <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+                <p class="error" id="error_genre_code"><?= h($error_genre_code) ?></p>
+
+                <!-- 全角数字・カンマも受け付けるので type="text"（type="number" だと入力できない） -->
+                <p><label for="price">値段</label></p>
+                <input type="text" id="price" name="price" class="Form-Item-Input" inputmode="numeric"
+                    data-price-min="<?= h($price_min) ?>" data-price-max="<?= h($price_max) ?>"
+                    value="<?= h($form_price) ?>"> 円
+                <p class="error" id="error_price"><?= h($error_price) ?></p>
+
+                <p>
+                    <label for="images">
+                        商品画像（任意・
+                        <?= h($image_max) ?>枚まで・1枚2MBまで）
+                    </label>
+                </p>
+                <input type="file" id="images" name="images[]" accept="image/jpeg,image/png,image/gif,image/webp" multiple
+                    data-image-max="<?= h($image_max) ?>">
+                <p class="error" id="error_images"><?= h($error_images) ?></p>
+
+                <!-- 選択中の画像のプレビュー
+                        最初は前に選んだ画像（販売確認画面から戻ったとき）を出し、画像を選ぶと sell.js が入れ替える -->
+                <p id="image_preview_label" <?=$image_urls ? '' : ' hidden' ?>>選択中の画像（選び直すと入れ替わります）</p>
+                <!-- 左右の矢印で横にスクロールする（はみ出していないとき・端まで来たときは sell.js が矢印を隠す） -->
+                <div class="image-slider">
+                    <button type="button" class="image-slider__arrow image-slider__arrow--prev" id="image_prev"
+                        aria-label="前の画像を表示" hidden>&lsaquo;</button>
+                    <div class="image-list" id="image_preview">
+                        <?php foreach ($image_urls as $url): ?>
+                        <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="image-slider__arrow image-slider__arrow--next" id="image_next"
+                        aria-label="次の画像を表示" hidden>&rsaquo;</button>
+                </div>
+
+                <p>
+                    <button type="submit" name="action" value="sell">販売</button>
+                    <button type="submit" name="action" value="clear">クリア</button>
+                    <button type="submit" name="action" value="back">戻る</button>
+                </p>
+            </form>
+        </main>
+
+        <!-- ===== 「戻る」を押したとき、入力がすべて正しければ出す（sell.js が開く） ===== -->
+        <div class="draft-modal" id="draft_save_modal" role="dialog" aria-modal="true" aria-labelledby="draft_save_title" hidden>
+            <div class="draft-modal__card">
+                <h2 class="draft-modal__title" id="draft_save_title">下書き保存しますか？</h2>
+                <p class="draft-modal__text">保存すると、次に出品画面を開いたときに続きから入力できます。<br>
+                    下書きは1件だけ保存でき、前の下書きは上書きされます。</p>
+                <div class="draft-modal__actions">
+                    <button type="button" class="draft-modal__btn draft-modal__btn--primary" id="draft_save_yes">保存する</button>
+                    <button type="button" class="draft-modal__btn" id="draft_save_no">保存しない</button>
+                    <button type="button" class="draft-modal__btn" id="draft_save_cancel">キャンセル</button>
+                </div>
+            </div>
+        </div>
+
+        <?php if ($draft !== null): ?>
+        <!-- ===== 画面を開いたときに下書きがあれば出す（JS が無くても「はい」「いいえ」で送信できる） ===== -->
+        <div class="draft-modal" id="draft_load_modal" role="dialog" aria-modal="true" aria-labelledby="draft_load_title">
+            <div class="draft-modal__card">
+                <h2 class="draft-modal__title" id="draft_load_title">下書きがあります。使用しますか？</h2>
+                <dl class="draft-modal__summary">
+                    <dt>商品名</dt>
+                    <dd><?= h($draft['ProductName']) ?></dd>
+                    <dt>ジャンル</dt>
+                    <dd><?= h($draft_genre_name) ?></dd>
+                    <dt>値段</dt>
+                    <dd><?= h(number_format((int)$draft['Price'])) ?>円</dd>
+                    <dt>画像</dt>
+                    <dd><?= (int)$draft_image_count ?>枚</dd>
+                    <dt>保存日時</dt>
+                    <dd><?= h(format_datetime($draft['UpdateDateTime'])) ?></dd>
+                </dl>
+                <p class="draft-modal__text">「いいえ」を選ぶと、下書きは削除されます。</p>
+                <form action="sell.php" method="post" class="draft-modal__actions">
+                    <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+                    <button type="submit" name="action" value="load_draft" class="draft-modal__btn draft-modal__btn--primary">はい</button>
+                    <button type="submit" name="action" value="discard_draft" class="draft-modal__btn">いいえ</button>
+                </form>
+            </div>
+        </div>
         <?php endif; ?>
 
-        <!-- 画像を送るので enctype="multipart/form-data" -->
-        <form action="sell.php" method="post" id="sell_form" enctype="multipart/form-data" novalidate>
-            <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+        <script src="assets/js/sell.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/sell.js') ?>"></script>
 
+        <!-- フッター読み込み -->
+        <?php require __DIR__ . '/../public/footer.php'; ?>
 
-            <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
-            <p><label for="product_name">商品名</label></p>
-            <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
-            <input type="text" id="product_name" name="product_name" class="Form-Item-Input"
-                maxlength="<?= h($name_max) ?>" data-name-max="<?= h($name_max) ?>"
-                value="<?= h($form_product_name) ?>">
-            <p class="error" id="error_product_name">
-                <?= h($error_product_name) ?>
-            </p>
-
-            <p><label for="genre_code">ジャンル</label></p>
-            <select id="genre_code" name="genre_code" class="Form-Item-Input">
-                <option value="">選択してください</option>
-                <?php foreach ($genres as $genre_code => $genre_name): ?>
-                <?php if ((string)$genre_code === $form_genre_code): ?>
-                <option value="<?= h($genre_code) ?>" selected>
-                    <?= h($genre_name) ?>
-                </option>
-                <?php else: ?>
-                <option value="<?= h($genre_code) ?>">
-                    <?= h($genre_name) ?>
-                </option>
-                <?php endif; ?>
-                <?php endforeach; ?>
-            </select>
-            <p class="error" id="error_genre_code">
-                <?= h($error_genre_code) ?>
-            </p>
-
-            <!-- 全角数字・カンマも受け付けるので type="text"（type="number" だと入力できない） -->
-            <p><label for="price">値段</label></p>
-            <input type="text" id="price" name="price" class="Form-Item-Input" inputmode="numeric"
-                data-price-min="<?= h($price_min) ?>" data-price-max="<?= h($price_max) ?>"
-                value="<?= h($form_price) ?>"> 円
-            <p class="error" id="error_price">
-                <?= h($error_price) ?>
-            </p>
-
-            <p>
-                <label for="images">
-                    商品画像（任意・
-                    <?= h($image_max) ?>枚まで・1枚2MBまで）
-                </label>
-            </p>
-            <input type="file" id="images" name="images[]" accept="image/jpeg,image/png,image/gif,image/webp" multiple
-                data-image-max="<?= h($image_max) ?>">
-            <p class="error" id="error_images">
-                <?= h($error_images) ?>
-            </p>
-
-            <!-- 選択中の画像のプレビュー
-                     最初は前に選んだ画像（販売確認画面から戻ったとき）を出し、画像を選ぶと sell.js が入れ替える -->
-            <p id="image_preview_label" <?=$image_urls ? '' : ' hidden' ?>>選択中の画像（選び直すと入れ替わります）</p>
-            <!-- 左右の矢印で横にスクロールする（はみ出していないとき・端まで来たときは sell.js が矢印を隠す） -->
-            <div class="image-slider">
-                <button type="button" class="image-slider__arrow image-slider__arrow--prev" id="image_prev"
-                    aria-label="前の画像を表示" hidden>&lsaquo;</button>
-                <div class="image-list" id="image_preview">
-                    <?php foreach ($image_urls as $url): ?>
-                    <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
-                    <?php endforeach; ?>
-                </div>
-                <button type="button" class="image-slider__arrow image-slider__arrow--next" id="image_next"
-                    aria-label="次の画像を表示" hidden>&rsaquo;</button>
-            </div>
-
-            <p>
-                <button type="submit" name="action" value="sell">販売</button>
-                <button type="submit" name="action" value="clear">クリア</button>
-                <button type="submit" name="action" value="back">戻る</button>
-            </p>
-        </form>
-    </main>
-
-    <script src="assets/js/sell.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/sell.js') ?>"></script>
-
-    <!-- フッター読み込み -->
-    <?php require __DIR__ . '/../public/footer.php'; ?>
-
+        </div>
     </div>
-
+        
 </body>
 
 </html>

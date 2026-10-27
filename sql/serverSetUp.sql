@@ -36,6 +36,7 @@ GO
 -- ------------------------------------------------------------
 -- 既存テーブルの削除（外部キーで参照している側から消す）
 -- ------------------------------------------------------------
+DROP TABLE IF EXISTS SalesDraft;
 DROP TABLE IF EXISTS Common;
 DROP TABLE IF EXISTS Sales;
 DROP TABLE IF EXISTS SystemConfiguration;
@@ -82,6 +83,15 @@ CREATE TABLE Sales (
     SoldDate     DATETIME,
     sucre        INT,
     revwe        NVARCHAR(100)
+);
+
+-- 出品の下書き（1人1件。画像は public/uploads/products/draft_{Userid}/ に保存する）
+CREATE TABLE SalesDraft (
+    Userid         INT           NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    GenreCode      INT           NOT NULL,
+    ProductName    NVARCHAR(50)  NOT NULL,
+    Price          INT           NOT NULL,
+    UpdateDateTime DATETIME      NOT NULL
 );
 
 -- システム設定
@@ -161,5 +171,6 @@ GO
 SELECT 'UserData' AS TableName, COUNT(*) AS RecordCount FROM UserData
 UNION ALL SELECT 'Genre',               COUNT(*) FROM Genre
 UNION ALL SELECT 'Sales',               COUNT(*) FROM Sales
-UNION ALL SELECT 'SystemConfiguration', COUNT(*) FROM SystemConfiguration;
+UNION ALL SELECT 'SystemConfiguration', COUNT(*) FROM SystemConfiguration
+UNION ALL SELECT 'SalesDraft',          COUNT(*) FROM SalesDraft;
 GO

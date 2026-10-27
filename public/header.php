@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
 // ログイン状態とユーザー名（index.php から移動）
@@ -30,7 +30,7 @@ if ($headerLoggedIn) {
                         <img src="<?= h($headerIconPath) ?>" alt="" class="profile__icon__hd">
                     <?php else: ?>
                         <!-- アイコン未設定のときは名前の頭文字を表示 -->
-                        <span class="profile__icon profile__icon--initial" aria-hidden="true">
+                        <span class="profile__icon__hd profile__icon__hd--initial" aria-hidden="true">
                             <?= h(mb_substr($headerUserName, 0, 1)) ?>
                         </span>
                     <?php endif; ?>
@@ -49,4 +49,3 @@ if ($headerLoggedIn) {
         <?php endif; ?>
     </nav>
 </header>
-<hr>
