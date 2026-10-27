@@ -57,6 +57,43 @@ function sanitize_profile_input(array $source): array
 }
 
 /**
+ * 会員情報4項目の未入力・桁数・形式チェック（すべてのエラーを返す）。
+ * sanitize_profile_input() を通した値を渡すこと。
+ *
+ * @return string[] エラーメッセージの一覧（問題なければ空配列）
+ */
+function collect_profile_errors(string $userName, string $zipCode, string $address, string $tel): array
+{
+    $errors = [];
+
+    if ($userName === '') {
+        $errors[] = '氏名を入力してください。';
+    } elseif (mb_strlen($userName, 'UTF-8') > PROFILE_NAME_MAX) {
+        $errors[] = '氏名は' . PROFILE_NAME_MAX . '文字以内で入力してください。';
+    }
+
+    if ($zipCode === '') {
+        $errors[] = '郵便番号を入力してください。';
+    } elseif (!preg_match('/^[0-9]{7}$/D', $zipCode)) {
+        $errors[] = '郵便番号は半角数字7桁（ハイフンなし、例：1234567）で入力してください。';
+    }
+
+    if ($address === '') {
+        $errors[] = '住所を入力してください。';
+    } elseif (mb_strlen($address, 'UTF-8') > PROFILE_ADDRESS_MAX) {
+        $errors[] = '住所は' . PROFILE_ADDRESS_MAX . '文字以内で入力してください。';
+    }
+
+    if ($tel === '') {
+        $errors[] = '電話番号を入力してください。';
+    } elseif (strlen($tel) > PROFILE_TEL_MAX || !preg_match('/^[0-9\-]{10,15}$/D', $tel)) {
+        $errors[] = '電話番号は' . PROFILE_TEL_MAX . '桁以内の半角数字（ハイフン可）で入力してください。';
+    }
+
+    return $errors;
+}
+
+/**
  * 会員情報4項目の未入力・桁数・形式チェック。
  * sanitize_profile_input() を通した値を渡すこと。
  *
@@ -67,17 +104,5 @@ function validate_profile_fields(string $userName, string $zipCode, string $addr
     if ($userName === '' || $zipCode === '' || $address === '' || $tel === '') {
         return 'すべての項目を入力してください。';
     }
-    if (mb_strlen($userName, 'UTF-8') > PROFILE_NAME_MAX) {
-        return '氏名は' . PROFILE_NAME_MAX . '文字以内で入力してください。';
-    }
-    if (!preg_match('/^[0-9]{7}$/D', $zipCode)) {
-        return '郵便番号は半角数字7桁（ハイフンなし、例：1234567）で入力してください。';
-    }
-    if (mb_strlen($address, 'UTF-8') > PROFILE_ADDRESS_MAX) {
-        return '住所は' . PROFILE_ADDRESS_MAX . '文字以内で入力してください。';
-    }
-    if (strlen($tel) > PROFILE_TEL_MAX || !preg_match('/^[0-9\-]{10,15}$/D', $tel)) {
-        return '電話番号は' . PROFILE_TEL_MAX . '桁以内の半角数字（ハイフン可）で入力してください。';
-    }
-    return null;
+    return collect_profile_errors($userName, $zipCode, $address, $tel)[0] ?? null;
 }
