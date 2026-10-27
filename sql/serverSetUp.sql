@@ -36,6 +36,7 @@ GO
 -- ------------------------------------------------------------
 -- 既存テーブルの削除（外部キーで参照している側から消す）
 -- ------------------------------------------------------------
+DROP TABLE IF EXISTS UserSession;
 DROP TABLE IF EXISTS SalesDraft;
 DROP TABLE IF EXISTS Common;
 DROP TABLE IF EXISTS Sales;
@@ -92,6 +93,14 @@ CREATE TABLE SalesDraft (
     ProductName    NVARCHAR(50)  NOT NULL,
     Price          INT           NOT NULL,
     UpdateDateTime DATETIME      NOT NULL
+);
+
+-- ログイン中セッション（同時ログイン禁止用。1ユーザー1行。行があり最終操作がタイムアウト内なら「ログイン中」）
+CREATE TABLE UserSession (
+    Userid           INT       NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    SessionToken     CHAR(64)  NOT NULL,   -- ログイン成功時に発行するランダム値（このセッションの持ち主の証明）
+    LoginDateTime    DATETIME  NOT NULL,
+    LastActivityTime DATETIME  NOT NULL    -- 最終操作時刻（有効なセッションかの判定用）
 );
 
 -- システム設定
