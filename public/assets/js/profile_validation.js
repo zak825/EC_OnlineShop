@@ -25,31 +25,53 @@
     return m ? m[1] + m[2] : zip;
   }
 
+  // 4項目をチェックして、すべてのエラーメッセージを配列で返す（問題なければ空配列）
+  // 引数は trim() と normalizeZip() を通した値
+  function collectErrors(userName, zipCode, address, tel) {
+    var errors = [];
+
+    if (userName === '') {
+      errors.push('氏名を入力してください。');
+    } else if (charLength(userName) > NAME_MAX) {
+      errors.push('氏名は' + NAME_MAX + '文字以内で入力してください。');
+    }
+
+    if (zipCode === '') {
+      errors.push('郵便番号を入力してください。');
+    } else if (!/^[0-9]{7}$/.test(zipCode)) {
+      errors.push('郵便番号は半角数字7桁（ハイフンなし、例：1234567）で入力してください。');
+    }
+
+    if (address === '') {
+      errors.push('住所を入力してください。');
+    } else if (charLength(address) > ADDRESS_MAX) {
+      errors.push('住所は' + ADDRESS_MAX + '文字以内で入力してください。');
+    }
+
+    if (tel === '') {
+      errors.push('電話番号を入力してください。');
+    } else if (tel.length > TEL_MAX || !/^[0-9\-]{10,15}$/.test(tel)) {
+      errors.push('電話番号は' + TEL_MAX + '桁以内の半角数字（ハイフン可）で入力してください。');
+    }
+
+    return errors;
+  }
+
   // 4項目をチェックして、エラーメッセージを返す（問題なければ null）
   // 引数は trim() と normalizeZip() を通した値
   function validate(userName, zipCode, address, tel) {
     if (userName === '' || zipCode === '' || address === '' || tel === '') {
       return 'すべての項目を入力してください。';
     }
-    if (charLength(userName) > NAME_MAX) {
-      return '氏名は' + NAME_MAX + '文字以内で入力してください。';
-    }
-    if (!/^[0-9]{7}$/.test(zipCode)) {
-      return '郵便番号は半角数字7桁（ハイフンなし、例：1234567）で入力してください。';
-    }
-    if (charLength(address) > ADDRESS_MAX) {
-      return '住所は' + ADDRESS_MAX + '文字以内で入力してください。';
-    }
-    if (tel.length > TEL_MAX || !/^[0-9\-]{10,15}$/.test(tel)) {
-      return '電話番号は' + TEL_MAX + '桁以内の半角数字（ハイフン可）で入力してください。';
-    }
-    return null;
+    var errors = collectErrors(userName, zipCode, address, tel);
+    return errors.length > 0 ? errors[0] : null;
   }
 
   global.ProfileValidation = {
     trim: trim,
     charLength: charLength,
     normalizeZip: normalizeZip,
+    collectErrors: collectErrors,
     validate: validate
   };
 })(window);

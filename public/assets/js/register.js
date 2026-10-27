@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addressInput = document.getElementById('address');
     const telInput = document.getElementById('tel');
     const passwordInput = document.getElementById('password');
+    const passwordConfirmInput = document.getElementById('password_confirm');
     const secretQuestionSelect = document.getElementById('secret_question_id');
     const secretAnswerInput = document.getElementById('secret_answer');
     const clearBtn = document.getElementById('clear-btn');
@@ -14,13 +15,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!registerForm) return;
 
-    const showError = (msg) => {
-        errorMsg.textContent = msg;
+    // エラーメッセージを1件ずつリストで表示する
+    const showErrors = (messages) => {
+        const list = document.createElement('ul');
+        list.className = 'error-list';
+        messages.forEach((msg) => {
+            const item = document.createElement('li');
+            item.textContent = msg;
+            list.appendChild(item);
+        });
+        errorMsg.replaceChildren(list);
         errorMsg.style.display = 'block';
     };
 
     const hideError = () => {
-        errorMsg.textContent = '';
+        errorMsg.replaceChildren();
         errorMsg.style.display = 'none';
     };
 
@@ -32,29 +41,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const address = PV.trim(addressInput.value);
         const tel = PV.trim(telInput.value);
         const password = passwordInput.value;
+        const passwordConfirm = passwordConfirmInput ? passwordConfirmInput.value : '';
         const secretQuestionId = secretQuestionSelect ? secretQuestionSelect.value : '';
         const secretAnswer = secretAnswerInput ? secretAnswerInput.value.trim() : '';
 
-        // 1. 未入力・桁数チェックを行う
-        if (userName === '' || zipCode === '' || address === '' || tel === '' || password === ''
-            || secretQuestionId === '' || secretAnswer === '') {
-            e.preventDefault();
-            showError('すべての項目を入力してください。');
-            return;
-        }
+        // 1. 未入力・桁数チェックを行う（エラーはまとめて表示するため、すべての項目をチェックする）
+        const errors = PV.collectErrors(userName, zipCode, address, tel);
 
-        const profileError = PV.validate(userName, zipCode, address, tel);
-        if (profileError !== null) {
-            e.preventDefault();
-            showError(profileError);
-            return;
+        if (secretQuestionId === '') {
+            errors.push('秘密の質問を選択してください。');
         }
 
         // 秘密の質問の回答は100文字以内
-        if (secretAnswer.length > 100) {
-            e.preventDefault();
-            showError('秘密の質問の回答は100文字以内で入力してください。');
-            return;
+        if (secretAnswer === '') {
+            errors.push('秘密の質問の回答を入力してください。');
+        } else if (secretAnswer.length > 100) {
+            errors.push('秘密の質問の回答は100文字以内で入力してください。');
         }
 
         // 2. パスワードポリシーのチェックを行う
@@ -62,9 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxLen = parseInt(maxLenElem ? maxLenElem.value : '50', 10) || 50;
         const passwordLen = password.length;
 
-        if (passwordLen < minLen || passwordLen > maxLen) {
+        if (password === '') {
+            errors.push('パスワードを入力してください。');
+        } else if (passwordLen < minLen || passwordLen > maxLen) {
+            errors.push(`パスワードは${minLen}文字以上${maxLen}文字以内で入力してください。`);
+        }
+
+        // パスワード（確認用）が入力したパスワードと一致しているかチェックする
+        if (passwordConfirm === '') {
+            errors.push('パスワード（確認用）を入力してください。');
+        } else if (password !== '' && password !== passwordConfirm) {
+            errors.push('パスワードとパスワード（確認用）が一致しません。');
+        }
+
+        if (errors.length > 0) {
             e.preventDefault();
-            showError(`パスワードは${minLen}文字以上${maxLen}文字以内で入力してください。`);
+            showErrors(errors);
             return;
         }
 
@@ -82,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addressInput.value = '';
             telInput.value = '';
             passwordInput.value = '';
+            if (passwordConfirmInput) passwordConfirmInput.value = '';
             if (secretQuestionSelect) secretQuestionSelect.value = '';
             if (secretAnswerInput) secretAnswerInput.value = '';
             hideError();

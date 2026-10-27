@@ -98,6 +98,16 @@
     word-break: break-all;
 }
 
+/* エラーが複数あるときに1件ずつ並べる */
+.error-list {
+    margin: 0;
+    padding-left: 1.2em;
+}
+
+.error-list li + li {
+    margin-top: 4px;
+}
+
 /* 注意喚起（購入前のログイン案内など）のときは黄色ベースにする */
 .error-msg--warning {
     background-color: #fffbeb;
