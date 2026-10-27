@@ -48,3 +48,35 @@ main {
   height: 28px;
   object-fit: cover;
 }
+
+/* -------------------- エラーメッセージ表示領域 -------------------- */
+.error-msg {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 3px solid #ef4444;
+  color: #991b1b;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  border-radius: 0;
+  word-break: break-all;
+}
+
+/* エラーが複数あるときに1件ずつ並べる */
+.error-list {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.error-list li+li {
+  margin-top: 4px;
+}
+
+/* 注意喚起（購入前のログイン案内など）のときは黄色ベースにする */
+.error-msg--warning {
+  background-color: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
