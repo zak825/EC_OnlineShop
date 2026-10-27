@@ -74,7 +74,7 @@
 
                 <!-- 選択中の画像のプレビュー
                         最初は前に選んだ画像（販売確認画面から戻ったとき）を出し、画像を選ぶと sell.js が入れ替える -->
-                <p id="image_preview_label" <?=$image_urls ? '' : ' hidden' ?>>選択中の画像（選び直すと入れ替わります）</p>
+                <p id="image_preview_label" <?=$image_urls ? '' : ' hidden' ?>>選択中の画像（複数選択時:ドラック&amp;ドロップで順序の変更）</p>
                 <!-- 左右の矢印で横にスクロールする（はみ出していないとき・端まで来たときは sell.js が矢印を隠す） -->
                 <div class="image-slider">
                     <button type="button" class="image-slider__arrow image-slider__arrow--prev" id="image_prev"
