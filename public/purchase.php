@@ -17,7 +17,7 @@ require_once __DIR__ . '/../src/lib/product_image.php';
 // 0 以外の Userid を入れると、その人としてログインした扱いになる
 //   2 … 購入 花子（購入テスト用）
 // ログイン画面ができたら、または提出前には必ず 0 に戻す
-$DEV_SKIP_LOGIN_USER_ID = 2;
+$DEV_SKIP_LOGIN_USER_ID = 0;
 
 if ($DEV_SKIP_LOGIN_USER_ID > 0 && !isset($_SESSION['user_id'])) {
     $_SESSION['user_id'] = $DEV_SKIP_LOGIN_USER_ID;
@@ -30,6 +30,7 @@ $productId = filter_var($_REQUEST['productId'] ?? null, FILTER_VALIDATE_INT);
 // ---- 1. ログイン済みか確認する ---------------------------------
 if (!is_logged_in()) {
     // 商品IDを戻り先にして、ログイン後この画面に戻す
+    set_flash('購入にはログイン、またはアカウント登録が必要です。', 'warning');
     redirect_to_login($productId ? 'purchase.php?productId=' . $productId : null);
 }
 $userId = login_user_id();
