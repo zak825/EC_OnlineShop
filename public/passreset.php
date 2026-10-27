@@ -180,6 +180,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $pdo->commit();
 
+                    // ログイン中の枠を解除する（ログアウトできず入れなくなった人が、再設定後にログインできるように）
+                    release_login_slot($verifiedUserId);
+
                     // 13. 照合用セッションを破棄し、再設定完了画面を表示する
                     $clearVerifiedSession();
                     $step = 'complete';

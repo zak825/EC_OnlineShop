@@ -6,6 +6,8 @@
 //   ログイン成功時に $_SESSION['user_id'] / $_SESSION['user_name'] を入れる
 //   セッションの有効期限切れ（タイムアウト）はログイン担当の処理で判定し、
 //   切れていたら $_SESSION['user_id'] が無い状態になる
+//   同時ログイン禁止のため、ログイン成功時に $_SESSION['login_token'] も入れる
+//   （UserSession テーブルのトークンと一致するセッションだけが有効）
 //   login.php は ?return=xxx を受け取り、ログイン成功後そこへ遷移する
 //   （return は自サイト内のパスだけ許可すること）
 // ============================================================
@@ -38,33 +40,30 @@ function is_logged_in(): bool {
     }
 
     // 2. DB (SystemConfiguration) からセッションタイムアウト秒数を取得（初期値: 1800秒 = 30分）
-    $timeout = 30 * 60;
-    if (function_exists('db')) {
-        try {
-            $pdo = db();
-            $sql = "SELECT TOP (1) [Value]
-                    FROM dbo.SystemConfiguration
-                    WHERE Category = :category AND [Key] = :config_key";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                ':category'   => 'Session',
-                ':config_key' => 'SessionTimeout',
-            ]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($row !== false && is_numeric($row['Value']) && (int)$row['Value'] > 0) {
-                $timeout = (int)$row['Value'] * 60;
-            }
-        } catch (PDOException $e) {
-            // DB接続エラーやテーブル未作成時はデフォルト値（1800秒）を使用
-            error_log('Session timeout config fetch error: ' . $e->getMessage());
-        }
-    }
+    $timeout = get_session_timeout_seconds();
 
     // 3. 最終操作時刻から設定秒数以上経過していたらログイン切れ（セッション破棄）
     if ((time() - (int)$_SESSION['last_activity']) > $timeout) {
         logout_session();
         set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
         return false;
+    }
+
+    // 3.5 同時ログイン禁止：このセッションが UserSession に登録された正規のセッションか確認する
+    //     （確認と同時に DB 側の最終操作時刻も更新する）
+    if (!is_dev_session_without_login_token()) {
+        try {
+            if (!touch_login_slot((int)$_SESSION['user_id'], (string)($_SESSION['login_token'] ?? ''))) {
+                // 行が無い・トークンが違う（タイムアウト後に別の端末がログインした、パスワード再設定で解除された等）
+                logout_session();
+                set_flash('ログイン状態が無効になりました。再度ログインしてください。', 'error');
+                return false;
+            }
+        } catch (PDOException $e) {
+            // DBエラー時は安全側（ログイン扱いにしない）。セッションは残すので、DB復旧後は続きから使える
+            error_log('Login slot check error: ' . $e->getMessage());
+            return false;
+        }
     }
 
     // 4. 有効期限内であれば最終操作時刻を現在時刻に更新してログイン状態を維持
@@ -155,6 +154,13 @@ function buyer_value(int $userId): string {
  * ログアウト処理（セッション情報の初期化）
  */
 function logout_session(): void {
+    // 同時ログイン禁止の枠を解放する（このセッションが持っている枠だけ。他の端末の枠は消さない）
+    $userId = current_user_id();
+    $token  = $_SESSION['login_token'] ?? null;
+    if ($userId !== null && is_string($token) && $token !== '') {
+        release_login_slot($userId, $token);
+    }
+
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();
@@ -170,6 +176,167 @@ function logout_session(): void {
     }
     session_destroy();
     session_start();
+}
+
+/**
+ * セッションタイムアウトの秒数を返す
+ * SystemConfiguration (Category='Session', Key='SessionTimeout', 単位: 分) を参照し、
+ * 取得できないときは 1800 秒（30分）
+ */
+function get_session_timeout_seconds(): int {
+    $timeout = 30 * 60;
+    if (function_exists('db')) {
+        try {
+            $pdo = db();
+            $sql = "SELECT TOP (1) [Value]
+                    FROM dbo.SystemConfiguration
+                    WHERE Category = :category AND [Key] = :config_key";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':category'   => 'Session',
+                ':config_key' => 'SessionTimeout',
+            ]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row !== false && is_numeric($row['Value']) && (int)$row['Value'] > 0) {
+                $timeout = (int)$row['Value'] * 60;
+            }
+        } catch (PDOException $e) {
+            // DB接続エラーやテーブル未作成時はデフォルト値（1800秒）を使用
+            error_log('Session timeout config fetch error: ' . $e->getMessage());
+        }
+    }
+    return $timeout;
+}
+
+// ============================================================
+// 同時ログイン禁止（UserSession テーブル）
+//
+//   1ユーザーにつき有効なセッションは1つだけ。
+//   UserSession に行があり、最終操作からタイムアウト内なら「ログイン中」とみなし、
+//   他の端末からのログインは拒否する（先にログインした方が優先）。
+//   時刻の比較はすべて DB の GETDATE() で行う（PHP と DB の時計ずれ対策）。
+// ============================================================
+
+/**
+ * ログインの枠を取得する（ログイン認証が成功した後に呼ぶ）
+ *
+ * @param PDO $pdo         DB接続
+ * @param int $userId      ログインするユーザーID
+ * @param int $timeoutSec  セッションタイムアウト秒数（get_session_timeout_seconds()）
+ * @return string|null     取得できたら新しいセッショントークン。他の端末がログイン中なら null
+ * @throws PDOException    DBエラー時
+ */
+function acquire_login_slot(PDO $pdo, int $userId, int $timeoutSec): ?string {
+    $token = bin2hex(random_bytes(32)); // 64文字
+
+    $pdo->beginTransaction();
+    try {
+        // 行をロックして判定する（ほぼ同時の2つのログインを順番に処理するため）
+        $stmt = $pdo->prepare(
+            'SELECT CASE WHEN DATEDIFF(SECOND, LastActivityTime, GETDATE()) <= :timeout
+                         THEN 1 ELSE 0 END AS IsActive
+             FROM dbo.UserSession WITH (UPDLOCK, HOLDLOCK)
+             WHERE Userid = :user_id'
+        );
+        $stmt->bindValue(':timeout', $timeoutSec, PDO::PARAM_INT);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row !== false && (int)$row['IsActive'] === 1) {
+            // 他の端末がログイン中
+            $pdo->rollBack();
+            return null;
+        }
+
+        if ($row !== false) {
+            // 期限切れの古い行を新しいセッションで置き換える
+            $stmt = $pdo->prepare(
+                'UPDATE dbo.UserSession
+                 SET SessionToken = :token, LoginDateTime = GETDATE(), LastActivityTime = GETDATE()
+                 WHERE Userid = :user_id'
+            );
+        } else {
+            $stmt = $pdo->prepare(
+                'INSERT INTO dbo.UserSession (Userid, SessionToken, LoginDateTime, LastActivityTime)
+                 VALUES (:user_id, :token, GETDATE(), GETDATE())'
+            );
+        }
+        $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $pdo->commit();
+        return $token;
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        // 主キー重複（ほぼ同時に別の端末が先に登録した）は「ログイン中」と同じ扱い
+        if ($e->getCode() === '23000') {
+            return null;
+        }
+        throw $e;
+    }
+}
+
+/**
+ * このセッションが正規のログインか確認し、DB側の最終操作時刻を更新する
+ * （確認と更新を1回のUPDATEで行う）
+ *
+ * @return bool 正規のセッションなら true
+ * @throws PDOException DBエラー時
+ */
+function touch_login_slot(int $userId, string $token): bool {
+    if ($token === '') {
+        return false;
+    }
+    $stmt = db()->prepare(
+        'UPDATE dbo.UserSession
+         SET LastActivityTime = GETDATE()
+         WHERE Userid = :user_id AND SessionToken = :token'
+    );
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->rowCount() === 1;
+}
+
+/**
+ * ログインの枠を解放する（失敗してもログアウト等の処理は止めない）
+ *
+ * @param int         $userId ユーザーID
+ * @param string|null $token  指定すると、トークンが一致する行だけ削除する。
+ *                            null なら、そのユーザーの行を無条件に削除する（パスワード再設定用）
+ */
+function release_login_slot(int $userId, ?string $token = null): void {
+    try {
+        if ($token === null) {
+            $stmt = db()->prepare('DELETE FROM dbo.UserSession WHERE Userid = :user_id');
+        } else {
+            $stmt = db()->prepare(
+                'DELETE FROM dbo.UserSession WHERE Userid = :user_id AND SessionToken = :token'
+            );
+            $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        error_log('Login slot release error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * 開発用の自動ログインで入ったセッション（login_token を持たない）か判定する
+ * 開発ログインが有効で、セッションのユーザーが DEV_LOGIN_USER_ID と同じ場合のみ true
+ * （本番では DEV_LOGIN_USER_ID = 0 のため常に false）
+ */
+function is_dev_session_without_login_token(): bool {
+    if (!empty($_SESSION['login_token'])) {
+        return false;
+    }
+    $devUserId = development_login_user_id();
+    return $devUserId !== null && current_user_id() === $devUserId;
 }
 
 /**

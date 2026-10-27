@@ -37,25 +37,38 @@
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if ($user && password_verify($password, $user['LoginPassword'])) {
-                        // 4. ログイン情報をセッションに書き込む
-                        session_regenerate_id(true);
-                        $_SESSION['logged_in']     = true;
-                        $_SESSION['user_id']       = (int)$user['UserId'];
-                        $_SESSION['UserId']        = (int)$user['UserId']; // src/lib/auth.php のキー名に合わせて両方保持
-                        $_SESSION['user_name']     = $user['UserName'];
-                        $_SESSION['UserName']      = $user['UserName'];
-                        $_SESSION['last_activity'] = time();
+                        // 3.5 同時ログイン禁止：同じアカウントが他の端末でログイン中なら拒否する
+                        //     （パスワード認証が通った人にだけ、ログイン中かどうかを伝える）
+                        $loginToken = acquire_login_slot(
+                            $pdo,
+                            (int)$user['UserId'],
+                            get_session_timeout_seconds()
+                        );
 
-                        // 画面遷移：リダイレクト指定があればその画面へ、なければメイン画面へ
-                        $redirectTo = $_SESSION['redirect_after_login'] ?? $_GET['redirect'] ?? $_GET['return'] ?? 'index.php';
-                        unset($_SESSION['redirect_after_login']);
-                        // 外部URLへのオープンリダイレクト防止（クエリパラメータ付きURLも許可）
-                        if (!preg_match('/^[a-zA-Z0-9_\-\.]+\.php(\?[a-zA-Z0-9_\-\.=&]+)?$/', $redirectTo)) {
-                            $redirectTo = 'index.php';
+                        if ($loginToken === null) {
+                            $errorMessage = 'このアカウントは他の端末でログイン中のため、ログインできません。';
+                        } else {
+                            // 4. ログイン情報をセッションに書き込む
+                            session_regenerate_id(true);
+                            $_SESSION['logged_in']     = true;
+                            $_SESSION['user_id']       = (int)$user['UserId'];
+                            $_SESSION['UserId']        = (int)$user['UserId']; // src/lib/auth.php のキー名に合わせて両方保持
+                            $_SESSION['user_name']     = $user['UserName'];
+                            $_SESSION['UserName']      = $user['UserName'];
+                            $_SESSION['last_activity'] = time();
+                            $_SESSION['login_token']   = $loginToken;
+
+                            // 画面遷移：リダイレクト指定があればその画面へ、なければメイン画面へ
+                            $redirectTo = $_SESSION['redirect_after_login'] ?? $_GET['redirect'] ?? $_GET['return'] ?? 'index.php';
+                            unset($_SESSION['redirect_after_login']);
+                            // 外部URLへのオープンリダイレクト防止（クエリパラメータ付きURLも許可）
+                            if (!preg_match('/^[a-zA-Z0-9_\-\.]+\.php(\?[a-zA-Z0-9_\-\.=&]+)?$/', $redirectTo)) {
+                                $redirectTo = 'index.php';
+                            }
+
+                            header('Location: ' . $redirectTo);
+                            exit;
                         }
-
-                        header('Location: ' . $redirectTo);
-                        exit;
                     } else {
                         $errorMessage = 'userIDまたはパスワードが間違っています。';
                     }
