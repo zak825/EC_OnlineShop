@@ -148,7 +148,23 @@ function renderImagePreview() {
     img.className = 'image-list__item';
     img.width     = 100;
     img.height    = 100;
-    imagePreview.appendChild(img);
+    img.draggable = false;   // 画像ではなく枠ごとドラッグさせる
+
+    // ×ボタンと、ドラッグ用の枠で包む（i は picked.files の何番目か）
+    var cell = document.createElement('div');
+    cell.className     = 'image-list__cell';
+    cell.dataset.index = i;
+    cell.draggable     = true;
+
+    var remove = document.createElement('button');
+    remove.type      = 'button';
+    remove.className = 'image-list__remove';
+    remove.setAttribute('aria-label', 'この画像を削除');
+    remove.innerHTML = '&times;';
+
+    cell.appendChild(img);
+    cell.appendChild(remove);
+    imagePreview.appendChild(cell);
   }
   imagePreviewLabel.hidden = imagePreview.children.length === 0;
 }
@@ -163,6 +179,113 @@ function isAlreadyPicked(file) {
   }
   return false;
 }
+
+// ×ボタン：選んだ画像を1枚だけ外す（サーバーに保存済みの画像には×を付けないので影響しない）
+imagePreview.addEventListener('click', function(event) {
+  var button = event.target.closest('.image-list__remove');
+  if (!button) {
+    return;
+  }
+  var index = Number(button.parentNode.dataset.index);
+
+  picked.items.remove(index);     // ためている画像から1枚外す
+  images.files = picked.files;    // 送信される内容も合わせる
+
+  validateImages();               // 「10枚まで」などのエラー表示を更新
+  renderImagePreview();           // 0枚になったら保存済み画像の表示に戻る
+});
+
+// ------------------------------------------------------------
+// ドラッグ&ドロップで画像の順番を入れ替える（選んだ画像だけ。保存済みの画像は対象外）
+//   ドラッグした画像を、ドロップした画像の位置に移す
+//   画像のない空きスペースで離したときは、カーソルの位置に合わせて入れる
+//   （空きスペースは1枚目の右側なので、そこで離すと1枚目になる）
+// ------------------------------------------------------------
+var dragIndex = null;   // ドラッグ中の画像が picked の何番目か
+
+function clearDragClasses() {
+  imagePreview.querySelectorAll('.is-dragging, .is-dragover').forEach(function(el) {
+    el.classList.remove('is-dragging', 'is-dragover');
+  });
+}
+
+// picked の from 番目を to 番目の位置に移す
+function movePicked(from, to) {
+  var list  = Array.from(picked.files);
+  var moved = list.splice(from, 1)[0];
+  list.splice(to, 0, moved);
+
+  picked = new DataTransfer();
+  list.forEach(function(file) {
+    picked.items.add(file);
+  });
+  images.files = picked.files;   // 送信される順番も合わせる
+  renderImagePreview();
+}
+
+// 空きスペースで離したとき、入れる位置を決める（カーソルより右にある、ほかの画像の数）
+function indexFromX(x, from) {
+  var count = 0;
+  Array.from(imagePreview.children).forEach(function(c, i) {
+    if (i === from) {
+      return;
+    }
+    var r = c.getBoundingClientRect();
+    if (r.left + r.width / 2 > x) {
+      count++;
+    }
+  });
+  return count;
+}
+
+imagePreview.addEventListener('dragstart', function(event) {
+  var cell = event.target.closest('.image-list__cell');
+  if (!cell) {
+    return;
+  }
+  dragIndex = Number(cell.dataset.index);
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', String(dragIndex));   // Firefox は何か入れないとドラッグが始まらない
+  cell.classList.add('is-dragging');
+});
+
+imagePreview.addEventListener('dragover', function(event) {
+  if (dragIndex === null) {
+    return;
+  }
+  event.preventDefault();   // これがないとドロップできない
+  event.dataTransfer.dropEffect = 'move';
+  imagePreview.querySelectorAll('.is-dragover').forEach(function(el) {
+    el.classList.remove('is-dragover');
+  });
+  var cell = event.target.closest('.image-list__cell');
+  if (cell) {
+    cell.classList.add('is-dragover');
+  }
+});
+
+imagePreview.addEventListener('drop', function(event) {
+  if (dragIndex === null) {
+    return;
+  }
+  event.preventDefault();
+  var from = dragIndex;
+  dragIndex = null;
+
+  var cell = event.target.closest('.image-list__cell');
+  var to   = cell ? Number(cell.dataset.index) : indexFromX(event.clientX, from);
+
+  if (from !== to) {
+    movePicked(from, to);
+  } else {
+    clearDragClasses();
+  }
+});
+
+imagePreview.addEventListener('dragend', function() {
+  dragIndex = null;
+  clearDragClasses();
+});
 
 images.addEventListener('change', function() {
   // 今回ダイアログで選ばれた分を、ためているリストに足していく
@@ -329,3 +452,6 @@ new MutationObserver(function() {
 }).observe(imagePreview, { childList: true });
 
 showNewestImages();
+
+
+
