@@ -29,6 +29,22 @@
                         <?= h($errorMessage ?? '') ?>
                     </p>
 
+                    <?php if (($step ?? 'login') === 'confirm'): ?>
+                    <!-- 他の端末でログイン中のアカウントにログインしようとしたときの確認 -->
+                    <p class="confirm-lead">
+                        このアカウントは他の端末でログイン中です。<br>
+                        このまま続行すると、他の端末はログアウトされます。
+                    </p>
+
+                    <form id="login-confirm-form" action="login.php" method="post">
+                        <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
+
+                        <div class="btn-row">
+                            <button type="submit" name="login_action" value="confirm" class="btn-main">続行してログイン</button>
+                            <button type="submit" name="login_action" value="cancel" class="btn-sub">キャンセル</button>
+                        </div>
+                    </form>
+                    <?php else: ?>
                     <form id="login-form" action="login.php" method="post" novalidate>
                         <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
 
@@ -64,6 +80,7 @@
                         <button type="button" id="register-btn" class="btn-register"
                             onclick="location.href='register.php'">新規ユーザー登録</button>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </main>

@@ -141,7 +141,7 @@ include TEMPLATE_DIR . '/layout/header.html';
 
 ログイン処理では `$_SESSION['logged_in'] = true`、`$_SESSION['user_id']`（または互換キー `UserId`）、`$_SESSION['user_name']`（または互換キー `UserName`）、`$_SESSION['last_activity'] = time()` を設定します。認証が必要な各画面では `is_logged_in()` を呼び、未ログインまたはタイムアウトの場合は `redirect_to_login()` でログイン画面へ遷移します。タイムアウト時間は `SystemConfiguration` の `Category = 'Session'`、`Key = 'SessionTimeout'` に設定された分数を参照します。
 
-同じアカウントの同時ログインは禁止です（先にログインした端末が優先され、後からのログインは拒否されます）。ログイン成功時に `$_SESSION['login_token']` も設定し、`UserSession` テーブル（1ユーザー1行）のトークンと一致するセッションだけが有効になります。ログアウトできずに残った場合は、最終操作から `SessionTimeout` 分が過ぎると別の端末からログインできます（パスワード再設定でも解除されます）。既存のDBには `sql/add_user_session.sql` を実行してテーブルを追加してください。
+同じアカウントで同時に有効なセッションは1つだけです（後からログインした端末が優先されます）。ログイン成功時に `$_SESSION['login_token']` も設定し、`UserSession` テーブル（1ユーザー1行）のトークンと一致するセッションだけが有効になります。他の端末でログイン中のアカウントにログインしようとすると確認画面が出て、「続行」を選ぶと新しい端末が有効になり、古い端末は次の操作でログアウトされます（「キャンセル」なら何も変わりません）。最終操作から `SessionTimeout` 分が過ぎたセッションは「ログイン中」とみなされないため、確認なしでログインできます。既存のDBには `sql/add_user_session.sql` を実行してテーブルを追加してください。
 
 ログイン中のユーザー情報は `current_user_id()`（互換関数 `login_user_id()`）と `current_user_name()` で取得できます。POSTフォームには `csrf_token()` の値を hidden 項目として含め、受信時は `check_csrf_token()` を呼びます。この関数は引数を省略すると `$_POST['csrf_token']` を検証します。
 

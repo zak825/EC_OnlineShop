@@ -54,9 +54,9 @@ function is_logged_in(): bool {
     if (!is_dev_session_without_login_token()) {
         try {
             if (!touch_login_slot((int)$_SESSION['user_id'], (string)($_SESSION['login_token'] ?? ''))) {
-                // 行が無い・トークンが違う（タイムアウト後に別の端末がログインした、パスワード再設定で解除された等）
+                // 行が無い・トークンが違う（別の端末でログインされ、このセッションが引き継がれた等）
                 logout_session();
-                set_flash('ログイン状態が無効になりました。再度ログインしてください。', 'error');
+                set_flash('別の端末でログインされたため、ログアウトしました。', 'error');
                 return false;
             }
         } catch (PDOException $e) {
@@ -212,8 +212,10 @@ function get_session_timeout_seconds(): int {
 // 同時ログイン禁止（UserSession テーブル）
 //
 //   1ユーザーにつき有効なセッションは1つだけ。
-//   UserSession に行があり、最終操作からタイムアウト内なら「ログイン中」とみなし、
-//   他の端末からのログインは拒否する（先にログインした方が優先）。
+//   UserSession に行があり、最終操作からタイムアウト内なら「ログイン中」とみなす。
+//   ログイン中のアカウントに別の端末からログインするときは、確認画面を出し、
+//   了承されたら新しい端末を有効にして、古い端末のセッションを無効にする（後から
+//   ログインした方が優先）。無効になった端末は、次の操作でログアウトされる。
 //   時刻の比較はすべて DB の GETDATE() で行う（PHP と DB の時計ずれ対策）。
 // ============================================================
 
@@ -222,11 +224,14 @@ function get_session_timeout_seconds(): int {
  *
  * @param PDO $pdo         DB接続
  * @param int $userId      ログインするユーザーID
- * @param int $timeoutSec  セッションタイムアウト秒数（get_session_timeout_seconds()）
- * @return string|null     取得できたら新しいセッショントークン。他の端末がログイン中なら null
- * @throws PDOException    DBエラー時
+ * @param int  $timeoutSec  セッションタイムアウト秒数（get_session_timeout_seconds()）
+ * @param bool $force       true なら、他の端末がログイン中でも新しいセッションで置き換える
+ *                          （古い端末のトークンは無効になる。確認画面で了承された後に使う）
+ * @return string|null      取得できたら新しいセッショントークン。
+ *                          $force = false で他の端末がログイン中なら null
+ * @throws PDOException     DBエラー時
  */
-function acquire_login_slot(PDO $pdo, int $userId, int $timeoutSec): ?string {
+function acquire_login_slot(PDO $pdo, int $userId, int $timeoutSec, bool $force = false): ?string {
     $token = bin2hex(random_bytes(32)); // 64文字
 
     $pdo->beginTransaction();
@@ -243,14 +248,14 @@ function acquire_login_slot(PDO $pdo, int $userId, int $timeoutSec): ?string {
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($row !== false && (int)$row['IsActive'] === 1) {
-            // 他の端末がログイン中
+        if (!$force && $row !== false && (int)$row['IsActive'] === 1) {
+            // 他の端末がログイン中（呼び出し側で確認画面を出す）
             $pdo->rollBack();
             return null;
         }
 
         if ($row !== false) {
-            // 期限切れの古い行を新しいセッションで置き換える
+            // 古い行（期限切れ、または了承済みの引き継ぎ）を新しいセッションで置き換える
             $stmt = $pdo->prepare(
                 'UPDATE dbo.UserSession
                  SET SessionToken = :token, LoginDateTime = GETDATE(), LastActivityTime = GETDATE()
@@ -272,8 +277,8 @@ function acquire_login_slot(PDO $pdo, int $userId, int $timeoutSec): ?string {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        // 主キー重複（ほぼ同時に別の端末が先に登録した）は「ログイン中」と同じ扱い
-        if ($e->getCode() === '23000') {
+        // 主キー重複（ほぼ同時に別の端末が先に登録した）は「ログイン中」と同じ扱い（確認画面へ）
+        if ($e->getCode() === '23000' && !$force) {
             return null;
         }
         throw $e;
@@ -305,20 +310,17 @@ function touch_login_slot(int $userId, string $token): bool {
 /**
  * ログインの枠を解放する（失敗してもログアウト等の処理は止めない）
  *
- * @param int         $userId ユーザーID
- * @param string|null $token  指定すると、トークンが一致する行だけ削除する。
- *                            null なら、そのユーザーの行を無条件に削除する（パスワード再設定用）
+ * トークンが一致する行だけ削除する（引き継がれて無効になった古い端末が、新しい端末の枠を消さないため）
+ *
+ * @param int    $userId ユーザーID
+ * @param string $token  このセッションのトークン
  */
-function release_login_slot(int $userId, ?string $token = null): void {
+function release_login_slot(int $userId, string $token): void {
     try {
-        if ($token === null) {
-            $stmt = db()->prepare('DELETE FROM dbo.UserSession WHERE Userid = :user_id');
-        } else {
-            $stmt = db()->prepare(
-                'DELETE FROM dbo.UserSession WHERE Userid = :user_id AND SessionToken = :token'
-            );
-            $stmt->bindValue(':token', $token, PDO::PARAM_STR);
-        }
+        $stmt = db()->prepare(
+            'DELETE FROM dbo.UserSession WHERE Userid = :user_id AND SessionToken = :token'
+        );
+        $stmt->bindValue(':token', $token, PDO::PARAM_STR);
         $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
     } catch (PDOException $e) {
