@@ -29,6 +29,17 @@ $secretAnswerInput     = '';
 // 秘密の質問リスト（質問ID => 質問文）
 $secretQuestions = get_secret_questions();
 
+// 【確認画面でキャンセルして戻ってきたとき】セッションに一時保存した入力内容をフォームに戻す
+// パスワードと秘密の質問の回答はハッシュ化して保存しているため戻せない（再入力してもらう）
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !empty($_SESSION['register_user'])) {
+    $registerUser = $_SESSION['register_user'];
+    $userNameInput = (string)($registerUser['UserName'] ?? $registerUser['user_name'] ?? '');
+    $zipCodeInput  = (string)($registerUser['ZipCode'] ?? $registerUser['zip_code'] ?? '');
+    $addressInput  = (string)($registerUser['Address'] ?? $registerUser['address'] ?? '');
+    $telInput      = (string)($registerUser['TEL'] ?? $registerUser['tel'] ?? '');
+    $secretQuestionIdInput = (string)($registerUser['SecretQuestionId'] ?? $registerUser['secret_question_id'] ?? '');
+}
+
 // パスワード文字数設定のデフォルト値
 $passwordMinLength = 8;
 $passwordMaxLength = 50;
