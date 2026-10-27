@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     registerForm.addEventListener('submit', (e) => {
         // 氏名・郵便番号・住所・電話番号のチェックは profile_validation.js（サーバー側は src/lib/validation.php）
         const PV = window.ProfileValidation;
-        const userName = PV.trim(userNameInput.value);
+        const userName = PV.normalizeName(PV.trim(userNameInput.value));   // 山田　太郎 → 山田 太郎
         const zipCode = PV.normalizeZip(PV.trim(zipCodeInput.value));   // 123-4567 → 1234567
         const address = PV.trim(addressInput.value);
         const tel = PV.trim(telInput.value);
@@ -83,7 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 郵便番号はハイフンなしの形に直してから送信する
+        // 氏名は語の間を半角スペース1つに、郵便番号はハイフンなしの形に直してから送信する
+        userNameInput.value = userName;
         zipCodeInput.value = zipCode;
 
         hideError();

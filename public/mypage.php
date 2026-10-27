@@ -233,8 +233,9 @@ $profile  = $stmt->fetch() ?: [];
 $userName = $profile['UserName'] ?? '';
 $iconPath = $profile['IconPath'] ?? null;   // 未設定（NULL）のときは名前の頭文字を表示する
 $userProfile = [
-    'UserName' => $userName,
-    // 編集フォームに入れる値。過去にハイフンありで登録された郵便番号も、ハイフンなしにして表示する
+    // 編集フォームに入れる値。過去に全角スペース区切りで登録された氏名も「姓 名」の形にして表示する
+    'UserName' => normalize_user_name(trim_input($userName)),
+    // 過去にハイフンありで登録された郵便番号も、ハイフンなしにして表示する
     'ZipCode'  => normalize_zip_code(trim_input($profile['ZipCode'] ?? '')),
     'Address'  => (string)($profile['Address'] ?? ''),
     'TEL'      => (string)($profile['TEL'] ?? ''),

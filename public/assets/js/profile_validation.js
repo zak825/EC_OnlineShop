@@ -25,8 +25,14 @@
     return m ? m[1] + m[2] : zip;
   }
 
+  // 氏名を保存する形式（語の間は半角スペース1つ）にそろえる。「山田　太郎」「山田  太郎  次郎」→「山田 太郎」「山田 太郎 次郎」
+  // 引数は trim() を通した値
+  function normalizeName(name) {
+    return name.replace(/[\s\u3000\u00a0]+/g, ' ');
+  }
+
   // 4項目をチェックして、すべてのエラーメッセージを配列で返す（問題なければ空配列）
-  // 引数は trim() と normalizeZip() を通した値
+  // 引数は trim() と normalizeName()・normalizeZip() を通した値
   function collectErrors(userName, zipCode, address, tel) {
     var errors = [];
 
@@ -34,6 +40,12 @@
       errors.push('氏名を入力してください。');
     } else if (charLength(userName) > NAME_MAX) {
       errors.push('氏名は' + NAME_MAX + '文字以内で入力してください。');
+    } else if (/[^\p{L}\p{M} ]/u.test(userName)) {
+      // 文字（漢字・かな・カナ・英字。「ー」「々」を含む）以外 = 記号・数字は使えない
+      errors.push('氏名に記号や数字は使えません。');
+    } else if (!/^[\p{L}\p{M}]+( [\p{L}\p{M}]+){1,2}$/u.test(userName)) {
+      // 2語（半角スペース1つ）または3語（半角スペース2つ）まで
+      errors.push('氏名は2語または3語で、間を半角スペースで区切って入力してください（例：山田 太郎、Tony Shane Miller）。');
     }
 
     if (zipCode === '') {
@@ -58,7 +70,7 @@
   }
 
   // 4項目をチェックして、エラーメッセージを返す（問題なければ null）
-  // 引数は trim() と normalizeZip() を通した値
+  // 引数は trim() と normalizeName()・normalizeZip() を通した値
   function validate(userName, zipCode, address, tel) {
     if (userName === '' || zipCode === '' || address === '' || tel === '') {
       return 'すべての項目を入力してください。';
@@ -70,6 +82,7 @@
   global.ProfileValidation = {
     trim: trim,
     charLength: charLength,
+    normalizeName: normalizeName,
     normalizeZip: normalizeZip,
     collectErrors: collectErrors,
     validate: validate

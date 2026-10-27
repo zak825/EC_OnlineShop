@@ -41,7 +41,19 @@ function normalize_zip_code(string $zipCode): string
 }
 
 /**
- * POST などの入力から会員情報4項目を取り出し、前後の空白除去と郵便番号の正規化をして返す。
+ * 氏名を保存する形式（語の間は半角スペース1つ）にそろえる。
+ * 「山田　太郎」「山田  太郎  次郎」→「山田 太郎」「山田 太郎 次郎」。間の空白（全角スペース・連続スペースなど）を半角スペース1つにする。
+ * trim_input() を通した値を渡すこと。
+ */
+function normalize_user_name(string $userName): string
+{
+    $normalized = preg_replace('/[\s\x{3000}\x{00A0}]+/u', ' ', $userName);
+    // UTF-8 として不正な文字列のときは null が返るので、そのまま返す（チェックでエラーにする）
+    return $normalized ?? $userName;
+}
+
+/**
+ * POST などの入力から会員情報4項目を取り出し、前後の空白除去と氏名・郵便番号の正規化をして返す。
  *
  * @param array $source $_POST など
  * @return array{user_name:string, zip_code:string, address:string, tel:string}
@@ -49,7 +61,7 @@ function normalize_zip_code(string $zipCode): string
 function sanitize_profile_input(array $source): array
 {
     return [
-        'user_name' => trim_input($source['user_name'] ?? ''),
+        'user_name' => normalize_user_name(trim_input($source['user_name'] ?? '')),
         'zip_code'  => normalize_zip_code(trim_input($source['zip_code'] ?? '')),
         'address'   => trim_input($source['address'] ?? ''),
         'tel'       => trim_input($source['tel'] ?? ''),
@@ -70,6 +82,12 @@ function collect_profile_errors(string $userName, string $zipCode, string $addre
         $errors[] = '氏名を入力してください。';
     } elseif (mb_strlen($userName, 'UTF-8') > PROFILE_NAME_MAX) {
         $errors[] = '氏名は' . PROFILE_NAME_MAX . '文字以内で入力してください。';
+    } elseif (preg_match('/[^\p{L}\p{M} ]/u', $userName) !== 0) {
+        // 文字（漢字・かな・カナ・英字。「ー」「々」を含む）以外 = 記号・数字は使えない
+        $errors[] = '氏名に記号や数字は使えません。';
+    } elseif (!preg_match('/^[\p{L}\p{M}]+( [\p{L}\p{M}]+){1,2}$/Du', $userName)) {
+        // 2語（半角スペース1つ）または3語（半角スペース2つ）まで
+        $errors[] = '氏名は2語または3語で、間を半角スペースで区切って入力してください（例：山田 太郎、Tony Shane Miller）。';
     }
 
     if ($zipCode === '') {
