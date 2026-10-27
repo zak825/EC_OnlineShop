@@ -24,7 +24,7 @@
                     </div>
 
                     <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-                    <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
+                    <p id="error-message" class="error-msg<?= ($messageType ?? 'error') === 'warning' ? ' error-msg--warning' : '' ?>" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
                         : '' ?>>
                         <?= h($errorMessage ?? '') ?>
                     </p>

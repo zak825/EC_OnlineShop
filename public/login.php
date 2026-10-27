@@ -153,15 +153,22 @@
         }
     }
 
+    // メッセージの種別：'error'（赤） / 'warning'（黄）
+    $messageType = 'error';
+
     $flash = get_flash();
     if ($errorMessage === '' && !empty($flash['message'])) {
         $errorMessage = $flash['message'];
+        if (($flash['type'] ?? '') === 'warning') {
+            $messageType = 'warning';
+        }
     }
 
     view('login', [
         'flash'        => $flash,
         'token'        => csrf_token(),
         'errorMessage' => $errorMessage,
+        'messageType'  => $messageType,
         'userIdInput'  => $userIdInput,
         'step'         => $step,
     ]);
