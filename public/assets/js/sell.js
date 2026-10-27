@@ -148,7 +148,23 @@ function renderImagePreview() {
     img.className = 'image-list__item';
     img.width     = 100;
     img.height    = 100;
-    imagePreview.appendChild(img);
+
+
+    
+    // ×ボタン付きの枠で包む（i は picked.files の何番目か）
+    var cell = document.createElement('div');
+    cell.className     = 'image-list__cell';
+    cell.dataset.index = i;
+
+    var remove = document.createElement('button');
+    remove.type      = 'button';
+    remove.className = 'image-list__remove';
+    remove.setAttribute('aria-label', 'この画像を削除');
+    remove.innerHTML = '&times;';
+
+    cell.appendChild(img);
+    cell.appendChild(remove);
+    imagePreview.appendChild(cell);
   }
   imagePreviewLabel.hidden = imagePreview.children.length === 0;
 }
@@ -163,6 +179,19 @@ function isAlreadyPicked(file) {
   }
   return false;
 }
+imagePreview.addEventListener('click', function(event) {
+  var button = event.target.closest('.image-list__remove');
+  if (!button) {
+    return;
+  }
+  var index = Number(button.parentNode.dataset.index);
+
+  picked.items.remove(index);     // ためている画像から1枚外す
+  images.files = picked.files;    // 送信される内容も合わせる
+
+  validateImages();               // 「10枚まで」などのエラー表示を更新
+  renderImagePreview();           // 0枚になったら保存済み画像の表示に戻る
+});
 
 images.addEventListener('change', function() {
   // 今回ダイアログで選ばれた分を、ためているリストに足していく

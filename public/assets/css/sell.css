@@ -384,3 +384,7 @@ input[type="file"] {
   background: #4f23a0;
   border-color: #4f23a0;
 }
+
+.image-list__cell .image-list__item {
+  animation: none;
+}
