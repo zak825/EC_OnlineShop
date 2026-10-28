@@ -16,7 +16,7 @@
     <?php require __DIR__ . '/../public/header.php'; ?>
 
     <main class="container container--grid">
-      <h1 class="page-title">商品一覧</h1>
+      <h1 class="page-title">啁E��一覧</h1>
 
       <?php if (!empty($flash)): ?>
       <p class="message message--<?= h($flash['type']) ?>">
@@ -24,9 +24,9 @@
       </p>
       <?php endif; ?>
 
-      <!-- 検索＋ジャンル絞り込み（ジャンルは選ぶと自動送信） -->
+      <!-- 検索�E�ジャンル絞り込み�E�ジャンルは選ぶと自動送信�E�E-->
       <form method="get" action="index.php" class="search-bar">
-        <input type="text" name="q" value="<?= h($keyword) ?>" placeholder="商品名で検索" class="search-bar__input">
+        <input type="text" name="q" value="<?= h($keyword) ?>" placeholder="啁E��名で検索" class="search-bar__input">
         <select name="genre" class="search-bar__select" onchange="this.form.submit()">
           <option value="">すべてのジャンル</option>
           <?php foreach ($genres as $g): ?>
@@ -40,17 +40,17 @@
 
       <?php if ($keyword !== '' || $genreFilter !== null): ?>
       <p class="search-result">
-        <?php if ($keyword !== ''): ?>「<?= h($keyword) ?>」<?php endif; ?>の検索結果：<?= count($products) ?>件
+        <?php if ($keyword !== ''): ?>、E?= h($keyword) ?>、E?php endif; ?>の検索結果�E�E?= count($products) ?>件
         <a href="index.php" class="search-clear">条件をクリア</a>
       </p>
       <?php endif; ?>
 
       <?php if (!$products): ?>
       <p class="empty">
-        該当する販売中の商品はありません。
+        該当する販売中の啁E��はありません、E
       </p>
       <?php else: ?>
-      <!-- ===== 商品一覧 ===== -->
+      <!-- ===== 啁E��一覧 ===== -->
       <ul class="product-list">
         <?php foreach ($products as $item): ?>
         <li class="product">
@@ -75,12 +75,12 @@
               <span class="product__genre">
                 <?= h($item['GenreName']) ?>
               </span>
-              出品者：
+              出品老E��E
               <?= name_label($item['SellerName']) ?>
 
               <?php if ($item['SellerAvgScore'] !== null): ?>
                 <span class="product__seller-rating"
-                  aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
+                  aria-label="出品老E��価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
                   <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
                 </span>
               <?php else: ?>
@@ -90,11 +90,11 @@
               <?php endif; ?>
             </p>
             <p class="product__condition">
-              状態：<?= h($item['ProductCondition'] ?? '未設定') ?>
+              状態！E?= h($item['ProductCondition'] ?? '未設宁E) ?>
             </p>
 
             <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
-            <span class="product__own">自分の出品</span>
+            <span class="product__own">自刁E�E出品E/span>
             <?php else: ?>
             <a href="purchase.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary product__buy">購入</a>
             <?php endif; ?>
