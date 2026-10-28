@@ -129,8 +129,8 @@ function validate_profile_fields(string $userName, string $zipCode, string $addr
 }
 
 /**
- * 全角文字、半角英数字、半角ハイフン（-）だけか。
- * 住所と秘密の質問の回答で使う。半角カナ・半角記号・半角スペースは不可。
+ * 全角文字、半角英数字、半角ハイフン（-）、半角・全角スペースだけか。
+ * 住所と秘密の質問の回答で使う。半角カナ・半角記号は不可。
  */
 function is_allowed_zenkaku_text(string $value): bool
 {
@@ -138,7 +138,7 @@ function is_allowed_zenkaku_text(string $value): bool
         return false;
     }
     return preg_match(
-        '/^(?:[A-Za-z0-9\-]|[\x{3000}-\x{303F}\x{3040}-\x{309F}\x{30A0}-\x{30FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FFF}\x{F900}-\x{FAFF}\x{FF01}-\x{FF60}\x{FFE0}-\x{FFE6}\x{20000}-\x{3FFFF}])+$/u',
+        '/^(?:[A-Za-z0-9\- ]|[\x{3000}-\x{303F}\x{3040}-\x{309F}\x{30A0}-\x{30FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FFF}\x{F900}-\x{FAFF}\x{FF01}-\x{FF60}\x{FFE0}-\x{FFE6}\x{20000}-\x{3FFFF}])+$/u',
         $value
     ) === 1;
 }
@@ -146,7 +146,7 @@ function is_allowed_zenkaku_text(string $value): bool
 /** 住所・秘密の質問の回答で、使えない文字があったときの文言 */
 function zenkaku_text_error(string $label): string
 {
-    return $label . 'は全角文字、半角英数字、ハイフン（-）のみ使用できます。';
+    return $label . 'は全角文字、半角英数字、ハイフン（-）、スペースのみ使用できます。';
 }
 
 /**

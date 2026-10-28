@@ -72,13 +72,13 @@
     return errors;
   }
 
-  // 全角文字、半角英数字、半角ハイフン（-）だけか。住所と秘密の質問の回答で使う
+  // 全角文字、半角英数字、半角ハイフン（-）、半角・全角スペースだけか。住所と秘密の質問の回答で使う
   function isAllowedZenkakuText(value) {
-    return /^(?:[A-Za-z0-9\-]|[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFF01-\uFF60\uFFE0-\uFFE6]|[\u{20000}-\u{3FFFF}])+$/u.test(value);
+    return /^(?:[A-Za-z0-9\- ]|[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFF01-\uFF60\uFFE0-\uFFE6]|[\u{20000}-\u{3FFFF}])+$/u.test(value);
   }
 
   function zenkakuTextError(label) {
-    return label + 'は全角文字、半角英数字、ハイフン（-）のみ使用できます。';
+    return label + 'は全角文字、半角英数字、ハイフン（-）、スペースのみ使用できます。';
   }
 
   // パスワードの禁止文字（-!"#$%&()*,./:;?[]^_`{}~+<=> と半角・全角スペース。@ は使える）
