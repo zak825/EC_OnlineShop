@@ -88,6 +88,9 @@
                 </span>
               <?php endif; ?>
             </p>
+            <p class="product__condition">
+              状態：<?= h($item['ProductCondition'] ?? '未設定') ?>
+            </p>
 
             <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
             <span class="product__own">自分の出品</span>

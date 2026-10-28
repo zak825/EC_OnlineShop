@@ -18,7 +18,8 @@ function sell_draft_image_dir(int $userId): string
 function find_sell_draft(int $userId): ?array
 {
     $stmt = db()->prepare(
-        'SELECT GenreCode, ProductName, Price, UpdateDateTime FROM SalesDraft WHERE Userid = :userid'
+        'SELECT GenreCode, ProductName, Price, ProductCondition, Description, UpdateDateTime
+         FROM SalesDraft WHERE Userid = :userid'
     );
     $stmt->execute([':userid' => $userId]);
     $draft = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -29,26 +30,38 @@ function find_sell_draft(int $userId): ?array
  * 下書きを保存する（すでにあれば上書きする）
  * $tmpImages … 販売画面で一時保存している画像のフォルダ名（無ければ null）。その画像を下書きの画像にする
  */
-function save_sell_draft(int $userId, int $genreCode, string $productName, int $price, ?string $tmpImages): void
+function save_sell_draft(
+    int $userId,
+    int $genreCode,
+    string $productName,
+    int $price,
+    string $condition,
+    string $description,
+    ?string $tmpImages
+): void
 {
     $params = [
         ':userid'       => $userId,
         ':genre_code'   => $genreCode,
         ':product_name' => $productName,
         ':price'        => $price,
+        ':condition'    => $condition,
+        ':description'  => $description,
     ];
 
     $stmt = db()->prepare(
         'UPDATE SalesDraft
-         SET GenreCode = :genre_code, ProductName = :product_name, Price = :price, UpdateDateTime = GETDATE()
+         SET GenreCode = :genre_code, ProductName = :product_name, Price = :price,
+             ProductCondition = :condition, Description = :description, UpdateDateTime = GETDATE()
          WHERE Userid = :userid'
     );
     $stmt->execute($params);
 
     if ($stmt->rowCount() === 0) {
         $stmt = db()->prepare(
-            'INSERT INTO SalesDraft (Userid, GenreCode, ProductName, Price, UpdateDateTime)
-             VALUES (:userid, :genre_code, :product_name, :price, GETDATE())'
+            'INSERT INTO SalesDraft
+                (Userid, GenreCode, ProductName, Price, ProductCondition, Description, UpdateDateTime)
+             VALUES (:userid, :genre_code, :product_name, :price, :condition, :description, GETDATE())'
         );
         $stmt->execute($params);
     }

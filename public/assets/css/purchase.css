@@ -332,7 +332,7 @@ body {
 .product-gallery__thumb {
   width: 64px;
   height: 64px;
-  object-fit: cover;
+  object-fit: contain;
   border: 1px solid #e2e8f0;
   background: #fff;
   cursor: pointer;
@@ -341,4 +341,28 @@ body {
 .product-gallery__thumb:hover,
 .product-gallery__thumb.is-active {
   border-color: #8c52ff;
+}
+
+
+/* ============================================================
+   リアルタイム制御（purchase_status.js）
+   ============================================================ */
+
+/* JS が買えなくなったときに出す警告。hidden の間は出さない */
+.message[hidden] {
+  display: none;
+}
+
+/* 押せなくなったボタン（売り切れ・購入不可になったとき） */
+.btn:disabled,
+.btn:disabled:hover {
+  background: #cbd5e1;
+  border-color: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* 押せないボタンは沈ませない */
+.btn:disabled:active {
+  transform: none;
 }
