@@ -1,0 +1,196 @@
+/* 商品編集画面：購入確認・マイページと同じカードと紫アクセント */
+.product-edit {
+  max-width: 640px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+.product-edit__card {
+  padding: 24px 28px;
+}
+
+.product-edit__form {
+  display: block;
+}
+
+.product-edit__field {
+  display: grid;
+  gap: 6px;
+}
+
+.product-edit__field label {
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.product-edit__field input,
+.product-edit__field select,
+.product-edit__field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 2px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+}
+
+.product-edit__field textarea {
+  resize: vertical;
+  min-height: 150px;
+  transition: min-height 0.2s ease, border-color 0.15s ease,
+    background-color 0.2s ease, box-shadow 0.15s ease;
+}
+
+.product-edit__field input:focus,
+.product-edit__field select:focus,
+.product-edit__field textarea:focus {
+  outline: none;
+  border-color: #8c52ff;
+  box-shadow: 0 0 0 3px rgba(140, 82, 255, 0.15);
+}
+
+.product-edit__field textarea.is-expanded {
+  border-color: #8c52ff;
+  background: #faf8ff;
+  box-shadow: 0 0 0 3px rgba(140, 82, 255, 0.14);
+}
+
+.product-edit__images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.product-edit__images img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+}
+
+.product-edit__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.product-edit__field small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* ブラウザ標準のファイル選択表示を使わず、共通ボタンを表示する */
+.file-picker__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.file-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.file-picker__button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  color: #fff;
+  background: #8c52ff;
+  border: 1px solid #8c52ff;
+  border-radius: 2px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.file-picker:hover .file-picker__button {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
+
+.file-picker__count {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.product-edit__form .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.product-edit__form .btn {
+  min-width: 150px;
+  min-height: 44px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, transform 0.1s ease;
+}
+
+.product-edit__form .btn:active {
+  transform: translateY(1px);
+}
+
+.product-edit__form .btn--secondary {
+  background: #fff;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.product-edit__form .btn--secondary:hover {
+  background: #f8fafc;
+  color: #8c52ff;
+  border-color: #8c52ff;
+}
+
+.product-edit__form .btn--primary {
+  background: #8c52ff;
+  color: #fff;
+  border-color: #8c52ff;
+}
+
+.product-edit__form .btn--primary:hover {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
+
+@media (max-width: 480px) {
+  .product-edit__form .actions {
+    flex-direction: column-reverse;
+  }
+
+  .product-edit__form .btn {
+    width: 100%;
+  }
+}

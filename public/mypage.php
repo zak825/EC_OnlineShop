@@ -54,7 +54,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $action = $_POST['action'] ?? '';
 
-    if ($action === 'upload_icon') {
+    if ($action === 'delete_product' || $action === 'update_product') {
+        if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
+            set_flash('不正な操作です。もう一度やり直してください。', 'error');
+            redirect('mypage.php?tab=sold');
+        }
+        $productId = filter_var($_POST['product_id'] ?? null, FILTER_VALIDATE_INT);
+        if (!$productId) {
+            set_flash('商品が見つかりません。', 'error');
+            redirect('mypage.php?tab=sold');
+        }
+        $stmt = db()->prepare(
+            'SELECT BuyerUserid FROM Sales WHERE ProductID = :product_id AND Userid = :user_id'
+        );
+        $stmt->execute([':product_id' => $productId, ':user_id' => $userId]);
+        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$product) {
+            set_flash('商品が見つかりません。', 'error');
+            redirect('mypage.php?tab=sold');
+        }
+        if ($product['BuyerUserid'] !== null) {
+            set_flash('購入済みの商品は編集・削除できません。', 'error');
+            redirect('mypage.php?tab=sold');
+        }
+        if ($action === 'delete_product') {
+            $stmt = db()->prepare(
+                'DELETE FROM Sales WHERE ProductID = :product_id AND Userid = :user_id AND BuyerUserid IS NULL'
+            );
+            $stmt->execute([':product_id' => $productId, ':user_id' => $userId]);
+            delete_product_image_dir(PRODUCT_IMAGE_DIR . '/' . $productId);
+            set_flash('商品を削除しました。', 'success');
+            redirect('mypage.php?tab=sold');
+        }
+        redirect('product_edit.php?productId=' . $productId);
+    } elseif ($action === 'upload_icon') {
         if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
             set_flash('不正な操作です。もう一度やり直してください。', 'error');
             redirect('mypage.php');
@@ -276,8 +309,12 @@ unset($item);
 
 // ---- 3. 出品情報参照（出品者が自分の商品） ------------------------
 // 購入者名・配送先は、BuyerUserid で UserData と結合して取る
+$hasProductCondition = db_has_column('Sales', 'ProductCondition');
+$productConditionSelect = $hasProductCondition
+    ? 's.ProductCondition,'
+    : 'CAST(NULL AS NVARCHAR(30)) AS ProductCondition,';
 $stmt = db()->prepare(
-    'SELECT s.ProductID, s.ProductName, s.Price, s.BuyerUserid, s.SoldDate, s.ShippingFlag,
+    'SELECT s.ProductID, s.ProductName, s.Price, ' . $productConditionSelect . ' s.BuyerUserid, s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
             g.GenreName,
             buyer.UserName AS BuyerUserName, buyer.ZipCode, buyer.Address, buyer.TEL

@@ -12,6 +12,13 @@ const URL_SELL = 'sell.php';
 
 const MSG_DB_ERROR   = '処理に失敗しました。時間をおいて再度お試しください';
 const MSG_CSRF_ERROR = '不正な操作です。もう一度やり直してください。';
+const CONFIRM_DESCRIPTION_MAX_DEFAULT = 500;
+const CONFIRM_CONDITIONS = [
+  '新品・未使用',
+  '目立った傷や汚れなし',
+  'やや傷や汚れあり',
+  '傷や汚れあり',
+];
 
 // ------------------------------------------------------------
 // ログインチェック
@@ -55,6 +62,28 @@ $done = false;   // 登録が完了したら true
 // （$_POST ではなく $_SESSION['sell'] の値を使う）
 // ------------------------------------------------------------
 if ($action === 'sell') {
+  $descriptionMax = CONFIRM_DESCRIPTION_MAX_DEFAULT;
+  $setting = db()->prepare(
+    'SELECT Value FROM SystemConfiguration
+     WHERE Category = :category AND [Key] = :setting_key'
+  );
+  $setting->execute([':category' => 'Sales', ':setting_key' => 'DescriptionMaxLength']);
+  $configuredDescriptionMax = trim((string)$setting->fetchColumn());
+  if (preg_match('/^[0-9]+$/', $configuredDescriptionMax) && (int)$configuredDescriptionMax > 0) {
+    $descriptionMax = min((int)$configuredDescriptionMax, 1000);
+  }
+  $condition = trim((string)($sell['condition'] ?? ''));
+  $description = trim((string)($sell['description'] ?? ''));
+  if (!in_array($condition, CONFIRM_CONDITIONS, true)) {
+    $error = '商品の状態を選択してください。';
+    $action = '';
+  } elseif ($description === '' || mb_strlen($description, 'UTF-8') > $descriptionMax) {
+    $error = '商品の説明は1〜' . $descriptionMax . '文字で入力してください。';
+    $action = '';
+  }
+}
+
+if ($action === 'sell') {
   $pdo = null;
   try {
     $pdo = db();
@@ -67,21 +96,41 @@ if ($action === 'sell') {
     $stmt->execute();
     $product_id = (int)$stmt->fetchColumn();
 
-    $sql = 'INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, ShippingFlag) '
-      . 'VALUES (:product_id, :genre_code, :product_name, :price, :userid, 0)';
+    $hasProductDetails = db_has_column('Sales', 'ProductCondition')
+      && db_has_column('Sales', 'Description');
+    if ($hasProductDetails) {
+      $sql = 'INSERT INTO Sales
+        (ProductID, GenreCode, ProductName, Price, ProductCondition, Description, Userid, ShippingFlag)
+        VALUES (:product_id, :genre_code, :product_name, :price, :condition, :description, :userid, 0)';
+    } else {
+      // 既存DBへ移行SQLを適用する前も、従来の項目だけで出品できるようにする。
+      $sql = 'INSERT INTO Sales
+        (ProductID, GenreCode, ProductName, Price, Userid, ShippingFlag)
+        VALUES (:product_id, :genre_code, :product_name, :price, :userid, 0)';
+    }
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([
+    $params = [
       ':product_id'   => $product_id,
       ':genre_code'   => $sell['genre_code'],
       ':product_name' => $sell['product_name'],
       ':price'        => $sell['price'],
-      ':userid'       => $user_id,
-    ]);
+      ':userid'        => $user_id,
+    ];
+    if ($hasProductDetails) {
+      $params[':condition'] = $sell['condition'];
+      $params[':description'] = $sell['description'];
+    }
+    $stmt->execute($params);
 
     // 販売画面で一時保存した画像を、商品IDのフォルダ（uploads/products/{商品ID}）に移す
     // 移せなかったら商品の登録も取り消す
-    if (isset($_SESSION['sell_images']) && !move_product_images($_SESSION['sell_images'], $product_id)) {
-      throw new RuntimeException('商品画像を移せませんでした: ' . $_SESSION['sell_images']);
+    if (isset($_SESSION['sell_images'])) {
+      if (!move_product_images($_SESSION['sell_images'], $product_id)) {
+        throw new RuntimeException('商品画像を移せませんでした: ' . $_SESSION['sell_images']);
+      }
+    } else {
+      // 画像なしの出品でも、同じ商品IDに残った古い画像を表示しない。
+      delete_product_image_dir(PRODUCT_IMAGE_DIR . '/' . $product_id);
     }
 
     $pdo->commit();
@@ -124,4 +173,5 @@ view('sell_confirm', [
   'done'       => $done,
   'error'      => $error,
   'image_urls' => $image_urls,
+  'product_conditions' => [],
 ]);
