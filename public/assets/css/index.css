@@ -440,3 +440,31 @@ div.product__image {
 #search-results.is-loading {
   opacity: 0.5;
 }
+
+/* ---------- 商品カードの「ジャンル」と「出品者＋評価」の位置をそろえる ---------- */
+.product__meta {
+  display: grid;
+  grid-template-columns: 6em 1fr;   /* ジャンル | 出品者名と評価（つなげて表示） */
+  align-items: center;
+  column-gap: 8px;
+}
+
+.product__meta .product__genre {
+  justify-self: start;   /* 枠は文字の幅のまま、列の左端に置く */
+  margin-right: 0;
+}
+
+/* 名前と評価は1つのまとまり。幅が足りなければ評価が次の行に回る */
+.product__seller {
+  min-width: 0;
+}
+
+/* スマホは幅が足りないので、今までのように折り返して並べる */
+@media (max-width: 560px) {
+  .product__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+  }
+}
