@@ -1,0 +1,107 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   管理画面 スタイルシート (setting.css)
+   対象: setting.html / setting_confirm.html
+   ヘッダーは header.css、カード・フォーム・ボタンは auth.css をそのまま使い、ここでは差分だけ書く
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. ページ全体
+   -------------------------------------------------------------------------- */
+body.admin-page {
+    background-color: #464646;
+}
+
+#setting-card {
+    max-width: 520px;
+}
+
+#setting-confirm-card {
+    max-width: 600px;
+}
+
+/* --------------------------------------------------------------------------
+   2. ヘッダー（ロゴ・「管理画面」・ログアウト）
+   -------------------------------------------------------------------------- */
+.admin-header {
+    align-items: center;
+}
+
+.admin-header__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #606060;
+    letter-spacing: 0.06em;
+}
+
+/* --------------------------------------------------------------------------
+   3. 入力画面
+   -------------------------------------------------------------------------- */
+.form-group input.is-invalid {
+    border-color: #ef4444;
+}
+
+.form-group input.is-invalid:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 1px #ef4444;
+}
+
+/* 入力欄直下のエラーは .form-group の余白があるので、下の余白を詰める */
+.form-group .field-error {
+    margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. 確認画面（変更前・変更後の一覧、注意書き）
+   -------------------------------------------------------------------------- */
+.setting-diff {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.setting-diff th,
+.setting-diff td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: left;
+    word-break: break-word;
+}
+
+.setting-diff thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.setting-diff tbody th {
+    color: #475569;
+    font-weight: 600;
+}
+
+.setting-diff td {
+    width: 22%;
+    text-align: right;
+    color: #0f172a;
+}
+
+/* 変更した行 */
+.setting-diff tr.is-changed {
+    background-color: #f5f0ff;
+}
+
+.setting-diff tr.is-changed td:last-child {
+    color: #8c52ff;
+    font-weight: 700;
+}
+
+.setting-notes__title {
+    margin: 0 0 6px;
+    font-weight: 600;
+}

@@ -191,11 +191,12 @@ INSERT INTO Sales (
 -- システム設定
 INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment) VALUES
     (1, 'Password', 'PasswordMinLength',    '8',       'int', N'パスワードの最小文字数'),
-    (2, 'Session',  'SessionTimeout',       '30',      'int', N'セッションの有効時間（分）'),
-    (3, 'Sales',    'PriceMin',             '300',     'int', N'出品価格の下限（円）'),
-    (4, 'Sales',    'PriceMax',             '9999999', 'int', N'出品価格の上限（円）'),
-    (5, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）'),
-    (6, 'Sales',    'DescriptionMaxLength', '500',     'int', N'商品の説明の最大文字数');
+    (2, 'Password', 'PasswordMaxLength',    '50',      'int', N'パスワードの最大文字数'),
+    (3, 'Session',  'SessionTimeout',       '30',      'int', N'セッションの有効時間（分）'),
+    (4, 'Sales',    'PriceMin',             '300',     'int', N'出品価格の下限（円）'),
+    (5, 'Sales',    'PriceMax',             '9999999', 'int', N'出品価格の上限（円）'),
+    (6, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）'),
+    (7, 'Sales',    'DescriptionMaxLength', '500',     'int', N'商品の説明の最大文字数');
 GO
 
 -- ------------------------------------------------------------

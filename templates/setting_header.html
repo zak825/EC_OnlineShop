@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="assets/css/header.css">
+
+<!-- 管理画面用ヘッダー（setting.html / setting_confirm.html で読み込む） -->
+<header class="admin-header">
+    <div class="logo">
+        <a href="setting.php">
+            <img src="assets/images/logo.png" width="140" height="50" alt="elogo">
+        </a>
+    </div>
+    <p class="admin-header__title">管理画面</p>
+
+    <nav>
+        <div class="right">
+            <form action="logout.php" method="post" onsubmit="return confirm('ログアウトしますか？');">
+                <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
+                <button type="submit" class="btn-header btn-header--secondary">ログアウト</button>
+            </form>
+        </div>
+    </nav>
+</header>

@@ -95,6 +95,39 @@ function redirect_to_login(?string $returnTo = null): void {
 }
 
 /**
+ * ログイン中のユーザーが管理者か（config.php の ADMIN_USER_IDS に含まれているか）
+ * 定数が無い・空のときは誰も管理者にしない
+ *
+ * @return bool
+ */
+function is_admin(): bool {
+    if (!defined('ADMIN_USER_IDS') || !is_array(ADMIN_USER_IDS)) {
+        return false;
+    }
+    $userId = current_user_id();
+    if ($userId === null) {
+        return false;
+    }
+    return in_array($userId, array_map('intval', ADMIN_USER_IDS), true);
+}
+
+/**
+ * 管理画面の先頭で呼ぶ
+ * 未ログインならログイン画面へ（ログイン後は $returnTo に戻す）、管理者でなければ 403 で止める
+ *
+ * @param string $returnTo ログイン成功後に戻す画面パス
+ */
+function require_admin(string $returnTo): void {
+    if (!is_logged_in()) {
+        redirect_to_login($returnTo);
+    }
+    if (!is_admin()) {
+        http_response_code(403);
+        exit('このページへのアクセス権限がありません。');
+    }
+}
+
+/**
  * 現在ログイン中のユーザーIDを取得する（未ログイン時は null）
  *
  * @return int|null
