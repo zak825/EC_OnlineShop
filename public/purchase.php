@@ -38,7 +38,7 @@ $userId = login_user_id();
 // ---- 2. 商品の存在チェック --------------------------------------
 $product = false;
 if ($productId) {
-    $sql = 'SELECT s.ProductID, s.ProductName, s.Price, s.Userid, s.BuyerUserid,
+    $sql =     'SELECT s.ProductID, s.ProductName, s.Price, s.ProductCondition, s.Description, s.Userid, s.BuyerUserid,
                    g.GenreName, u.UserName AS SellerName
             FROM Sales s
             JOIN Genre    g ON s.GenreCode = g.GenreCode

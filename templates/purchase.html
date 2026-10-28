@@ -67,8 +67,10 @@
 
           <dt>状態</dt>
           <dd data-live-state>
-            <?= $product['BuyerUserid'] === null ? '販売中' : '売り切れ' ?>
+            <?= h($product['ProductCondition'] ?? '') ?>
           </dd>
+          <dt>説明</dt>
+          <dd><?= nl2br(h($product['Description'] ?? '')) ?></dd>
         </dl>
       </section>
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e-shop | 商品編集</title>
+  <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/sell.css">
+  <link rel="stylesheet" href="assets/css/product_edit.css">
+  <link rel="stylesheet" href="assets/css/product_edit_images.css">
+  <link rel="icon" href="assets/icons/favicon.ico">
+</head>
+<body>
+<div id="wrap">
+<?php require __DIR__ . '/../public/header.php'; ?>
+<main>
+  <h1>商品編集画面</h1>
+  <?php if ($errors): ?>
+    <div class="message message--error" role="alert">
+      <?php foreach ($errors as $error): ?><p class="message__line"><?= h($error) ?></p><?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+    <form method="post" action="product_edit.php?productId=<?= (int)$product['ProductID'] ?>"
+      class="product-edit__form" id="sell_form" enctype="multipart/form-data" novalidate>
+      <input type="hidden" name="product_id" value="<?= (int)$product['ProductID'] ?>">
+      <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+      <p><label for="product_name">商品名</label></p>
+      <input id="product_name" name="product_name" class="Form-Item-Input" maxlength="50"
+        data-name-max="50" value="<?= h($product['ProductName']) ?>">
+      <p class="field-error" id="error_product_name"></p>
+      <p><label for="genre_code">ジャンル</label></p>
+      <select id="genre_code" name="genre_code" class="Form-Item-Input">
+        <?php foreach ($genres as $code => $name): ?>
+        <option value="<?= (int)$code ?>"<?= (int)$product['GenreCode'] === (int)$code ? ' selected' : '' ?>><?= h($name) ?></option>
+        <?php endforeach; ?>
+      </select>
+      <p class="field-error" id="error_genre_code"></p>
+      <p><label for="price">値段</label></p>
+      <input id="price" name="price" type="text" class="Form-Item-Input" inputmode="numeric"
+        data-price-min="1" data-price-max="2147483647" value="<?= h($product['Price']) ?>"> 円
+      <p class="field-error" id="error_price"></p>
+      <p><label for="condition">商品の状態</label></p>
+      <select id="condition" name="condition" class="Form-Item-Input">
+        <?php foreach ($conditions as $value => $label): ?>
+        <option value="<?= h($value) ?>"<?= $product['ProductCondition'] === $value ? ' selected' : '' ?>><?= h($label) ?></option>
+        <?php endforeach; ?>
+      </select>
+      <p class="field-error" id="error_condition"></p>
+      <p class="description-label">
+        <label for="description">商品の説明（<?= (int)$description_max ?>文字まで）</label>
+        <span id="edit_description_counter" class="description-counter"
+          aria-live="polite">0 / <?= (int)$description_max ?>文字</span>
+      </p>
+      <textarea id="description" name="description" class="Form-Item-Input" maxlength="<?= (int)$description_max ?>" rows="6"
+        data-resizable-description><?= h($product['Description'] ?? '') ?></textarea>
+      <p class="field-error" id="error_description"></p>
+      <p><label for="images">商品画像（変更する場合のみ選択・<?= PRODUCT_IMAGE_MAX ?>枚まで・1枚2MBまで）</label></p>
+        <label class="file-picker" for="images">
+          <span class="file-picker__button">画像を選択</span>
+          <span class="file-picker__count" id="edit_image_file_count" aria-live="polite"></span>
+        </label>
+        <input id="images" type="file" name="images[]" accept="image/jpeg,image/png,image/gif,image/webp" multiple
+          data-image-max="<?= PRODUCT_IMAGE_MAX ?>" class="file-picker__input">
+        <p id="edit_image_error" class="field-error"></p>
+        <p id="edit_image_preview_label" class="product-edit__image-label"
+          <?= $image_urls ? '' : ' hidden' ?>>選択中の画像（複数選択時:ドラック&amp;ドロップで順序の変更）</p>
+        <div class="image-slider product-edit__image-slider">
+          <button type="button" class="image-slider__arrow image-slider__arrow--prev"
+            id="edit_image_prev" aria-label="前の画像を表示" hidden>&lsaquo;</button>
+          <div class="image-list product-edit__image-list" id="edit_image_preview">
+          <?php foreach ($image_urls as $url): ?>
+          <?php $fileName = basename(parse_url($url, PHP_URL_PATH)); ?>
+          <div class="image-list__cell" draggable="true" data-existing="<?= h($fileName) ?>">
+            <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
+            <button type="button" class="image-list__remove" aria-label="この画像を削除">&times;</button>
+          </div>
+          <?php endforeach; ?>
+          </div>
+          <button type="button" class="image-slider__arrow image-slider__arrow--next"
+            id="edit_image_next" aria-label="次の画像を表示" hidden>&rsaquo;</button>
+        </div>
+      <p class="actions">
+        <a href="mypage.php?tab=sold" class="btn btn--secondary">キャンセル</a>
+        <button type="submit" name="action" value="save" class="btn btn--primary">保存する</button>
+      </p>
+    </form>
+</main>
+<?php require __DIR__ . '/../public/footer.php'; ?>
+</div>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/product_edit.js"></script>
+</body>
+</html>
