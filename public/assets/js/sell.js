@@ -431,13 +431,15 @@ form.addEventListener('submit', function(event) {
     return;
   }
 
-  // 4項目とも必ずチェックする（&& でつなぐと途中で止まるので別々に呼ぶ）
+  // すべての項目を必ず個別にチェックする（&& でつなぐと途中で止まる）
   var okProductName = validateProductName();
   var okGenreCode   = validateGenreCode();
   var okPrice       = validatePrice();
+  var okCondition   = validateCondition();
+  var okDescription = validateDescription();
   var okImages      = validateImages();
 
-  if (!okProductName || !okGenreCode || !okPrice || !okImages) {
+  if (!okProductName || !okGenreCode || !okPrice || !okCondition || !okDescription || !okImages) {
     event.preventDefault();
   }
 });
