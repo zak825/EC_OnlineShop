@@ -37,7 +37,8 @@ function image_urls_in(string $dir, string $url): array
 
     $urls = [];
     foreach ($files as $file) {
-        $urls[] = $url . '/' . basename($file);
+        $version = (string)@filemtime($file);
+        $urls[] = $url . '/' . basename($file) . ($version !== '' ? '?v=' . rawurlencode($version) : '');
     }
     return $urls;
 }
@@ -100,13 +101,86 @@ function move_product_images(string $tmpName, int $productId): bool
 {
     $from = PRODUCT_IMAGE_DIR . '/' . basename($tmpName);
     $to   = PRODUCT_IMAGE_DIR . '/' . $productId;
+    // 画像なしでも、同じ商品IDに残った古い画像を表示しない。
+    if (is_dir($to)) {
+        delete_product_image_dir($to);
+    }
+
     if (!is_dir($from)) {
         return true;   // 画像なし
     }
-    if (is_dir($to)) {
-        delete_product_image_dir($to);   // 同じ商品IDの古い画像が残っていたら消す
-    }
     return rename($from, $to);
+}
+
+/** 商品編集で、削除・追加・並び替え後の順番で画像を再構築する */
+function update_product_images(
+    int $productId,
+    array $removedFiles,
+    ?string $tmpName,
+    array $imageOrder = []
+): bool {
+    $target = PRODUCT_IMAGE_DIR . '/' . $productId;
+    $removed = [];
+    foreach ($removedFiles as $file) {
+        $name = basename((string)$file);
+        if ($name === (string)$file && preg_match('/^\d+\.(jpg|png|gif|webp)$/', $name)) {
+            $removed[$name] = true;
+        }
+    }
+
+    $existing = [];
+    foreach (glob($target . '/*.{jpg,png,gif,webp}', GLOB_BRACE) ?: [] as $file) {
+        $name = basename($file);
+        if (!isset($removed[$name])) {
+            $existing[$name] = $file;
+        }
+    }
+    natsort($existing);
+    $newFiles = $tmpName === null
+        ? []
+        : (glob(PRODUCT_IMAGE_DIR . '/' . basename($tmpName) . '/*.{jpg,png,gif,webp}', GLOB_BRACE) ?: []);
+    natsort($newFiles);
+
+    $ordered = [];
+    $used = [];
+    foreach ($imageOrder as $token) {
+        if (isset($existing[$token])) {
+            $ordered[] = $existing[$token];
+            $used[$token] = true;
+            continue;
+        }
+        if (preg_match('/^new:(\d+)$/', $token, $match)) {
+            $index = (int)$match[1];
+            if (isset($newFiles[$index])) {
+                $ordered[] = $newFiles[$index];
+                $used['new:' . $index] = true;
+            }
+        }
+    }
+    foreach ($existing as $name => $file) {
+        if (!isset($used[$name])) $ordered[] = $file;
+    }
+    foreach ($newFiles as $index => $file) {
+        if (!isset($used['new:' . $index])) $ordered[] = $file;
+    }
+
+    if (!$removed && !$newFiles && !$imageOrder) return true;
+    $staging = PRODUCT_IMAGE_DIR . '/edit_' . bin2hex(random_bytes(8));
+    if (!mkdir($staging, 0777, true)) return false;
+    foreach ($ordered as $number => $source) {
+        $extension = strtolower(pathinfo($source, PATHINFO_EXTENSION));
+        if (!copy($source, $staging . '/' . ($number + 1) . '.' . $extension)) {
+            delete_product_image_dir($staging);
+            return false;
+        }
+    }
+    delete_product_image_dir($target);
+    if (!rename($staging, $target)) {
+        delete_product_image_dir($staging);
+        return false;
+    }
+    if ($tmpName !== null) delete_product_images_tmp($tmpName);
+    return true;
 }
 
 /** 一時フォルダを中の画像ごと削除する（クリア・戻る・選び直しのとき） */

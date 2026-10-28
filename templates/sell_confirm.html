@@ -1,17 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-shop | 出品確認</title>
-    <link rel="stylesheet" href="assets/css/common.css">
-    <link rel="stylesheet" href="assets/css/index.css">
-    <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
-    <link rel="stylesheet"
-        href="assets/css/sell_confirm.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell_confirm.css') ?>">
-    <link rel="icon" href="assets/icons/favicon.ico">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e shop | 出品確認</title>
+  <link rel="stylesheet" href="assets/css/common.css">
+  <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
+  <link rel="stylesheet" href="assets/css/sell_confirm.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell_confirm.css') ?>">
+  <link rel="icon" href="assets/icons/favicon.ico">
 </head>
 
 <body>
@@ -22,7 +19,7 @@
         <h1>出品確認画面</h1>
 
         <?php if ($error !== ''): ?>
-        <p class="error">
+        <p class="message message--error">
             <?= h($error) ?>
         </p>
         <?php endif; ?>
@@ -36,6 +33,16 @@
             ジャンル：
             <?= h($sell['genre_name']) ?>
         </p>
+        <div class="confirm-details">
+          <p class="confirm-details__item">
+            <span class="confirm-details__label">商品の状態</span>
+            <span><?= h($sell['condition']) ?></span>
+          </p>
+          <div class="confirm-details__item confirm-details__item--description">
+            <p class="confirm-details__label">商品の説明</p>
+            <div class="confirm-description"><?= nl2br(h($sell['description'])) ?></div>
+          </div>
+        </div>
 
 
         <!-- ===== メイン画面での見え方プレビュー ===== -->
@@ -75,8 +82,14 @@
 
         <?php if ($done): ?>
         <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する（sell_confirm.js） -->
-        <p>出品が完了しました</p>
-        <p><a href="<?= h(URL_MAIN) ?>" id="main_link">移動しない場合はこちら</a></p>
+        <section class="complete-box" id="complete_box">
+          <img src="assets/images/checkpoint.png" alt="" class="complete-check">
+          <p class="complete-title">出品が完了しました</p>
+          <p class="complete-sub">商品の出品が完了しました。<br>購入されるまでお待ちください。</p>
+          <div class="actions">
+            <a href="<?= h(URL_MAIN) ?>" class="btn btn--primary complete-box__main-link" id="main_link">メイン画面へ戻る</a>
+          </div>
+        </section>
         <?php else: ?>
         <form action="sell_confirm.php" method="post" id="confirm_form">
             <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
@@ -86,7 +99,7 @@
         <?php endif; ?>
     </main>
 
-    <script src="assets/js/sell_confirm.js"></script>
+    <script src="assets/js/sell_confirm.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/sell_confirm.js') ?>"></script>
 
     <!-- フッター読み込み -->
     <?php require __DIR__ . '/../public/footer.php'; ?>

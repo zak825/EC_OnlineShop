@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!loginForm) return;
 
     const showError = (msg) => {
+        errorMsg.classList.remove('error-msg--warning');
         errorMsg.textContent = msg;
         errorMsg.style.display = 'block';
     };

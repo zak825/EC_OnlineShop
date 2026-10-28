@@ -22,6 +22,19 @@ if (sellButton !== null) {
 // 登録完了後：3秒後にメイン画面へ移動する
 var mainLink = document.getElementById('main_link');
 if (mainLink !== null) {
+  var completeBox = document.getElementById('complete_box');
+  if (completeBox !== null) {
+    window.setTimeout(function() {
+      var pageHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight
+      );
+      window.scrollTo({
+        top: Math.max(0, pageHeight - window.innerHeight + 24),
+        behavior: 'smooth'
+      });
+    }, 120);
+  }
   setTimeout(function() {
     location.href = mainLink.href;
   }, 3000);

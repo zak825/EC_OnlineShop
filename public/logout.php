@@ -1,4 +1,4 @@
-﻿<?php
+<?php
     require_once __DIR__ . '/../src/bootstrap.php';
 
     // 確認ポップアップは index.js で出す（OK のときだけ送信される）
