@@ -260,7 +260,7 @@
                           <?= h($item['ProductName']) ?>
                       </h2>
                       <p class="item__price">
-                          ¥
+                          &yen;
                           <?= number_format((int)$item['Price']) ?>
                       </p>
                       <dl class="item__meta">
@@ -362,7 +362,7 @@
             <h2 class="item__name">
               <?= h($item['ProductName']) ?>
             </h2>
-            <p class="item__price">¥
+            <p class="item__price">&yen;
               <?= number_format((int)$item['Price']) ?>
             </p>
             <?php if (!empty($item['ProductCondition'])): ?>
