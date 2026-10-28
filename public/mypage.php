@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        set_flash('', 'success');
+        set_flash('アイコンを更新しました。', 'success');
         redirect('mypage.php');
     } elseif ($action === 'update_profile') {
         // ---- 会員情報の変更 -------------------------------------------
