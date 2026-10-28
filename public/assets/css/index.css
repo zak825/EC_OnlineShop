@@ -421,3 +421,13 @@ div.product__image {
     width: auto;
   }
 }
+
+
+/* リアルタイム検索中：結果を少し薄くして、更新中だと分かるようにする */
+#search-results {
+  transition: opacity 0.15s ease;
+}
+
+#search-results.is-loading {
+  opacity: 0.5;
+}

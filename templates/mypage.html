@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -17,312 +17,323 @@
     <!--ヘッダー読み込み-->
     <?php require __DIR__ . '/../public/header.php'; ?>
 
-    <main class="container container--wide">
-      <?php if (!empty($flash)): ?>
-      <p class="message message--<?= h($flash['type']) ?>">
-        <?= h($flash['message']) ?>
-      </p>
-      <?php endif; ?>
+      <main class="container container--wide">
+          <?php if (!empty($flash)): ?>
+          <p class="message message--<?= h($flash['type']) ?>">
+              <?= h($flash['message']) ?>
+          </p>
+          <?php endif; ?>
 
-      <?php if (!$loggedIn): ?>
-      <!-- ===== 未ログイン ===== -->
-      <section class="card-login-prompt">
-        <img src="assets/images/key_off.png" width="70" height="70" alt="key_off" class="key_off">
-        <h1>セッションがタイムアウトしました</h1>
-        <p>マイページを見るにはログインしてください。</p>
-      </section>
+          <?php if (!$loggedIn): ?>
+          <!-- ===== 未ログイン ===== -->
+          <section class="card-login-prompt">
+              <img src="assets/images/key_off.png" width="70" height="70" alt="key_off" class="key_off">
+              <h1>セッションがタイムアウトしました</h1>
+              <p>マイページを見るにはログインしてください。</p>
+          </section>
 
-      <?php else: ?>
-      <!-- ===== プロフィール（アイコン・名前・評価） ===== -->
-      <!-- ===== プロフィール（名前・アイコン・評価） ===== -->
-      <section class="profile">
-        <div class="profile__left">
-          <?php if ($iconPath !== null && $iconPath !== ''): ?>
-          <img src="<?= h($iconPath) ?>" alt="" class="profile__icon">
           <?php else: ?>
-          <!-- アイコン未設定のときは名前の頭文字を表示 -->
-          <span class="profile__icon profile__icon--initial" aria-hidden="true">
-            <?= h(mb_substr($userName, 0, 1)) ?>
-          </span>
+          <!-- ===== 商品一覧ページ遷移ボタン ===== -->
+          <a href="index.php" class="index_btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="arrow-left-circle" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z" />
+              </svg>
+              <span class="btn_question">商品を探す？</span>
+          </a>
+
+          <!-- ===== プロフィール（アイコン・名前・評価） ===== -->
+          <!-- ===== プロフィール（名前・アイコン・評価） ===== -->
+          <section class="profile">
+              <div class="profile__left">
+                  <?php if ($iconPath !== null && $iconPath !== ''): ?>
+                  <img src="<?= h($iconPath) ?>" alt="" class="profile__icon">
+                  <?php else: ?>
+                  <!-- アイコン未設定のときは名前の頭文字を表示 -->
+                  <span class="profile__icon profile__icon--initial" aria-hidden="true">
+                      <?= h(mb_substr($userName, 0, 1)) ?>
+                  </span>
+                  <?php endif; ?>
+
+                  <div class="profile__info">
+                      <p class="profile__name">
+                          <?= h($userName) ?>
+                      </p>
+
+                      <!-- ↓ 評価の表示（自分で直した版があればそれをここに入れる） -->
+                      <p class="profile__rating">
+                          <?php if ($avgScore !== null): ?>
+                          <span class="profile__stars" aria-label="評価の平均 <?= h(number_format($avgScore, 1)) ?>">
+                              <?= stars((int)round($avgScore)) ?>
+                          </span>
+                          <span class="profile__score">
+                              <?= h(number_format($avgScore, 1)) ?>
+                          </span>
+                          <span class="profile__count">
+                              （
+                              <?= (int)$reviewCount ?>件）
+                          </span>
+                          <?php else: ?>
+                          <span class="profile__count">まだ評価はありません</span>
+                          <?php endif; ?>
+                      </p>
+                  </div>
+              </div>
+
+              <!-- ===== 設定ボタン（吹き出しポップアップ） ===== -->
+              <div class="profile__right">
+                  <button type="button" class="btn btn--secondary btn--small" id="settingsToggleBtn" aria-expanded="false" aria-haspopup="true">設定</button>
+                  <div class="settings-balloon" id="settingsBalloon" hidden>
+                      <button type="button" class="settings-balloon__item" id="openProfileModal">会員情報編集</button>
+                      <button type="button" class="settings-balloon__item" id="openIconModal">アイコン変更</button>
+                  </div>
+              </div>
+          </section>
+
+          <!-- ===== アイコン変更モーダル ===== -->
+          <div class="modal-overlay" id="iconModal" aria-hidden="true">
+              <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="iconModalTitle">
+                  <h2 id="iconModalTitle" class="modal-title">アイコンを変更</h2>
+
+                  <form action="mypage.php" method="post" enctype="multipart/form-data" id="iconForm">
+                      <input type="hidden" name="action" value="upload_icon">
+                      <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+
+                      <!-- プレビュー（選択前は今のアイコン、選択後は選んだ画像） -->
+                      <div class="modal-preview">
+                          <?php if ($iconPath !== null && $iconPath !== ''): ?>
+                          <img src="<?= h($iconPath) ?>" alt="" class="profile__icon__md" id="iconPreviewImg">
+                          <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" hidden
+                                aria-hidden="true"></span>
+                          <?php else: ?>
+                          <img src="" alt="" class="profile__icon" id="iconPreviewImg" hidden>
+                          <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" aria-hidden="true">
+                              <?= h(mb_substr($userName, 0, 1)) ?>
+                          </span>
+                          <?php endif; ?>
+                      </div>
+
+                      <!-- ファイル選択（input本体は隠して、ラベルをボタンとして使う） -->
+                      <label for="iconFile" class="btn-btn--secondary btn--small">ファイルを選択</label>
+                      <input type="file" id="iconFile" name="icon" class="visually-hidden"
+                             accept="image/jpeg,image/png,image/gif,image/webp" required>
+                      <p class="modal-filename" id="iconFileName">ファイルが選択されていません</p>
+                      <p class="modal-error" id="iconError" hidden></p>
+
+                      <div class="modal-actions">
+                          <button type="submit" class="btn btn--primary btn--small" id="iconSubmit" disabled>決定</button>
+                          <button type="button" class="btn btn--small" id="closeIconModal">キャンセル</button>
+
+                      </div>
+                  </form>
+              </div>
+          </div>
+
+          <!-- ===== 会員情報変更モーダル ===== -->
+          <div class="modal-overlay" id="profileModal" aria-hidden="true">
+              <div class="auth-card modal-auth-card" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+                  <div class="auth-header">
+                      <h2 id="profileModalTitle" class="auth-title">会員情報編集</h2>
+                  </div>
+
+                  <!-- エラーメッセージ表示領域 -->
+                  <p id="profileErrorMsg" class="error-msg" style="display: none;"></p>
+
+                  <!-- 入力セクション -->
+                  <div id="profileEditSection">
+                      <form id="profileEditForm" novalidate>
+                          <div class="form-group">
+                              <label for="edit_user_name">氏名</label>
+                              <input type="text" id="edit_user_name" name="user_name" maxlength="50"
+                                     value="<?= h($userProfile['UserName'] ?? '') ?>" placeholder="例：山田 太郎">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="edit_zip_code">郵便番号</label>
+                              <input type="text" id="edit_zip_code" name="zip_code" maxlength="8"
+                                     value="<?= h($userProfile['ZipCode'] ?? '') ?>" placeholder="例：1234567（ハイフンなし）"
+                                     inputmode="numeric" autocomplete="postal-code">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="edit_address">住所</label>
+                              <input type="text" id="edit_address" name="address" maxlength="256"
+                                     value="<?= h($userProfile['Address'] ?? '') ?>" placeholder="例：東京都千代田区1-1-1">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="edit_tel">電話番号</label>
+                              <input type="tel" id="edit_tel" name="tel" maxlength="15"
+                                     value="<?= h($userProfile['TEL'] ?? '') ?>" placeholder="例：09012345678">
+                          </div>
+
+                          <div class="btn-row">
+                              <button type="button" id="profileToConfirmBtn" class="btn-main">変更</button>
+                              <button type="button" id="closeProfileModal" class="btn-sub">キャンセル</button>
+                          </div>
+                      </form>
+                  </div>
+
+                  <!-- 確認セクション -->
+                  <div id="profileConfirmSection" style="display: none;">
+                      <p class="confirm-lead">以下の内容で変更します。よろしいですか？</p>
+
+                      <div class="confirm-list">
+                          <div class="confirm-item">
+                              <span class="confirm-label">氏名</span>
+                              <span class="confirm-value" id="confirm_user_name"></span>
+                          </div>
+                          <div class="confirm-item">
+                              <span class="confirm-label">郵便番号</span>
+                              <span class="confirm-value" id="confirm_zip_code"></span>
+                          </div>
+                          <div class="confirm-item">
+                              <span class="confirm-label">住所</span>
+                              <span class="confirm-value" id="confirm_address"></span>
+                          </div>
+                          <div class="confirm-item">
+                              <span class="confirm-label">電話番号</span>
+                              <span class="confirm-value" id="confirm_tel"></span>
+                          </div>
+                      </div>
+
+                      <form id="profileConfirmForm">
+                          <input type="hidden" name="csrf_token" id="profileCsrfToken" value="<?= h($token ?? csrf_token()) ?>">
+                          <div class="btn-row">
+                              <button type="button" id="profileSubmitBtn" class="btn-main">はい（変更する）</button>
+                              <button type="button" id="profileBackToEditBtn" class="btn-sub">キャンセル</button>
+                          </div>
+                      </form>
+                  </div>
+
+                  <!-- 完了セクション -->
+                  <div id="profileCompleteSection" class="complete-section" style="display: none;">
+                      <div class="complete-box">
+                          <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
+                          <p class="complete-message">会員情報の変更が完了しました！</p>
+                          <div class="btn-row">
+                              <button type="button" id="profileFinishBtn" class="btn-main">閉じる</button>
+                          </div>
+                      </div>
+                  </div>
+
+              </div>
+          </div>
+
+          <!-- ===== 購入した商品 / 出品した商品 の切り替え ===== -->
+          <nav class="tabs">
+              <a href="mypage.php" class="tabs__item<?= $tab === 'bought' ? ' is-active' : '' ?>">
+                  購入した商品（
+                  <?= count($bought) ?>）
+              </a>
+              <a href="mypage.php?tab=sold" class="tabs__item<?= $tab === 'sold' ? ' is-active' : '' ?>">
+                  出品した商品（
+                  <?= (int)$soldTotal ?>）
+              </a>
+          </nav>
+
+
+          <?php if ($tab === 'bought'): ?>
+          <!-- ===== 購入した商品 ===== -->
+          <?php if (!$bought): ?>
+          <p class="empty">履歴なし</p>
           <?php endif; ?>
 
-          <div class="profile__info">
-            <p class="profile__name">
-              <?= h($userName) ?>
-            </p>
+          <?php foreach ($bought as $item): ?>
+          <article class="card item">
+              <div class="item__row">
+                  <!-- 左：商品画像 -->
+                  <div class="item__col item__col--image">
+                      <div class="item__image">
+                          <?php if (!empty($item['image_url'])): ?>
+                          <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
+                          <?php else: ?>
+                          <div class="item__image--noimage" aria-hidden="true">
+                              <?= h($item['GenreName']) ?>
+                          </div>
+                          <?php endif; ?>
+                      </div>
+                  </div>
 
-            <!-- ↓ 評価の表示（自分で直した版があればそれをここに入れる） -->
-            <p class="profile__rating">
-              <?php if ($avgScore !== null): ?>
-              <span class="profile__stars" aria-label="評価の平均 <?= h(number_format($avgScore, 1)) ?>">
-                <?= stars((int)round($avgScore)) ?>
-              </span>
-              <span class="profile__score">
-                <?= h(number_format($avgScore, 1)) ?>
-              </span>
-              <span class="profile__count">（
-                <?= (int)$reviewCount ?>件）
-              </span>
-              <?php else: ?>
-              <span class="profile__count">まだ評価はありません</span>
-              <?php endif; ?>
-            </p>
-          </div>
-        </div>
+                  <!-- 中央：商品名・価格・出品者・購入日時 -->
+                  <div class="item__col item__col--center">
+                      <h2 class="item__name">
+                          <?= h($item['ProductName']) ?>
+                      </h2>
+                      <p class="item__price">
+                          ¥
+                          <?= number_format((int)$item['Price']) ?>
+                      </p>
+                      <dl class="item__meta">
+                          <dt>出品者：</dt>
+                          <dd>
+                              <?= h($item['SellerName']) ?>
+                          </dd>
+                          <dt>購入日時：</dt>
+                          <dd>
+                              <?= h(format_datetime($item['SoldDate'])) ?>
+                          </dd>
+                      </dl>
+                  </div>
 
-        <!-- ===== 設定ボタン（吹き出しポップアップ） ===== -->
-        <div class="profile__right">
-          <button type="button" class="btn btn--secondary btn--small" id="settingsToggleBtn" aria-expanded="false" aria-haspopup="true">設定</button>
-          <div class="settings-balloon" id="settingsBalloon" hidden>
-            <button type="button" class="settings-balloon__item" id="openProfileModal">会員情報編集</button>
-            <button type="button" class="settings-balloon__item" id="openIconModal">アイコン変更</button>
-          </div>
-        </div>
-      </section>
+                  <!-- 右：商品ステータス -->
+                  <div class="item__col item__col--right">
+                      <div class="item__status-block">
+                          <div class="item__status-header">
+                              <p class="item__label">ステータス：</p>
+                              <?php if ($item['sucre'] !== null): ?>
+                              <span class="badge badge--done">取引完了</span>
+                              <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
+                              <span class="badge badge--wait">発送済み</span>
+                              <?php else: ?>
+                              <span class="badge">未発送</span>
+                              <?php endif; ?>
+                          </div>
 
-      <!-- ===== アイコン変更モーダル ===== -->
-      <div class="modal-overlay" id="iconModal" aria-hidden="true">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="iconModalTitle">
-          <h2 id="iconModalTitle" class="modal-title">アイコンを変更</h2>
-
-          <form action="mypage.php" method="post" enctype="multipart/form-data" id="iconForm">
-            <input type="hidden" name="action" value="upload_icon">
-            <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-
-            <!-- プレビュー（選択前は今のアイコン、選択後は選んだ画像） -->
-            <div class="modal-preview">
-              <?php if ($iconPath !== null && $iconPath !== ''): ?>
-              <img src="<?= h($iconPath) ?>" alt="" class="profile__icon__md" id="iconPreviewImg">
-              <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" hidden
-                aria-hidden="true"></span>
-              <?php else: ?>
-              <img src="" alt="" class="profile__icon" id="iconPreviewImg" hidden>
-              <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" aria-hidden="true">
-                <?= h(mb_substr($userName, 0, 1)) ?>
-              </span>
-              <?php endif; ?>
-            </div>
-
-            <!-- ファイル選択（input本体は隠して、ラベルをボタンとして使う） -->
-            <label for="iconFile" class="btn-btn--secondary btn--small">ファイルを選択</label>
-            <input type="file" id="iconFile" name="icon" class="visually-hidden"
-              accept="image/jpeg,image/png,image/gif,image/webp" required>
-            <p class="modal-filename" id="iconFileName">ファイルが選択されていません</p>
-            <p class="modal-error" id="iconError" hidden></p>
-
-            <div class="modal-actions">
-              <button type="submit" class="btn btn--primary btn--small" id="iconSubmit" disabled>決定</button>
-              <button type="button" class="btn btn--small" id="closeIconModal">キャンセル</button>
-
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- ===== 会員情報変更モーダル ===== -->
-      <div class="modal-overlay" id="profileModal" aria-hidden="true">
-        <div class="auth-card modal-auth-card" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
-          <div class="auth-header">
-            <h2 id="profileModalTitle" class="auth-title">会員情報編集</h2>
-          </div>
-
-          <!-- エラーメッセージ表示領域 -->
-          <p id="profileErrorMsg" class="error-msg" style="display: none;"></p>
-
-          <!-- 入力セクション -->
-          <div id="profileEditSection">
-            <form id="profileEditForm" novalidate>
-              <div class="form-group">
-                <label for="edit_user_name">氏名</label>
-                <input type="text" id="edit_user_name" name="user_name" maxlength="50"
-                  value="<?= h($userProfile['UserName'] ?? '') ?>" placeholder="例：山田 太郎">
+                          <?php if ($item['sucre'] === null && (int)$item['ShippingFlag'] === 1): ?>
+                          <a href="review.php?productId=<?= (int)$item['ProductID'] ?>"
+                             class="btn btn--primary btn--small item__action-btn">取引完了（レビューを書く）</a>
+                          <?php endif; ?>
+                      </div>
+                  </div>
               </div>
 
-              <div class="form-group">
-                <label for="edit_zip_code">郵便番号</label>
-                <input type="text" id="edit_zip_code" name="zip_code" maxlength="8"
-                  value="<?= h($userProfile['ZipCode'] ?? '') ?>" placeholder="例：1234567（ハイフンなし）"
-                  inputmode="numeric" autocomplete="postal-code">
-              </div>
-
-              <div class="form-group">
-                <label for="edit_address">住所 (番地と建物名の間はスペースで区切ってください)</label>
-                <input type="text" id="edit_address" name="address" maxlength="256"
-                  value="<?= h($userProfile['Address'] ?? '') ?>" placeholder="例：東京都千代田区1-1-1">
-              </div>
-
-              <div class="form-group">
-                <label for="edit_tel">電話番号</label>
-                <input type="tel" id="edit_tel" name="tel" maxlength="15"
-                  value="<?= h($userProfile['TEL'] ?? '') ?>" placeholder="例：09012345678">
-              </div>
-
-              <div class="btn-row">
-                <button type="button" id="profileToConfirmBtn" class="btn-main">変更</button>
-                <button type="button" id="closeProfileModal" class="btn-sub">キャンセル</button>
-              </div>
-            </form>
-          </div>
-
-          <!-- 確認セクション -->
-          <div id="profileConfirmSection" style="display: none;">
-            <p class="confirm-lead">以下の内容で変更します。よろしいですか？</p>
-
-            <div class="confirm-list">
-              <div class="confirm-item">
-                <span class="confirm-label">氏名</span>
-                <span class="confirm-value" id="confirm_user_name"></span>
-              </div>
-              <div class="confirm-item">
-                <span class="confirm-label">郵便番号</span>
-                <span class="confirm-value" id="confirm_zip_code"></span>
-              </div>
-              <div class="confirm-item">
-                <span class="confirm-label">住所</span>
-                <span class="confirm-value" id="confirm_address"></span>
-              </div>
-              <div class="confirm-item">
-                <span class="confirm-label">電話番号</span>
-                <span class="confirm-value" id="confirm_tel"></span>
-              </div>
-            </div>
-
-            <form id="profileConfirmForm">
-              <input type="hidden" name="csrf_token" id="profileCsrfToken" value="<?= h($token ?? csrf_token()) ?>">
-              <div class="btn-row">
-                <button type="button" id="profileSubmitBtn" class="btn-main">はい（変更する）</button>
-                <button type="button" id="profileBackToEditBtn" class="btn-sub">キャンセル</button>
-              </div>
-            </form>
-          </div>
-
-          <!-- 完了セクション -->
-          <div id="profileCompleteSection" class="complete-section" style="display: none;">
-            <div class="complete-box">
-              <img src="assets/images/checkpoint.png" alt="完了" class="complete-icon-img">
-              <p class="complete-message">会員情報の変更が完了しました！</p>
-              <div class="btn-row">
-                <button type="button" id="profileFinishBtn" class="btn-main">閉じる</button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ===== 購入した商品 / 出品した商品 の切り替え ===== -->
-      <nav class="tabs">
-        <a href="mypage.php" class="tabs__item<?= $tab === 'bought' ? ' is-active' : '' ?>">
-          購入した商品（
-          <?= count($bought) ?>）
-        </a>
-        <a href="mypage.php?tab=sold" class="tabs__item<?= $tab === 'sold' ? ' is-active' : '' ?>">
-          出品した商品（
-          <?= (int)$soldTotal ?>）
-        </a>
-      </nav>
-
-
-      <?php if ($tab === 'bought'): ?>
-      <!-- ===== 購入した商品 ===== -->
-      <?php if (!$bought): ?>
-      <p class="empty">履歴なし</p>
-      <?php endif; ?>
-
-      <?php foreach ($bought as $item): ?>
-      <article class="card item">
-        <div class="item__row">
-          <!-- 左：商品画像 -->
-          <div class="item__col item__col--image">
-            <div class="item__image">
-              <?php if (!empty($item['image_url'])): ?>
-              <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
-              <?php else: ?>
-              <div class="item__image--noimage" aria-hidden="true">
-                <?= h($item['GenreName']) ?>
+              <?php if ($item['sucre'] !== null): ?>
+              <div class="review-body">
+                  <p class="review-body__stars" aria-label="評価<?= (int)$item['sucre'] ?>">
+                      <?= stars($item['sucre']) ?>
+                  </p>
+                  <?php if ($item['revwe'] !== null): ?>
+                  <p class="review-body__text">
+                      <?= nl2br(h($item['revwe'])) ?>
+                  </p>
+                  <?php endif; ?>
               </div>
               <?php endif; ?>
-            </div>
-          </div>
+          </article>
+          <?php endforeach; ?>
 
-          <!-- 中央：商品名・価格・出品者・購入日時 -->
-          <div class="item__col item__col--center">
-            <h2 class="item__name">
-              <?= h($item['ProductName']) ?>
-            </h2>
-            <p class="item__price">¥
-              <?= number_format((int)$item['Price']) ?>
-            </p>
-            <dl class="item__meta">
-              <dt>出品者：</dt>
-              <dd>
-                <?= h($item['SellerName']) ?>
-              </dd>
-              <dt>購入日時：</dt>
-              <dd>
-                <?= h(format_datetime($item['SoldDate'])) ?>
-              </dd>
-            </dl>
-          </div>
-
-          <!-- 右：商品ステータス -->
-          <div class="item__col item__col--right">
-            <div class="item__status-block">
-              <div class="item__status-header">
-                <p class="item__label">ステータス：</p>
-                <?php if ($item['sucre'] !== null): ?>
-                <span class="badge badge--done">取引完了</span>
-                <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
-                <span class="badge badge--wait">発送済み</span>
-                <?php else: ?>
-                <span class="badge">未発送</span>
-                <?php endif; ?>
-              </div>
-
-              <?php if ($item['sucre'] === null && (int)$item['ShippingFlag'] === 1): ?>
-              <a href="review.php?productId=<?= (int)$item['ProductID'] ?>"
-                class="btn btn--primary btn--small item__action-btn">取引完了（レビューを書く）</a>
-              <?php endif; ?>
-            </div>
-          </div>
-        </div>
-
-        <?php if ($item['sucre'] !== null): ?>
-        <div class="review-body">
-          <p class="review-body__stars" aria-label="評価<?= (int)$item['sucre'] ?>">
-            <?= stars($item['sucre']) ?>
-          </p>
-          <?php if ($item['revwe'] !== null): ?>
-          <p class="review-body__text">
-            <?= nl2br(h($item['revwe'])) ?>
-          </p>
-          <?php endif; ?>
-        </div>
-        <?php endif; ?>
-      </article>
-      <?php endforeach; ?>
-
-      <?php else: ?>
-      <!-- ===== 出品した商品 ===== -->
-      <?php if ($soldTotal > 0): ?>
-      <!-- ステータスで絞り込むプルダウン（選ぶと mypage.js が送信する。JS が無くても「表示」で送れる） -->
-      <form method="get" action="mypage.php" class="sold-filter" id="sold-filter">
-        <input type="hidden" name="tab" value="sold">
-        <label for="sold-status" class="sold-filter__label">ステータス</label>
-        <select name="status" id="sold-status" class="sold-filter__select">
-          <option value="">すべて（
-            <?= (int)$soldTotal ?>）
-          </option>
-          <?php foreach ($soldStatuses as $key => $label): ?>
-          <option value="<?= h($key) ?>" <?=$soldFilter===$key ? ' selected' : '' ?>>
+          <?php else: ?>
+          <!-- ===== 出品した商品 ===== -->
+          <?php if ($soldTotal > 0): ?>
+          <!-- ステータスで絞り込むプルダウン（選ぶと mypage.js が送信する。JS が無くても「表示」で送れる） -->
+          <form method="get" action="mypage.php" class="sold-filter" id="sold-filter">
+              <input type="hidden" name="tab" value="sold">
+              <label for="sold-status" class="sold-filter__label">ステータス</label>
+              <select name="status" id="sold-status" class="sold-filter__select">
+                  <option value="">
+                      すべて（
+                      <?= (int)$soldTotal ?>）
+                  </option>
+                  <?php foreach ($soldStatuses as $key => $label): ?>
+                  <option value="<?= h($key) ?>" <?=$soldFilter===$key ? ' selected' : '' ?>>
             <?= h($label) ?>（
             <?= (int)$soldCounts[$key] ?>）
           </option>
-          <?php endforeach; ?>
-        </select>
-        <noscript><button type="submit" class="btn btn--secondary btn--small">表示</button></noscript>
-      </form>
-      <?php endif; ?>
+                  <?php endforeach; ?>
+              </select>
+              <noscript><button type="submit" class="btn btn--secondary btn--small">表示</button></noscript>
+          </form>
+          <?php endif; ?>
 
       <?php if (!$sold): ?>
       <p class="empty">
@@ -441,14 +452,113 @@
             <?= nl2br(h($item['revwe'])) ?>
           </p>
           <?php endif; ?>
-        </div>
-        <?php endif; ?>
-      </article>
-      <?php endforeach; ?>
-      <?php endif; ?>
 
-      <?php endif; ?>
-    </main>
+          <?php foreach ($sold as $item): ?>
+          <article class="card item">
+              <div class="item__row">
+                  <!-- 左：商品画像 -->
+                  <div class="item__col item__col--image">
+                      <div class="item__image">
+                          <?php if (!empty($item['image_url'])): ?>
+                          <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
+                          <?php else: ?>
+                          <div class="item__image--noimage" aria-hidden="true">
+                              <?= h($item['GenreName']) ?>
+                          </div>
+                          <?php endif; ?>
+                      </div>
+                  </div>
+
+                  <!-- 中央：商品名・価格・購入者・購入日時 -->
+                  <div class="item__col item__col--center">
+                      <h2 class="item__name">
+                          <?= h($item['ProductName']) ?>
+                      </h2>
+                      <p class="item__price">
+                          ¥
+                          <?= number_format((int)$item['Price']) ?>
+                      </p>
+
+                      <?php if ($item['BuyerUserid'] !== null): ?>
+                      <dl class="item__meta">
+                          <dt>購入者：</dt>
+                          <dd>
+                              <?= h($item['BuyerUserName'] ?? '不明') ?>
+                          </dd>
+                          <dt>購入日時：</dt>
+                          <dd>
+                              <?= h(format_datetime($item['SoldDate'])) ?>
+                          </dd>
+                      </dl>
+                      <?php endif; ?>
+                  </div>
+
+                  <!-- 右：商品ステータス・配送先 -->
+                  <div class="item__col item__col--right">
+                      <div class="item__status-block">
+                          <div class="item__status-header">
+                              <p class="item__label">ステータス：</p>
+                              <?php if ($item['BuyerUserid'] === null): ?>
+                              <span class="badge">販売中</span>
+                              <?php elseif ($item['sucre'] !== null): ?>
+                              <span class="badge badge--done">取引完了</span>
+                              <?php elseif ((int)$item['ShippingFlag'] === 1): ?>
+                              <span class="badge badge--wait">発送済み</span>
+                              <?php else: ?>
+                              <span class="badge badge--alert">未発送</span>
+                              <?php endif; ?>
+                          </div>
+
+                          <?php if ($item['BuyerUserid'] !== null && (int)$item['ShippingFlag'] !== 1 && $item['sucre'] === null): ?>
+                          <!-- 発送ボタン：発送通知送信画面へ POST で商品IDを渡す -->
+                          <form action="<?= h(URL_SHIPPING) ?>" method="post" class="inline-form item__action-btn">
+                              <input type="hidden" name="action" value="open">
+                              <input type="hidden" name="product_id" value="<?= (int)$item['ProductID'] ?>">
+                              <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+                              <button type="submit" class="btn btn--primary btn--small">発送</button>
+                          </form>
+                          <?php endif; ?>
+                      </div>
+
+                      <?php if ($item['BuyerUserid'] !== null && (int)$item['ShippingFlag'] !== 1): ?>
+                      <!-- 配送先は発送に必要なので、未発送のあいだだけ表示する -->
+                      <div class="item__shipping-block">
+                          <p class="item__label">配送先：</p>
+                          <div class="item__shipping">
+                              <?php if ($item['BuyerUserName'] !== null): ?>
+                              〒
+                              <?= h($item['ZipCode']) ?><br>
+                              <?= h($item['Address']) ?><br>
+                              TEL
+                              <?= h($item['TEL']) ?>
+                              <?php else: ?>
+                              不明
+                              <?php endif; ?>
+                          </div>
+                      </div>
+                      <?php endif; ?>
+                  </div>
+              </div>
+
+              <?php if ($item['BuyerUserid'] !== null && $item['sucre'] !== null): ?>
+              <div class="review-body">
+                  <p class="review-body__label">購入者からのレビュー</p>
+                  <p class="review-body__stars" aria-label="評価<?= (int)$item['sucre'] ?>">
+                      <?= stars($item['sucre']) ?>
+                  </p>
+                  <?php if ($item['revwe'] !== null): ?>
+                  <p class="review-body__text">
+                      <?= nl2br(h($item['revwe'])) ?>
+                  </p>
+                  <?php endif; ?>
+              </div>
+              <?php endif; ?>
+          </article>
+          <?php endforeach; ?>
+          <?php endif; ?>
+
+          <?php endif; ?>
+      </main>
 
     <!-- フッター読み込み -->
     <?php require __DIR__ . '/../public/footer.php'; ?>
