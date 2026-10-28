@@ -25,9 +25,7 @@
 
                     <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
                     <p id="error-message" class="error-msg<?= ($messageType ?? 'error') === 'warning' ? ' error-msg--warning' : '' ?>" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
-                        : '' ?>>
-                        <?= h($errorMessage ?? '') ?>
-                    </p>
+                        : '' ?>><?= nl2br(h($errorMessage ?? ''), false) ?></p>
 
                     <?php if (($step ?? 'login') === 'confirm'): ?>
                     <!-- 他の端末でログイン中のアカウントにログインしようとしたときの確認 -->
