@@ -268,6 +268,18 @@ main>p:first-of-type {
   height: 44px;
   background: #8c52ff;
   color: #fff;
+  border: 1px solid #8c52ff;
+  text-decoration: none;
+}
+
+.complete-box__main-link {
+  color: #fff !important;
+}
+
+.complete-box__main-link:hover {
+  color: #fff !important;
+  background: #4f23a0;
+  border-color: #4f23a0;
   text-decoration: none;
 }
 
