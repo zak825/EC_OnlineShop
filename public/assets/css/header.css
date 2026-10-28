@@ -1,4 +1,4 @@
-body {
+﻿body {
     margin-top: 0;
 }
 
@@ -55,6 +55,9 @@ nav a {
 }
 
 
+#login-btn{
+    margin: 0 5px 0 0;
+}
 
 .UserName {
     margin: 0px 40px 0px 10px;

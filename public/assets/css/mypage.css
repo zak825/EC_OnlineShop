@@ -1,4 +1,4 @@
-/* ---------- 未ログイン(セッション切れ) ---------- */
+﻿/* ---------- 未ログイン(セッション切れ) ---------- */
 .card-login-prompt {
   margin: 0px auto;
   align-items: center;
@@ -6,12 +6,38 @@
   color: #808080;
 }
 
+/* ---------- 商品一覧遷移ボタン ---------- */
+.index_btn {
+    display: flex;
+    margin: 10px 0 40px 0;
+    text-decoration: none;
+    text-align: center;
+    color: #0f172a;
+}
+.btn_question {
+    position: relative;
+    margin-left: 5px;
+}
+.btn_question:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -0.3rem;
+    transform: translateX(-50%);
+    width: 0%;
+    height: 2px;
+    background: #8c52ff;
+    transition: all 0.5s;
+}
+.index_btn:hover .btn_question:after {
+    width: 100%;
+}
 /* ---------- プロフィール（名前・アイコン・評価） ---------- */
 .profile {
-  display: flex;
-  max-width: 700px;
-  align-items: center;
-  margin: 0px auto 24px auto;
+    display: flex;
+    max-width: 700px;
+    align-items: center;
+    margin: 0px auto 24px auto;
 }
 
 .profile__stars {
@@ -169,9 +195,7 @@
   font-weight: bold;
 }
 
-main {
-  margin-top: 50px;
-}
+
 
 /* 購入・出品商品タブ横並び */
 .tabs {
@@ -337,6 +361,7 @@ label.btn-btn--secondary.btn--small:hover {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
+
 
 /* ============================================================
    出品ステータス絞り込みバー
