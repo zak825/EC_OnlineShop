@@ -81,6 +81,28 @@ body {
   word-break: break-all;
 }
 
+.info-list dd.description-content {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-height: 16rem;
+  overflow: auto !important;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  line-height: 1.7;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  scrollbar-width: thin;
+}
+
+.info-list dd.description-content br {
+  display: block;
+  content: "";
+  margin-bottom: 0.35em;
+}
+
 /* ---------- メッセージ ---------- */
 .message {
   padding: 10px 14px;

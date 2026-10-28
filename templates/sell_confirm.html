@@ -82,12 +82,12 @@
 
         <?php if ($done): ?>
         <!-- 登録完了：ボタンは出さず、3秒後にメイン画面へ移動する（sell_confirm.js） -->
-        <section class="complete-box">
+        <section class="complete-box" id="complete_box">
           <img src="assets/images/checkpoint.png" alt="" class="complete-check">
           <p class="complete-title">出品が完了しました</p>
           <p class="complete-sub">商品の出品が完了しました。<br>購入されるまでお待ちください。</p>
           <div class="actions">
-            <a href="<?= h(URL_MAIN) ?>" class="btn btn--primary" id="main_link">メイン画面へ</a>
+            <a href="<?= h(URL_MAIN) ?>" class="btn btn--primary complete-box__main-link" id="main_link">メイン画面へ戻る</a>
           </div>
         </section>
         <?php else: ?>
@@ -99,7 +99,7 @@
         <?php endif; ?>
     </main>
 
-    <script src="assets/js/sell_confirm.js"></script>
+    <script src="assets/js/sell_confirm.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/sell_confirm.js') ?>"></script>
 
     <!-- フッター読み込み -->
     <?php require __DIR__ . '/../public/footer.php'; ?>

@@ -37,7 +37,8 @@ function image_urls_in(string $dir, string $url): array
 
     $urls = [];
     foreach ($files as $file) {
-        $urls[] = $url . '/' . basename($file);
+        $version = (string)@filemtime($file);
+        $urls[] = $url . '/' . basename($file) . ($version !== '' ? '?v=' . rawurlencode($version) : '');
     }
     return $urls;
 }
