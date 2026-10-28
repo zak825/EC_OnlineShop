@@ -1,10 +1,12 @@
-﻿/* ---------- 未ログイン(セッション切れ) ---------- */
+/* ---------- 未ログイン(セッション切れ) ---------- */
 .card-login-prompt {
   margin: 0px auto;
   align-items: center;
   text-align: center;
   color: #808080;
 }
+
+
 
 /* ---------- 商品一覧遷移ボタン ---------- */
 .index_btn {
@@ -601,6 +603,18 @@ label.btn-btn--secondary.btn--small:hover {
   border-color: #2e7d32;
 }
 
+/* 削除・編集ボタン */
+div.actions {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+div.actions .inline-form {
+    display: flex;
+    margin: 0;
+}
+
 /* ---------- ボタン ---------- */
 .btn {
   display: inline-flex;
@@ -709,4 +723,5 @@ label.btn-btn--secondary.btn--small:hover {
     flex: 1;
     min-width: 0;
   }
-}
+
+
