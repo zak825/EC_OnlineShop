@@ -1,4 +1,4 @@
-body {
+﻿body {
     margin-top: 0;
 }
 
@@ -52,16 +52,6 @@ nav a {
     border: 1px solid var(--color-border);
     margin: 0;
     align-self: center;
-}
-
-
-#login-btn{
-    margin: 0 5px 0 0;
-}
-
-
-#login-btn{
-    margin: 0 5px 0 0;
 }
 
 
