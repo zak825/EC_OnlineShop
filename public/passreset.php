@@ -12,6 +12,7 @@ $verifyTimeout = 10 * 60;
 
 $pdo = db();
 $errorMessage = '';
+$messageType = 'error'; // 'error'（赤） / 'warning'（黄）
 $step = 'verify'; // 'verify'（照合） / 'reset'（新パスワード入力） / 'complete'（完了）
 
 // 秘密の質問リスト（質問ID => 質問文）
@@ -101,16 +102,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute();
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if (
+                $resetUserId = $user ? (int)$user['UserId'] : 0;
+                $lockMessage = $user ? active_reset_lock_message($pdo, $resetUserId) : null;
+
+                if ($lockMessage !== null) {
+                    // ロック中は回答が合っていても照合を通さない（回数も期限も変えない）
+                    $errorMessage = $lockMessage;
+                    $messageType = 'warning';
+                } elseif (
                     $user
                     && (int)$user['SecretQuestionId'] === (int)$secretQuestionIdInput
                     && password_verify($secretAnswerInput, (string)$user['SecretAnswer'])
                 ) {
+                    clear_reset_lock($pdo, $resetUserId);
                     // 8. 照合済みセッションの保存（セッション固定攻撃対策としてIDを再生成）
                     session_regenerate_id(true);
                     $_SESSION['passreset_verified_uid'] = (int)$user['UserId'];
                     $_SESSION['passreset_verified_at']  = time();
                     $step = 'reset';
+                } elseif ($user) {
+                    $lockMessage = register_reset_failure($pdo, $resetUserId);
+                    if ($lockMessage !== null) {
+                        $errorMessage = $lockMessage;
+                        $messageType = 'warning';
+                    } else {
+                        $errorMessage = 'ユーザーID、または秘密の質問と回答の組み合わせが正しくありません。'; // E-PR-02
+                    }
                 } else {
                     $errorMessage = 'ユーザーID、または秘密の質問と回答の組み合わせが正しくありません。'; // E-PR-02
                 }
@@ -178,6 +195,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $commonStmt->bindValue(':insert_user_id', $verifiedUserId, PDO::PARAM_INT);
                     $commonStmt->execute();
 
+                    // 再設定できたら、ログイン失敗と秘密の質問の失敗のロックを外す
+                    clear_login_lock($pdo, $verifiedUserId);
+                    clear_reset_lock($pdo, $verifiedUserId);
+
                     $pdo->commit();
 
                     // 13. 照合用セッションを破棄し、再設定完了画面を表示する
@@ -207,6 +228,7 @@ view('passreset', [
     'step'                  => $step,
     'token'                 => csrf_token(),
     'errorMessage'          => $errorMessage,
+    'messageType'           => $messageType,
     'secretQuestions'       => $secretQuestions,
     'userIdInput'           => $userIdInput,
     'secretQuestionIdInput' => $secretQuestionIdInput,

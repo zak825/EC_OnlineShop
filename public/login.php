@@ -9,6 +9,7 @@
 
     $pdo = db();
     $errorMessage = '';
+    $messageType = 'error'; // 'error'（赤） / 'warning'（黄）
     $userIdInput = '';
     $step = 'login'; // 'login'（ID・パスワード入力） / 'confirm'（他の端末でログイン中の確認）
 
@@ -123,24 +124,40 @@
                     $stmt->execute();
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    if ($user && password_verify($password, $user['LoginPassword'])) {
+                    $loginUserId = $user ? (int)$user['UserId'] : 0;
+                    $lockMessage = $user ? active_login_lock_message($pdo, $loginUserId) : null;
+
+                    if ($lockMessage !== null) {
+                        // ロック中はパスワードが合っていてもログインさせない（回数も期限も変えない）
+                        $errorMessage = $lockMessage;
+                        $messageType = 'warning';
+                    } elseif ($user && password_verify($password, $user['LoginPassword'])) {
+                        clear_login_lock($pdo, $loginUserId);
                         // 3.5 同時ログイン禁止：同じアカウントが他の端末でログイン中なら、確認画面を出す
                         //     （パスワード認証が通った人にだけ、ログイン中かどうかを伝える）
                         $loginToken = acquire_login_slot(
                             $pdo,
-                            (int)$user['UserId'],
+                            $loginUserId,
                             get_session_timeout_seconds()
                         );
 
                         if ($loginToken === null) {
                             // 確認待ちにする（まだログインはさせない。user_id もセッションに入れない）
                             session_regenerate_id(true);
-                            $_SESSION['login_pending_uid'] = (int)$user['UserId'];
+                            $_SESSION['login_pending_uid'] = $loginUserId;
                             $_SESSION['login_pending_at']  = time();
                             $step = 'confirm';
                         } else {
                             // 4. ログイン情報をセッションに書き込んで画面遷移する
                             $completeLogin($user, $loginToken);
+                        }
+                    } elseif ($user) {
+                        $lockMessage = register_login_failure($pdo, $loginUserId);
+                        if ($lockMessage !== null) {
+                            $errorMessage = $lockMessage;
+                            $messageType = 'warning';
+                        } else {
+                            $errorMessage = 'userIDまたはパスワードが間違っています。';
                         }
                     } else {
                         $errorMessage = 'userIDまたはパスワードが間違っています。';
@@ -152,9 +169,6 @@
             }
         }
     }
-
-    // メッセージの種別：'error'（赤） / 'warning'（黄）
-    $messageType = 'error';
 
     $flash = get_flash();
     if ($errorMessage === '' && !empty($flash['message'])) {

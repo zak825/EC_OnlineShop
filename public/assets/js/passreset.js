@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     const showError = (msg) => {
+        errorMsg.classList.remove('error-msg--warning');
         errorMsg.textContent = msg;
         errorMsg.style.display = 'block';
     };
