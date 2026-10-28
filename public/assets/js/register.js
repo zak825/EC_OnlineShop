@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         errorMsg.replaceChildren(list);
         errorMsg.style.display = 'block';
+        // エラーはフォーム上部にあるため、ページ先頭まで戻す
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const hideError = () => {

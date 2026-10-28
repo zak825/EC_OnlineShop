@@ -8,7 +8,7 @@
  * @returns {string}
  */
 function formatYen(value) {
-  return '¥' + Number(value).toLocaleString('ja-JP');
+  return '&yen;' + Number(value).toLocaleString('ja-JP');
 }
 
 // 説明欄は縦方向だけリサイズでき、広げたときは入力欄を強調する。
