@@ -12,6 +12,7 @@ $verifyTimeout = 10 * 60;
 
 $pdo = db();
 $errorMessage = '';
+$messageType = 'error'; // 'error'（赤） / 'warning'（黄）
 $step = 'verify'; // 'verify'（照合） / 'reset'（新パスワード入力） / 'complete'（完了）
 
 // 秘密の質問リスト（質問ID => 質問文）
@@ -90,6 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             || mb_strlen($secretAnswerInput, 'UTF-8') > 100
         ) {
             $errorMessage = 'すべての項目を正しく入力してください。'; // E-PR-01
+        } elseif (!is_allowed_zenkaku_text($secretAnswerInput)) {
+            $errorMessage = zenkaku_text_error('秘密の質問の回答');
         } else {
             try {
                 // 7. IDと秘密の質問のDB照合を行う（プレースホルダでSQLインジェクション対策）
@@ -101,16 +104,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute();
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if (
+                $resetUserId = $user ? (int)$user['UserId'] : 0;
+                $lockMessage = $user ? active_reset_lock_message($pdo, $resetUserId) : null;
+
+                if ($lockMessage !== null) {
+                    // ロック中は回答が合っていても照合を通さない（回数も期限も変えない）
+                    $errorMessage = $lockMessage;
+                    $messageType = 'warning';
+                } elseif (
                     $user
                     && (int)$user['SecretQuestionId'] === (int)$secretQuestionIdInput
                     && password_verify($secretAnswerInput, (string)$user['SecretAnswer'])
                 ) {
+                    clear_reset_lock($pdo, $resetUserId);
                     // 8. 照合済みセッションの保存（セッション固定攻撃対策としてIDを再生成）
                     session_regenerate_id(true);
                     $_SESSION['passreset_verified_uid'] = (int)$user['UserId'];
                     $_SESSION['passreset_verified_at']  = time();
                     $step = 'reset';
+                } elseif ($user) {
+                    $lockMessage = register_reset_failure($pdo, $resetUserId);
+                    if ($lockMessage !== null) {
+                        $errorMessage = $lockMessage;
+                        $messageType = 'warning';
+                    } else {
+                        $errorMessage = 'ユーザーID、または秘密の質問と回答の組み合わせが正しくありません。'; // E-PR-02
+                    }
                 } else {
                     $errorMessage = 'ユーザーID、または秘密の質問と回答の組み合わせが正しくありません。'; // E-PR-02
                 }
@@ -141,8 +160,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($newPassword !== $newPasswordConfirm) {
                 $errorMessage = '新しいパスワードと確認用パスワードが一致しません。'; // E-PR-04
             } elseif ($newPasswordLen < $passwordMinLength || $newPasswordLen > $passwordMaxLength) {
-                // 登録画面（register.php）と同じく文字数のみチェックする
                 $errorMessage = "パスワードは{$passwordMinLength}文字以上{$passwordMaxLength}文字以内で入力してください。"; // E-PR-05
+            } elseif (password_has_forbidden_char($newPassword)) {
+                $errorMessage = password_forbidden_char_error();
             } else {
                 // 既存のログイン処理（password_verify）に合わせてハッシュ化して保存する
                 $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -178,6 +198,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $commonStmt->bindValue(':insert_user_id', $verifiedUserId, PDO::PARAM_INT);
                     $commonStmt->execute();
 
+                    // 再設定できたら、ログイン失敗と秘密の質問の失敗のロックを外す
+                    clear_login_lock($pdo, $verifiedUserId);
+                    clear_reset_lock($pdo, $verifiedUserId);
+
                     $pdo->commit();
 
                     // 13. 照合用セッションを破棄し、再設定完了画面を表示する
@@ -207,6 +231,7 @@ view('passreset', [
     'step'                  => $step,
     'token'                 => csrf_token(),
     'errorMessage'          => $errorMessage,
+    'messageType'           => $messageType,
     'secretQuestions'       => $secretQuestions,
     'userIdInput'           => $userIdInput,
     'secretQuestionIdInput' => $secretQuestionIdInput,

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -19,7 +19,7 @@
             <h1>出品画面</h1>
 
             <?php if ($error_db !== ''): ?>
-            <p class="error">
+            <p class="message message--error">
                 <?= h($error_db) ?>
             </p>
             <?php endif; ?>
@@ -29,15 +29,14 @@
                 <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
 
-                <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく -->
+                <!-- エラー表示欄は JS（sell.js）でも使うので、エラーがなくても空で置いておく
+                     （中に改行や空白を入れない。空でなくなり、入力欄が最初から赤くなってしまう） -->
                 <p><label for="product_name">商品名</label></p>
                 <!-- 最大文字数は sell.php が DB（SystemConfiguration）から取得した値 -->
                 <input type="text" id="product_name" name="product_name" class="Form-Item-Input"
                     maxlength="<?= h($name_max) ?>" data-name-max="<?= h($name_max) ?>"
                     value="<?= h($form_product_name) ?>">
-                <p class="error" id="error_product_name">
-                    <?= h($error_product_name) ?>
-                </p>
+                <p class="field-error" id="error_product_name"><?= h($error_product_name) ?></p>
 
                 <p><label for="genre_code">ジャンル</label></p>
                 <select id="genre_code" name="genre_code" class="Form-Item-Input">
@@ -54,18 +53,35 @@
                     <?php endif; ?>
                     <?php endforeach; ?>
                 </select>
-                <p class="error" id="error_genre_code">
-                    <?= h($error_genre_code) ?>
-                </p>
+                <p class="field-error" id="error_genre_code"><?= h($error_genre_code) ?></p>
 
                 <!-- 全角数字・カンマも受け付けるので type="text"（type="number" だと入力できない） -->
                 <p><label for="price">値段</label></p>
                 <input type="text" id="price" name="price" class="Form-Item-Input" inputmode="numeric"
                     data-price-min="<?= h($price_min) ?>" data-price-max="<?= h($price_max) ?>"
                     value="<?= h($form_price) ?>"> 円
-                <p class="error" id="error_price">
-                    <?= h($error_price) ?>
+                <p class="field-error" id="error_price"><?= h($error_price) ?></p>
+
+                <p><label for="condition">商品の状態</label></p>
+                <select id="condition" name="condition" class="Form-Item-Input">
+                    <option value="">選択してください</option>
+                    <?php foreach ($product_conditions as $condition_value => $condition_label): ?>
+                    <option value="<?= h($condition_value) ?>"<?= $form_condition === $condition_value ? ' selected' : '' ?>>
+                        <?= h($condition_label) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="field-error" id="error_condition"><?= h($error_condition) ?></p>
+
+                <p class="description-label">
+                    <label for="description">商品の説明</label>
+                    <span id="description_counter" class="description-counter"
+                        aria-live="polite">0 / <?= h($description_max) ?>文字</span>
                 </p>
+                <textarea id="description" name="description" class="Form-Item-Input"
+                    maxlength="<?= h($description_max) ?>" rows="6"
+                    data-resizable-description><?= h($form_description) ?></textarea>
+                <p class="field-error" id="error_description"><?= h($error_description) ?></p>
 
                 <p>
                     <label for="images">
@@ -73,15 +89,17 @@
                         <?= h($image_max) ?>枚まで・1枚2MBまで）
                     </label>
                 </p>
+                <label class="file-picker" for="images">
+                    <span class="file-picker__button">画像を選択</span>
+                    <span class="file-picker__count" id="image_file_count" aria-live="polite"></span>
+                </label>
                 <input type="file" id="images" name="images[]" accept="image/jpeg,image/png,image/gif,image/webp" multiple
-                    data-image-max="<?= h($image_max) ?>">
-                <p class="error" id="error_images">
-                    <?= h($error_images) ?>
-                </p>
+                    data-image-max="<?= h($image_max) ?>" class="file-picker__input">
+                <p class="field-error" id="error_images"><?= h($error_images) ?></p>
 
                 <!-- 選択中の画像のプレビュー
                         最初は前に選んだ画像（販売確認画面から戻ったとき）を出し、画像を選ぶと sell.js が入れ替える -->
-                <p id="image_preview_label" <?=$image_urls ? '' : ' hidden' ?>>選択中の画像（選び直すと入れ替わります）</p>
+                <p id="image_preview_label" <?=$image_urls ? '' : ' hidden' ?>>選択中の画像（複数選択時:ドラック&amp;ドロップで順序の変更）</p>
                 <!-- 左右の矢印で横にスクロールする（はみ出していないとき・端まで来たときは sell.js が矢印を隠す） -->
                 <div class="image-slider">
                     <button type="button" class="image-slider__arrow image-slider__arrow--prev" id="image_prev"

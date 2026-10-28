@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -6,8 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e-shop | 購入</title>
   <link rel="stylesheet" href="assets/css/common.css">
-  <link rel="stylesheet" href="assets/css/purchase.css">
-  <link rel="stylesheet" href="assets/css/header.css">
+  <link rel="stylesheet" href="assets/css/purchase.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/purchase.css') ?>">
   <link rel="icon" href="assets/icons/favicon.ico">
 </head>
 
@@ -67,9 +66,11 @@
           </dd>
 
           <dt>状態</dt>
-          <dd>
-            <?= $product['BuyerUserid'] === null ? '販売中' : '売り切れ' ?>
+          <dd data-live-state>
+            <?= h($product['ProductCondition'] ?? '') ?>
           </dd>
+          <dt>説明</dt>
+          <dd class="description-content"><?= nl2br(h($product['Description'] ?? '')) ?></dd>
         </dl>
       </section>
 
@@ -82,19 +83,25 @@
         <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
       </div>
       <?php else: ?>
-      <form method="post" action="purchase.php">
+      <!-- JS（purchase_status.js）が、買えなくなったときにここへ理由を出す -->
+      <p class="message message--warning" data-live-message hidden></p>
+
+      <form method="post" action="purchase.php"
+            data-status-url="purchase_status.php"
+            data-product-id="<?= (int)$product['ProductID'] ?>">
         <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
         <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
         <div class="actions">
           <a href="<?= h(URL_MAIN) ?>" class="btn btn--secondary">戻る</a>
-          <button type="submit" class="btn btn--primary">購入</button>
+          <button type="submit" class="btn btn--primary" data-live-buy>購入</button>
         </div>
       </form>
       <?php endif; ?>
     </main>
 
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/purchase_status.js"></script>
     <script>
       // サムネイルをクリックしたらメイン画像を差し替える
       document.querySelectorAll('.product-gallery__thumb').forEach((thumb) => {

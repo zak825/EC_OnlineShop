@@ -30,10 +30,8 @@
                     </div>
 
                     <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
-                    <p id="error-message" class="error-msg" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
-                        : '' ?>>
-                        <?= h($errorMessage ?? '') ?>
-                    </p>
+                    <p id="error-message" class="error-msg<?= ($messageType ?? 'error') === 'warning' ? ' error-msg--warning' : '' ?>" <?=($errorMessage ?? '' )==='' ? ' style="display:none;"'
+                        : '' ?>><?= nl2br(h($errorMessage ?? ''), false) ?></p>
 
                     <!-- フェーズ1：ユーザーID・秘密の質問の照合 -->
                     <section id="verify-section"
@@ -135,6 +133,7 @@
             </div>
         </main>
 
+        <script src="assets/js/profile_validation.js"></script>
         <script src="assets/js/passreset.js"></script>
 
 

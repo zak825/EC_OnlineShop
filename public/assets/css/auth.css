@@ -94,8 +94,27 @@
     font-size: 13px;
     line-height: 1.5;
     margin: 0 0 20px 0;
+    align-items: center;
     border-radius: 0;
     word-break: break-all;
+}
+
+/* エラーが複数あるときに1件ずつ並べる */
+.error-list {
+    margin: 0;
+    padding-left: 1.2em;
+}
+
+.error-list li + li {
+    margin-top: 4px;
+}
+
+/* 注意喚起（購入前のログイン案内など）のときは黄色ベースにする */
+.error-msg--warning {
+    background-color: #fffbeb;
+    border-color: #fde68a;
+    border-left-color: #f59e0b;
+    color: #92400e;
 }
 
 /* --------------------------------------------------------------------------

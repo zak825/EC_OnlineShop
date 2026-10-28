@@ -267,10 +267,10 @@
     resetFormValues();
   }
 
-  // 入力欄の値を、送信する形（前後の空白除去・郵便番号はハイフンなし）で取り出す
+  // 入力欄の値を、送信する形（前後の空白除去・氏名の間は半角スペース1つ・郵便番号はハイフンなし）で取り出す
   function readValues() {
     return {
-      name: nameInput ? PV.trim(nameInput.value) : '',
+      name: nameInput ? PV.normalizeName(PV.trim(nameInput.value)) : '',
       zip:  zipInput ? PV.normalizeZip(PV.trim(zipInput.value)) : '',
       addr: addrInput ? PV.trim(addrInput.value) : '',
       tel:  telInput ? PV.trim(telInput.value) : ''
