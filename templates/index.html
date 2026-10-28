@@ -100,27 +100,36 @@
               <h2 class="product__name">
                 <?= h($item['ProductName']) ?>
               </h2>
-              <p class="product__price">¥
+              <p class="product__price">&yen;
                 <?= number_format((int)$item['Price']) ?>
               </p>
               <p class="product__meta">
                 <span class="product__genre">
                   <?= h($item['GenreName']) ?>
                 </span>
-                出品者：
-                <?= name_label($item['SellerName']) ?>
 
-                <?php if ($item['SellerAvgScore'] !== null): ?>
-                  <span class="product__seller-rating"
-                    aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
-                    <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
-                  </span>
-                <?php else: ?>
-                  <span class="product__seller-rating product__seller-rating--none">
-                    [評価無し]
-                  </span>
-                <?php endif; ?>
+                <span class="product__seller">
+                  <span class="product__seller-label">出品者：</span>
+                  <?= name_label($item['SellerName']) ?>
+
+                  <?php if ($item['SellerAvgScore'] !== null): ?>
+                    <span class="product__seller-rating"
+                      aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
+                      <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
+                    </span>
+                  <?php else: ?>
+                    <span class="product__seller-rating product__seller-rating--none">
+                      [評価無し]
+                    </span>
+                  <?php endif; ?>
+                </span>
               </p>
+
+              <?php if (!empty($item['ProductCondition'])): ?>
+              <p class="product__condition">
+                状態：<?= h($item['ProductCondition']) ?>
+              </p>
+              <?php endif; ?>
 
               <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
               <span class="product__own">自分の出品</span>
