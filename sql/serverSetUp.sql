@@ -37,6 +37,8 @@ GO
 -- 既存テーブルの削除（外部キーで参照している側から消す）
 -- ------------------------------------------------------------
 DROP TABLE IF EXISTS UserSession;
+DROP TABLE IF EXISTS UserLoginLock;
+DROP TABLE IF EXISTS UserResetLock;
 DROP TABLE IF EXISTS SalesDraft;
 DROP TABLE IF EXISTS Common;
 DROP TABLE IF EXISTS Sales;
@@ -105,6 +107,20 @@ CREATE TABLE UserSession (
     SessionToken     CHAR(64)  NOT NULL,   -- ログイン成功時に発行するランダム値（このセッションの持ち主の証明）
     LoginDateTime    DATETIME  NOT NULL,
     LastActivityTime DATETIME  NOT NULL    -- 最終操作時刻（有効なセッションかの判定用）
+);
+
+-- ログイン失敗の回数とロック期限（1ユーザー1行。行がなければ失敗0回・ロックなし）
+CREATE TABLE UserLoginLock (
+    Userid      INT      NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    FailCount   INT      NOT NULL,   -- 連続失敗回数（0〜2）。3回目でロックした時点で 0 に戻す
+    LockedUntil DATETIME NULL        -- この時刻までログイン不可。NULL または過去ならロックなし
+);
+
+-- 秘密の質問の回答失敗の回数とロック期限（ログインのロックとは別。1ユーザー1行）
+CREATE TABLE UserResetLock (
+    Userid      INT      NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    FailCount   INT      NOT NULL,   -- 連続失敗回数（0〜2）。3回目でロックした時点で 0 に戻す
+    LockedUntil DATETIME NULL        -- この時刻まで秘密の質問の照合不可。NULL または過去ならロックなし
 );
 
 -- システム設定

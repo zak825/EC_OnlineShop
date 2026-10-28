@@ -1,7 +1,8 @@
 <?php
 // ============================================================
-// 会員情報（氏名・郵便番号・住所・電話番号）の入力チェック共通関数
-//   使っている画面：register.php（新規登録） / mypage.php（会員情報編集）
+// 会員情報（氏名・郵便番号・住所・電話番号）と、
+// パスワード・秘密の質問の回答の文字種チェック
+//   使っている画面：register.php（新規登録） / mypage.php（会員情報編集） / passreset.php（再設定）
 //   画面側(JS)のチェックは public/assets/js/profile_validation.js に同じ内容がある。
 //   ルールを変えるときは、この2つを一緒に直すこと。
 // ============================================================
@@ -100,6 +101,8 @@ function collect_profile_errors(string $userName, string $zipCode, string $addre
         $errors[] = '住所を入力してください。';
     } elseif (mb_strlen($address, 'UTF-8') > PROFILE_ADDRESS_MAX) {
         $errors[] = '住所は' . PROFILE_ADDRESS_MAX . '文字以内で入力してください。';
+    } elseif (!is_allowed_zenkaku_text($address)) {
+        $errors[] = zenkaku_text_error('住所');
     }
 
     if ($tel === '') {
@@ -123,4 +126,41 @@ function validate_profile_fields(string $userName, string $zipCode, string $addr
         return 'すべての項目を入力してください。';
     }
     return collect_profile_errors($userName, $zipCode, $address, $tel)[0] ?? null;
+}
+
+/**
+ * 全角文字、半角英数字、半角ハイフン（-）、半角・全角スペースだけか。
+ * 住所と秘密の質問の回答で使う。半角カナ・半角記号は不可。
+ */
+function is_allowed_zenkaku_text(string $value): bool
+{
+    if ($value === '') {
+        return false;
+    }
+    return preg_match(
+        '/^(?:[A-Za-z0-9\- ]|[\x{3000}-\x{303F}\x{3040}-\x{309F}\x{30A0}-\x{30FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FFF}\x{F900}-\x{FAFF}\x{FF01}-\x{FF60}\x{FFE0}-\x{FFE6}\x{20000}-\x{3FFFF}])+$/u',
+        $value
+    ) === 1;
+}
+
+/** 住所・秘密の質問の回答で、使えない文字があったときの文言 */
+function zenkaku_text_error(string $label): string
+{
+    return $label . 'は全角文字、半角英数字、ハイフン（-）、スペースのみ使用できます。';
+}
+
+/**
+ * パスワードに禁止文字があるか。
+ * 禁止するもの：-!"#$%&()*,./:;?[]^_`{}~+<=> と半角スペース・全角スペース（@ は使える）
+ */
+function password_has_forbidden_char(string $value): bool
+{
+    $found = preg_match('/[\[\]!"#$%&()*,.\/:;?^_`{}~+<=> \x{3000}-]/u', $value);
+    return $found !== 0;
+}
+
+/** パスワードに禁止文字があったときの文言 */
+function password_forbidden_char_error(): string
+{
+    return 'パスワードに半角スペース、全角スペース、および次の記号は使用できません。-!"#$%&()*,./:;?[]^_`{}~+<=>';
 }

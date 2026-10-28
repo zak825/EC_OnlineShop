@@ -24,85 +24,115 @@
       </p>
       <?php endif; ?>
 
-      <!-- 検索＋ジャンル絞り込み（ジャンルは選ぶと自動送信） -->
-      <form method="get" action="index.php" class="search-bar">
-        <input type="text" name="q" value="<?= h($keyword) ?>" placeholder="商品名で検索" class="search-bar__input">
-        <select name="genre" class="search-bar__select" onchange="this.form.submit()">
-          <option value="">すべてのジャンル</option>
-          <?php foreach ($genres as $g): ?>
-          <option value="<?= (int)$g['GenreCode'] ?>" <?= (string)$genreFilter === (string)$g['GenreCode'] ? 'selected' : '' ?>>
-            <?= h($g['GenreName']) ?>
-          </option>
-          <?php endforeach; ?>
-        </select>
-        <button type="submit" class="search-bar__btn">検索</button>
+      <!-- 検索＋絞り込み＋並び替え（ジャンル・評価・並び順は選ぶと自動送信） -->
+      <form method="get" action="index.php" class="search-form">
+        <div class="search-bar">
+          <input type="text" name="q" value="<?= h($keyword) ?>" placeholder="商品名で検索" class="search-bar__input">
+          <select name="genre" class="search-bar__select">
+            <option value="">すべてのジャンル</option>
+            <?php foreach ($genres as $g): ?>
+            <option value="<?= (int)$g['GenreCode'] ?>" <?= (string)$genreFilter === (string)$g['GenreCode'] ? 'selected' : '' ?>>
+              <?= h($g['GenreName']) ?>
+            </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="search-options">
+          <label class="search-option">
+            <span class="search-option__label">出品者</span>
+            <input type="text" name="seller" value="<?= h($seller) ?>" placeholder="出品者名" class="search-option__input">
+          </label>
+
+          <label class="search-option">
+            <span class="search-option__label">出品者評価</span>
+            <select name="rating" class="search-option__select">
+              <option value="">指定なし</option>
+              <?php foreach ($ratingOptions as $value => $label): ?>
+              <option value="<?= h($value) ?>" <?= (string)$ratingFilter === (string)$value ? 'selected' : '' ?>>
+                <?= h($label) ?>
+              </option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+
+          <label class="search-option">
+            <span class="search-option__label">並び順</span>
+            <select name="sort" class="search-option__select">
+              <?php foreach ($sortOptions as $value => $option): ?>
+              <option value="<?= h($value) ?>" <?= $sort === (string)$value ? 'selected' : '' ?>>
+                <?= h($option['label']) ?>
+              </option>
+              <?php endforeach; ?>
+            </select>
+          </label>
+        </div>
       </form>
-
-      <?php if ($keyword !== '' || $genreFilter !== null): ?>
-      <p class="search-result">
-        <?php if ($keyword !== ''): ?>「<?= h($keyword) ?>」<?php endif; ?>の検索結果：<?= count($products) ?>件
-        <a href="index.php" class="search-clear">条件をクリア</a>
-      </p>
-      <?php endif; ?>
-
-      <?php if (!$products): ?>
-      <p class="empty">
-        該当する販売中の商品はありません。
-      </p>
-      <?php else: ?>
-      <!-- ===== 商品一覧 ===== -->
-      <ul class="product-list">
-        <?php foreach ($products as $item): ?>
-        <li class="product">
-          <?php if (!empty($item['image_url'])): ?>
-          <div class="product__image product__image--photo">
-            <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
-          </div>
-          <?php else: ?>
-          <div class="product__image" aria-hidden="true">
-            <?= h($item['GenreName']) ?>
-          </div>
-          <?php endif; ?>
-
-          <div class="product__body">
-            <h2 class="product__name">
-              <?= h($item['ProductName']) ?>
-            </h2>
-            <p class="product__price">¥
-              <?= number_format((int)$item['Price']) ?>
-            </p>
-            <p class="product__meta">
-              <span class="product__genre">
-                <?= h($item['GenreName']) ?>
-              </span>
-              出品者：
-              <?= name_label($item['SellerName']) ?>
-
-              <?php if ($item['SellerAvgScore'] !== null): ?>
-                <span class="product__seller-rating"
-                  aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
-                  <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
-                </span>
-              <?php else: ?>
-                <span class="product__seller-rating product__seller-rating--none">
-                  [評価無し]
-                </span>
-              <?php endif; ?>
-            </p>
-            <p class="product__condition">
-              状態：<?= h($item['ProductCondition'] ?? '未設定') ?>
-            </p>
-
-            <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
-            <span class="product__own">自分の出品</span>
+      <div id="search-results">
+        <?php if ($conditions || $sort !== 'new'): ?>
+        <p class="search-result">
+          <?php if ($conditions): ?>条件：<?= h(implode('、', $conditions)) ?> ／ <?php endif; ?>
+          <?= count($products) ?>件
+          <?php if ($sort !== 'new'): ?>（<?= h($sortOptions[$sort]['label']) ?>）<?php endif; ?>
+          <a href="index.php" class="search-clear">条件をクリア</a>
+        </p>
+        <?php endif; ?>
+    
+        <?php if (!$products): ?>
+        <p class="empty">
+          該当する販売中の商品はありません。
+        </p>
+        <?php else: ?>
+        <!-- ===== 商品一覧 ===== -->
+        <ul class="product-list">
+          <?php foreach ($products as $item): ?>
+          <li class="product">
+            <?php if (!empty($item['image_url'])): ?>
+            <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>"
+              class="product__image product__image--photo">
             <?php else: ?>
-            <a href="purchase.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary product__buy">購入</a>
+            <div class="product__image" aria-hidden="true">
+              <?= h($item['GenreName']) ?>
+            </div>
             <?php endif; ?>
-          </div>
-        </li>
-        <?php endforeach; ?>
-      </ul>
-      <?php endif; ?>
+
+            <div class="product__body">
+              <h2 class="product__name">
+                <?= h($item['ProductName']) ?>
+              </h2>
+              <p class="product__price">¥
+                <?= number_format((int)$item['Price']) ?>
+              </p>
+              <p class="product__meta">
+                <span class="product__genre">
+                  <?= h($item['GenreName']) ?>
+                </span>
+                出品者：
+                <?= name_label($item['SellerName']) ?>
+
+                <?php if ($item['SellerAvgScore'] !== null): ?>
+                  <span class="product__seller-rating"
+                    aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
+                    <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
+                  </span>
+                <?php else: ?>
+                  <span class="product__seller-rating product__seller-rating--none">
+                    [評価無し]
+                  </span>
+                <?php endif; ?>
+              </p>
+
+              <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
+              <span class="product__own">自分の出品</span>
+              <?php else: ?>
+              <a href="purchase.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--primary product__buy">購入</a>
+              <?php endif; ?>
+            </div>
+          </li>
+          <?php endforeach; ?>
+        </ul>
+        <?php endif; ?>
+      </div>
     </main>
     <!-- フッター読み込み -->
     <?php require __DIR__ . '/../public/footer.php'; ?>
