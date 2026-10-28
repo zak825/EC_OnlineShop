@@ -32,10 +32,6 @@
 .index_btn:hover .btn_question:after {
     width: 100%;
 }
-.arrow-left-circle:hover {
-    color: #fff;
-    background: #0f172a;
-}
 /* ---------- プロフィール（名前・アイコン・評価） ---------- */
 .profile {
     display: flex;
