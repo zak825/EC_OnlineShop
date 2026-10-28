@@ -19,7 +19,7 @@ if (logoutForm) {
 
 // ---------- ② リアルタイム検索 ----------
 (function () {
-  const form    = document.querySelector('.search-form');
+  const form    = document.getElementById('search-form');
   const results = document.getElementById('search-results');
   const keyword = form ? form.querySelector('[name="q"]') : null;
 
@@ -27,10 +27,15 @@ if (logoutForm) {
     return;
   }
 
-  const DELAY_MS = 20;   // 入力が止まってから検索するまでの待ち時間
+  const DELAY_MS = 200;   // 入力が止まってから検索するまでの待ち時間
 
   let timer      = null;
   let controller = null;    // 前の検索を取り消すためのもの
+
+  // フォームにつながっている入力欄すべて（左の絞り込みパネルの欄も含む）
+  const fields  = Array.from(form.elements);
+  const inputs  = fields.filter((el) => el.tagName === 'INPUT' && el.type === 'text');
+  const selects = fields.filter((el) => el.tagName === 'SELECT');
 
   // 今のフォームの内容から URL を作る（空の項目は付けない）
   function buildUrl() {
@@ -86,15 +91,14 @@ if (logoutForm) {
     timer = setTimeout(search, DELAY_MS);
   }
 
-  // 商品名・出品者名：入力のたびに（変換中は除く）
   // 商品名・出品者名：入力のたびに検索する（日本語の変換中も含む）
-  form.querySelectorAll('input[type="text"]').forEach((input) => {
+  inputs.forEach((input) => {
     input.addEventListener('input', schedule);
     input.addEventListener('compositionend', schedule);   // 変換を確定したときにも念のため
   });
 
-  // ジャンル・出品者評価・並び順：選んだらすぐ
-  form.querySelectorAll('select').forEach((select) => {
+  // ジャンル・出品者評価・商品状態・並び順：選んだらすぐ
+  selects.forEach((select) => {
     select.addEventListener('change', search);
   });
 
@@ -111,4 +115,23 @@ if (logoutForm) {
     const end = keyword.value.length;
     keyword.setSelectionRange(end, end);   // すでに文字があるときは末尾にカーソルを置く
   }
+})();
+
+
+
+// ---------- ④ ヘッダーの高さを CSS に伝える ----------
+// 検索窓・絞り込みパネルが「ヘッダーのすぐ下」に貼り付くように、ヘッダーの実際の高さを測る
+(function () {
+  const header = document.querySelector('header');
+  if (!header) {
+    return;
+  }
+
+  function updateHeaderHeight() {
+    document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+  }
+
+  updateHeaderHeight();
+  window.addEventListener('resize', updateHeaderHeight);
+  window.addEventListener('load', updateHeaderHeight);   // ロゴ画像が読み込まれたあとの高さにも合わせる
 })();
