@@ -36,16 +36,15 @@ if ($headerLoggedIn) {
                     <?php endif; ?>
                 </a>
                 <a href="mypage.php" class="UserName"><?= name_label($headerUserName) ?></a>
-                <a href="sell.php" class="btn-sell">出品</a>
+                <a href="sell.php" class="btn-header btn-header--primary">出品</a>
                 <form action="logout.php" method="post"
                     onsubmit="return confirm('ログアウトしますか？');">
-                    <input type="hidden" name="csrf_token"
-                        value="<?= h(csrf_token()) ?>">
-                    <button type="submit" class="btn-logout">ログアウト</button>
+                    <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
+                    <button type="submit" class="btn-header btn-header--secondary">ログアウト</button>
                 </form>
             </div>
         <?php else: ?>
-            <a href="<?= URL_LOGIN ?>" class="btn-login" id="login-btn">ログイン</a>
+            <a href="<?= URL_LOGIN ?>" class="btn-header btn-header--primary" id="login-btn">ログイン</a>
         <?php endif; ?>
     </nav>
 </header>

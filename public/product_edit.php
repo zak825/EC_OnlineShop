@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->rowCount() !== 1) {
                     throw new RuntimeException('商品情報を更新できませんでした。');
                 }
-                if ($tmpImages !== null || $removeImages) {
+                if ($tmpImages !== null || $removeImages || $imageOrder) {
                     if (!update_product_images($productId, $removeImages, $tmpImages, $imageOrder)) {
                         throw new RuntimeException('商品画像を更新できませんでした。');
                     }

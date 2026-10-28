@@ -113,11 +113,19 @@ body {
   background: #f8fafc;
 }
 
-/* 写真のとき */
-img.product__image {
+.product__image--photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.product__image--photo img {
   display: block;
+  width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center center;
   background: #f8fafc;
 }
 
