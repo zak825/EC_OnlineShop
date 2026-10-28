@@ -335,11 +335,11 @@
           </form>
           <?php endif; ?>
 
-          <?php if (!$sold): ?>
-          <p class="empty">
-              <?= $soldTotal > 0 ? '該当する商品はありません' : '履歴なし' ?>
-          </p>
-          <?php endif; ?>
+      <?php if (!$sold): ?>
+      <p class="empty">
+        <?= $soldTotal > 0 ? '該当する商品はありません' : '履歴なし' ?>
+      </p>
+      <?php endif; ?>
 
           <?php foreach ($sold as $item): ?>
           <article class="card item">
