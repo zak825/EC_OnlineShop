@@ -57,6 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
             errors.push('秘密の質問の回答を入力してください。');
         } else if (secretAnswer.length > 100) {
             errors.push('秘密の質問の回答は100文字以内で入力してください。');
+        } else if (!PV.isAllowedZenkakuText(secretAnswer)) {
+            errors.push(PV.zenkakuTextError('秘密の質問の回答'));
         }
 
         // 2. パスワードポリシーのチェックを行う
@@ -66,8 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (password === '') {
             errors.push('パスワードを入力してください。');
-        } else if (passwordLen < minLen || passwordLen > maxLen) {
-            errors.push(`パスワードは${minLen}文字以上${maxLen}文字以内で入力してください。`);
+        } else {
+            if (passwordLen < minLen || passwordLen > maxLen) {
+                errors.push(`パスワードは${minLen}文字以上${maxLen}文字以内で入力してください。`);
+            }
+            if (PV.passwordHasForbiddenChar(password)) {
+                errors.push(PV.passwordForbiddenCharError());
+            }
         }
 
         // パスワード（確認用）が入力したパスワードと一致しているかチェックする

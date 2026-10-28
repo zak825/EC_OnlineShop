@@ -91,6 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             || mb_strlen($secretAnswerInput, 'UTF-8') > 100
         ) {
             $errorMessage = 'すべての項目を正しく入力してください。'; // E-PR-01
+        } elseif (!is_allowed_zenkaku_text($secretAnswerInput)) {
+            $errorMessage = zenkaku_text_error('秘密の質問の回答');
         } else {
             try {
                 // 7. IDと秘密の質問のDB照合を行う（プレースホルダでSQLインジェクション対策）
@@ -158,8 +160,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($newPassword !== $newPasswordConfirm) {
                 $errorMessage = '新しいパスワードと確認用パスワードが一致しません。'; // E-PR-04
             } elseif ($newPasswordLen < $passwordMinLength || $newPasswordLen > $passwordMaxLength) {
-                // 登録画面（register.php）と同じく文字数のみチェックする
                 $errorMessage = "パスワードは{$passwordMinLength}文字以上{$passwordMaxLength}文字以内で入力してください。"; // E-PR-05
+            } elseif (password_has_forbidden_char($newPassword)) {
+                $errorMessage = password_forbidden_char_error();
             } else {
                 // 既存のログイン処理（password_verify）に合わせてハッシュ化して保存する
                 $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
