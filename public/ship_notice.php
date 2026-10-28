@@ -109,7 +109,7 @@ try {
     ]);
 
     if ($stmt->rowCount() === 1) {
-      // 更新できた → マイページへ
+      set_flash('発送通知を送りました。商品を発送済みに更新しました。', 'success');
       redirect(URL_STATUS);
     } else {
       // 更新できなかった（他人の商品・未購入・発送済みなど）

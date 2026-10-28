@@ -1,6 +1,7 @@
 // ============================================================
-// 会員情報（氏名・郵便番号・住所・電話番号）の入力チェック共通処理
-//   使っている画面：register.html（新規登録） / mypage.html（会員情報編集）
+// 会員情報（氏名・郵便番号・住所・電話番号）と、
+// パスワード・秘密の質問の回答の文字種チェック
+//   使っている画面：register.html / mypage.html / passreset.html
 //   サーバー側のチェックは src/lib/validation.php に同じ内容がある。
 //   ルールを変えるときは、この2つを一緒に直すこと。
 // ============================================================
@@ -58,6 +59,8 @@
       errors.push('住所を入力してください。');
     } else if (charLength(address) > ADDRESS_MAX) {
       errors.push('住所は' + ADDRESS_MAX + '文字以内で入力してください。');
+    } else if (!isAllowedZenkakuText(address)) {
+      errors.push(zenkakuTextError('住所'));
     }
 
     if (tel === '') {
@@ -67,6 +70,24 @@
     }
 
     return errors;
+  }
+
+  // 全角文字、半角英数字、半角ハイフン（-）だけか。住所と秘密の質問の回答で使う
+  function isAllowedZenkakuText(value) {
+    return /^(?:[A-Za-z0-9\-]|[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFF01-\uFF60\uFFE0-\uFFE6]|[\u{20000}-\u{3FFFF}])+$/u.test(value);
+  }
+
+  function zenkakuTextError(label) {
+    return label + 'は全角文字、半角英数字、ハイフン（-）のみ使用できます。';
+  }
+
+  // パスワードの禁止文字（-!"#$%&()*,./:;?[]^_`{}~+<=> と半角・全角スペース。@ は使える）
+  function passwordHasForbiddenChar(value) {
+    return /[\[\]!"#$%&()*,./:;?^_`{}~+<=> \u3000-]/.test(value);
+  }
+
+  function passwordForbiddenCharError() {
+    return 'パスワードに半角スペース、全角スペース、および次の記号は使用できません。-!"#$%&()*,./:;?[]^_`{}~+<=>';
   }
 
   // 4項目をチェックして、エラーメッセージを返す（問題なければ null）
@@ -85,6 +106,10 @@
     normalizeName: normalizeName,
     normalizeZip: normalizeZip,
     collectErrors: collectErrors,
-    validate: validate
+    validate: validate,
+    isAllowedZenkakuText: isAllowedZenkakuText,
+    zenkakuTextError: zenkakuTextError,
+    passwordHasForbiddenChar: passwordHasForbiddenChar,
+    passwordForbiddenCharError: passwordForbiddenCharError
   };
 })(window);

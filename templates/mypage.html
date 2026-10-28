@@ -354,6 +354,9 @@
             <p class="item__price">¥
               <?= number_format((int)$item['Price']) ?>
             </p>
+            <?php if (!empty($item['ProductCondition'])): ?>
+            <p class="item__condition">商品の状態：<?= h($item['ProductCondition']) ?></p>
+            <?php endif; ?>
 
             <?php if ($item['BuyerUserid'] !== null): ?>
             <dl class="item__meta">
@@ -371,6 +374,17 @@
 
           <!-- 右：商品ステータス・配送先 -->
           <div class="item__col item__col--right">
+            <?php if ($item['BuyerUserid'] === null): ?>
+            <div class="actions">
+              <a href="product_edit.php?productId=<?= (int)$item['ProductID'] ?>" class="btn btn--secondary btn--small">編集</a>
+              <form action="mypage.php" method="post" class="inline-form" onsubmit="return confirm('この商品を削除しますか？');">
+                <input type="hidden" name="action" value="delete_product">
+                <input type="hidden" name="product_id" value="<?= (int)$item['ProductID'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
+                <button type="submit" class="btn btn--secondary btn--small">削除</button>
+              </form>
+            </div>
+            <?php endif; ?>
             <div class="item__status-block">
               <div class="item__status-header">
                 <p class="item__label">ステータス：</p>

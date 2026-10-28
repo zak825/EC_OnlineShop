@@ -113,11 +113,20 @@ body {
   background: #f8fafc;
 }
 
-/* 写真のとき */
-img.product__image {
+.product__image--photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.product__image--photo img {
   display: block;
+  width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center center;
+  background: #f8fafc;
 }
 
 /* 画像が無いとき：ジャンル名を枠に出す */
@@ -156,6 +165,12 @@ div.product__image {
   margin: 0 0 10px;
   font-size: 0.85rem;
   color: #64748b;
+}
+
+.product__condition {
+  margin: -4px 0 8px;
+  color: #475569;
+  font-size: 0.85rem;
 }
 
 .product__seller-rating {

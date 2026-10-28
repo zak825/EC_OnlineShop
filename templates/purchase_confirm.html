@@ -80,20 +80,24 @@
         </dl>
       </section>
 
-      <form method="post" action="purchase_confirm.php" id="confirm-form">
+      <p class="message message--warning" data-live-message hidden></p>
+
+      <form method="post" action="purchase_confirm.php" id="confirm-form"
+            data-status-url="purchase_status.php"
+            data-product-id="<?= (int)$product['ProductID'] ?>">
         <!-- セッション切れ時の戻り先に使う -->
         <input type="hidden" name="productId" value="<?= (int)$product['ProductID'] ?>">
         <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
 
         <div class="actions">
           <button type="submit" name="action" value="cancel" class="btn btn--secondary">キャンセル</button>
-          <button type="submit" name="action" value="confirm" class="btn btn--primary">購入を確定する</button>
-        </div>
+          <button type="submit" name="action" value="confirm" class="btn btn--primary" data-live-buy>購入を確定する</button>        </div>
       </form>
       <?php endif; ?>
     </main>
 
     <script src="assets/js/common.js"></script>
+    <script src="assets/js/purchase_status.js"></script>
     <script src="assets/js/purchase_confirm.js"></script>
 
     <!-- フッター読み込み -->

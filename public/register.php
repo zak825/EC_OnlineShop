@@ -104,6 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $inputErrors[] = '秘密の質問の回答を入力してください。';
         } elseif (mb_strlen($secretAnswerInput, 'UTF-8') > 100) {
             $inputErrors[] = '秘密の質問の回答は100文字以内で入力してください。';
+        } elseif (!is_allowed_zenkaku_text($secretAnswerInput)) {
+            $inputErrors[] = zenkaku_text_error('秘密の質問の回答');
         }
 
         // 2. パスワードポリシーのチェックを行う
@@ -114,6 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $passwordLen = mb_strlen($password, 'UTF-8');
             if ($passwordLen < $passwordMinLength || $passwordLen > $passwordMaxLength) {
                 $inputErrors[] = "パスワードは{$passwordMinLength}文字以上{$passwordMaxLength}文字以内で入力してください。";
+            }
+            if (password_has_forbidden_char($password)) {
+                $inputErrors[] = password_forbidden_char_error();
             }
         }
 

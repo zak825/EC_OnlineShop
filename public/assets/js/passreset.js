@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('passreset-container');
+    const container = document.getElementById('passreset-card');
     const errorMsg = document.getElementById('error-message');
     const verifyForm = document.getElementById('verify-form');
     const resetForm = document.getElementById('reset-form');
@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     const showError = (msg) => {
+        errorMsg.classList.remove('error-msg--warning');
         errorMsg.textContent = msg;
         errorMsg.style.display = 'block';
     };
@@ -66,6 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const PV = window.ProfileValidation;
+            if (PV && !PV.isAllowedZenkakuText(answer)) {
+                e.preventDefault();
+                showError(PV.zenkakuTextError('秘密の質問の回答'));
+                return;
+            }
+
             hideError();
             disableSubmit(verifyForm);
         });
@@ -96,10 +104,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 文字種の制限は設けず、登録画面（register.js）と同じく文字数のみチェックする
             if (newPassword.length < minLen || newPassword.length > maxLen) {
                 e.preventDefault();
                 showError(`パスワードは${minLen}文字以上${maxLen}文字以内で入力してください。`);
+                return;
+            }
+
+            const PV = window.ProfileValidation;
+            if (PV && PV.passwordHasForbiddenChar(newPassword)) {
+                e.preventDefault();
+                showError(PV.passwordForbiddenCharError());
                 return;
             }
 

@@ -77,6 +77,39 @@ main h1::after {
   outline: none;
 }
 
+#description {
+  height: auto;
+  min-height: 132px;
+  resize: vertical;
+  line-height: 1.6;
+  transition: min-height 0.2s ease, border-color 0.15s ease,
+    background-color 0.2s ease, box-shadow 0.15s ease;
+}
+
+.description-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.description-counter {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.description-counter.is-limit {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+#description.is-expanded {
+  border-color: #8c52ff;
+  background: #faf8ff;
+  box-shadow: 0 0 0 3px rgba(140, 82, 255, 0.14);
+}
+
 /* セレクトに矢印を付ける */
 select.Form-Item-Input {
   cursor: pointer;
@@ -107,13 +140,13 @@ select.Form-Item-Input {
 }
 
 /* エラーメッセージ（空のときは出さない） */
-.error {
+.field-error {
   margin: 6px 0 0;
   font-size: 12px;
-  color: #ef4444;
+  color: #991b1b;
 }
 
-.error:empty {
+.field-error:empty {
   display: none;
 }
 
@@ -128,10 +161,45 @@ main>.error {
   color: #991b1b;
 }
 
-/* ファイル選択 */
-input[type="file"] {
+/* ブラウザ標準の「ファイルを選択していません」は表示しない */
+.file-picker__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.file-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.file-picker__button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  color: #fff;
+  background: #8c52ff;
+  border: 1px solid #8c52ff;
+  border-radius: 2px;
   font-size: 13px;
-  color: #475569;
+  font-weight: 600;
+}
+
+.file-picker:hover .file-picker__button {
+  background: #4f23a0;
+  border-color: #4f23a0;
+}
+
+.file-picker__count {
+  color: #64748b;
+  font-size: 13px;
 }
 
 /* 画像プレビュー */

@@ -12,6 +12,7 @@
 --   1. Sales.ProductName を VARCHAR(50) → NVARCHAR(50) に変更
 --      VARCHAR(50) は 50 バイトなので、日本語は 25 文字までしか入らなかった
 --   2. SystemConfiguration に販売の設定（値段の下限・上限、商品名の最大文字数）を追加
+--      商品説明の最大文字数は500文字
 -- ============================================================
 
 USE CSE_EC;
@@ -37,6 +38,10 @@ IF NOT EXISTS (SELECT 1 FROM SystemConfiguration WHERE Category = 'Sales' AND [K
 IF NOT EXISTS (SELECT 1 FROM SystemConfiguration WHERE Category = 'Sales' AND [Key] = 'ProductNameMaxLength')
     INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment)
     VALUES (5, 'Sales', 'ProductNameMaxLength', '50', 'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）');
+
+IF NOT EXISTS (SELECT 1 FROM SystemConfiguration WHERE Category = 'Sales' AND [Key] = 'DescriptionMaxLength')
+    INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment)
+    VALUES (6, 'Sales', 'DescriptionMaxLength', '500', 'int', N'商品の説明の最大文字数');
 GO
 
 -- 確認

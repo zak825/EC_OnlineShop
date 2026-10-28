@@ -16,10 +16,18 @@ const URL_SELL_CONFIRM = 'sell_confirm.php';
 const DEFAULT_PRICE_MIN = 300;
 const DEFAULT_PRICE_MAX = 9999999;
 const DEFAULT_PRODUCT_NAME_MAX = 50;
+const DEFAULT_DESCRIPTION_MAX = 500;
 
 // 商品名の列（Sales.ProductName NVARCHAR(50)）に入る最大文字数
 // SystemConfiguration の設定がこれより大きくても、これを超えないようにする（超えると登録時に DB エラーになる）
 const PRODUCT_NAME_COLUMN_MAX = 50;
+const CONDITION_MAX_LENGTH = 30;
+const PRODUCT_CONDITIONS = [
+  '新品・未使用' => '新品・未使用',
+  '目立った傷や汚れなし' => '目立った傷や汚れなし',
+  'やや傷や汚れあり' => 'やや傷や汚れあり',
+  '傷や汚れあり' => '傷や汚れあり',
+];
 
 const MSG_DB_ERROR   = '処理に失敗しました。時間をおいて再度お試しください';
 const MSG_CSRF_ERROR = '不正な操作です。もう一度やり直してください。';
@@ -128,6 +136,7 @@ $genres    = [];   // [GenreCode => GenreName]
 $price_min = DEFAULT_PRICE_MIN;
 $price_max = DEFAULT_PRICE_MAX;
 $name_max  = DEFAULT_PRODUCT_NAME_MAX;
+$description_max = DEFAULT_DESCRIPTION_MAX;
 
 try {
   $pdo = db();
@@ -144,6 +153,7 @@ try {
   $setting_min      = '';
   $setting_max      = '';
   $setting_name_max = '';
+  $setting_description_max = '';
   $stmt = $pdo->prepare('SELECT [Key], Value FROM SystemConfiguration WHERE Category = :category');
   $stmt->execute([':category' => 'Sales']);
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -157,6 +167,9 @@ try {
     if ($row['Key'] === 'ProductNameMaxLength') {
       $setting_name_max = trim($row['Value']);
     }
+    if ($row['Key'] === 'DescriptionMaxLength') {
+      $setting_description_max = trim($row['Value']);
+    }
   }
 
   // 半角数字のときだけ DB の値を使う
@@ -168,6 +181,9 @@ try {
   }
   if (preg_match('/^[0-9]+$/', $setting_name_max) && (int)$setting_name_max > 0) {
     $name_max = min((int)$setting_name_max, PRODUCT_NAME_COLUMN_MAX);
+  }
+  if (preg_match('/^[0-9]+$/', $setting_description_max) && (int)$setting_description_max > 0) {
+    $description_max = min((int)$setting_description_max, 1000);
   }
 
   // 下限 > 上限 の設定ミスなら両方とも仮の値に戻す
@@ -185,6 +201,8 @@ $error_product_name = '';
 $error_genre_code   = '';
 $error_price        = '';
 $error_images       = '';
+$error_condition    = '';
+$error_description  = '';
 
 // ------------------------------------------------------------
 // フォームに表示する値
@@ -192,12 +210,16 @@ $error_images       = '';
 $form_product_name = '';
 $form_genre_code   = '';
 $form_price        = '';
+$form_condition    = '';
+$form_description  = '';
 
 // 販売確認画面のキャンセルで戻ってきた場合は、入力値を復元する
 if ($action === '' && isset($_SESSION['sell'])) {
   $form_product_name = $_SESSION['sell']['product_name'];
   $form_genre_code   = (string)$_SESSION['sell']['genre_code'];
   $form_price        = (string)$_SESSION['sell']['price'];
+  $form_condition = (string)($_SESSION['sell']['condition'] ?? '');
+  $form_description = (string)($_SESSION['sell']['description'] ?? '');
 }
 
 // ------------------------------------------------------------
@@ -214,6 +236,8 @@ try {
       $form_product_name = $saved['ProductName'];
       $form_genre_code   = (string)$saved['GenreCode'];
       $form_price        = (string)$saved['Price'];
+      $form_condition    = (string)$saved['ProductCondition'];
+      $form_description  = (string)$saved['Description'];
 
       $tmp = copy_sell_draft_images_to_tmp($user_id);
       if ($tmp !== null) {
@@ -249,6 +273,8 @@ if (($action === 'sell' || $action === 'save_draft') && $error_db === '') {
   if (isset($_POST['price'])) {
     $form_price = trim_all($_POST['price']);
   }
+  $form_condition = trim_all($_POST['condition'] ?? '');
+  $form_description = trim_all($_POST['description'] ?? '');
 
   // 商品名
   if ($form_product_name === '') {
@@ -305,14 +331,32 @@ if (($action === 'sell' || $action === 'save_draft') && $error_db === '') {
     }
   }
 
-  $all_ok = $error_product_name === '' && $error_genre_code === '' && $error_price === '' && $error_images === '';
+  if (!isset(PRODUCT_CONDITIONS[$form_condition])) {
+    $error_condition = '商品の状態を選択してください';
+  }
+  if ($form_description === '') {
+    $error_description = '商品の説明を入力してください';
+  } elseif (mb_strlen($form_description, 'UTF-8') > $description_max) {
+    $error_description = '商品の説明は' . $description_max . '文字以内で入力してください';
+  }
+
+  $all_ok = $error_product_name === '' && $error_genre_code === '' && $error_price === ''
+    && $error_images === '' && $error_condition === '' && $error_description === '';
 
   // 下書き保存：4項目ともエラーがなければ下書きに保存してメイン画面へ（今の入力値・一時保存の画像は消す）
   if ($action === 'save_draft' && $all_ok) {
     try {
-      save_sell_draft($user_id, (int)$form_genre_code, $form_product_name, (int)$price, $_SESSION['sell_images'] ?? null);
+      save_sell_draft(
+        $user_id,
+        (int)$form_genre_code,
+        $form_product_name,
+        (int)$price,
+        $form_condition,
+        $form_description,
+        $_SESSION['sell_images'] ?? null
+      );
       clear_sell_input();
-      set_flash('下書きを保存しました。', 'success');
+      set_flash('下書き保存されました。', 'success');
       redirect(URL_MAIN);
     } catch (PDOException $e) {
       error_log($e->getMessage());
@@ -327,6 +371,8 @@ if (($action === 'sell' || $action === 'save_draft') && $error_db === '') {
       'genre_name'   => $genres[$form_genre_code],
       'product_name' => $form_product_name,
       'price'        => (int)$price,
+      'condition'    => $form_condition,
+      'description'  => $form_description,
     ];
     redirect(URL_SELL_CONFIRM);
   }
@@ -341,6 +387,11 @@ view('sell', [
   'form_product_name'  => $form_product_name,
   'form_genre_code'    => $form_genre_code,
   'form_price'         => $form_price,
+  'form_condition'     => $form_condition,
+  'form_description'   => $form_description,
+  'product_conditions' => PRODUCT_CONDITIONS,
+  'condition_max'      => CONDITION_MAX_LENGTH,
+  'description_max'    => $description_max,
   'price_min'          => $price_min,
   'price_max'          => $price_max,
   'name_max'           => $name_max,
@@ -349,6 +400,8 @@ view('sell', [
   'error_genre_code'   => $error_genre_code,
   'error_price'        => $error_price,
   'error_images'       => $error_images,
+  'error_condition'    => $error_condition,
+  'error_description'  => $error_description,
   'image_urls'         => isset($_SESSION['sell_images']) ? product_image_tmp_urls($_SESSION['sell_images']) : [],
   'image_max'          => PRODUCT_IMAGE_MAX,
   'draft'              => $draft,

@@ -73,8 +73,14 @@ if (!isset(SORT_OPTIONS[$sort])) {
 }
 
 // ---- 2. DBの参照 ---------------------------------------------------
+$hasProductDetails = db_has_column('Sales', 'ProductCondition')
+    && db_has_column('Sales', 'Description');
+$productDetailSelect = $hasProductDetails
+    ? 's.ProductCondition, s.Description,'
+    : 'CAST(NULL AS NVARCHAR(30)) AS ProductCondition,
+       CAST(NULL AS NVARCHAR(1000)) AS Description,';
 $sql =
-    'SELECT s.ProductID, s.ProductName, s.Price, s.Userid,
+    'SELECT s.ProductID, s.ProductName, s.Price, ' . $productDetailSelect . ' s.Userid,
             g.GenreName,
             u.UserName AS SellerName,
             seller_rating.AvgScore AS SellerAvgScore

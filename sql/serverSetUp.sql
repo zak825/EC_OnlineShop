@@ -37,6 +37,8 @@ GO
 -- 既存テーブルの削除（外部キーで参照している側から消す）
 -- ------------------------------------------------------------
 DROP TABLE IF EXISTS UserSession;
+DROP TABLE IF EXISTS UserLoginLock;
+DROP TABLE IF EXISTS UserResetLock;
 DROP TABLE IF EXISTS SalesDraft;
 DROP TABLE IF EXISTS Common;
 DROP TABLE IF EXISTS Sales;
@@ -77,6 +79,8 @@ CREATE TABLE Sales (
     GenreCode    INT           NOT NULL REFERENCES Genre(GenreCode),
     ProductName  NVARCHAR(50)  NOT NULL,                      -- NVARCHAR … 日本語でも50文字入る（VARCHAR だと50バイト＝日本語25文字まで）
     Price        INT           NOT NULL,
+    ProductCondition NVARCHAR(30) NOT NULL CONSTRAINT DF_Sales_ProductCondition DEFAULT (N'中古'),
+    Description  NVARCHAR(1000) NOT NULL CONSTRAINT DF_Sales_Description DEFAULT (N''),
     Userid       INT           NOT NULL REFERENCES UserData(Userid),
     BuyerUserid  INT           REFERENCES UserData(Userid),  -- 購入者のユーザーID（NULL = 販売中）
     BuyerName    NVARCHAR(50),                                -- 購入者の名前（表示用）
@@ -92,6 +96,8 @@ CREATE TABLE SalesDraft (
     GenreCode      INT           NOT NULL,
     ProductName    NVARCHAR(50)  NOT NULL,
     Price          INT           NOT NULL,
+    ProductCondition NVARCHAR(30) NOT NULL CONSTRAINT DF_SalesDraft_ProductCondition DEFAULT (N'中古'),
+    Description    NVARCHAR(1000) NOT NULL CONSTRAINT DF_SalesDraft_Description DEFAULT (N''),
     UpdateDateTime DATETIME      NOT NULL
 );
 
@@ -101,6 +107,20 @@ CREATE TABLE UserSession (
     SessionToken     CHAR(64)  NOT NULL,   -- ログイン成功時に発行するランダム値（このセッションの持ち主の証明）
     LoginDateTime    DATETIME  NOT NULL,
     LastActivityTime DATETIME  NOT NULL    -- 最終操作時刻（有効なセッションかの判定用）
+);
+
+-- ログイン失敗の回数とロック期限（1ユーザー1行。行がなければ失敗0回・ロックなし）
+CREATE TABLE UserLoginLock (
+    Userid      INT      NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    FailCount   INT      NOT NULL,   -- 連続失敗回数（0〜2）。3回目でロックした時点で 0 に戻す
+    LockedUntil DATETIME NULL        -- この時刻までログイン不可。NULL または過去ならロックなし
+);
+
+-- 秘密の質問の回答失敗の回数とロック期限（ログインのロックとは別。1ユーザー1行）
+CREATE TABLE UserResetLock (
+    Userid      INT      NOT NULL PRIMARY KEY REFERENCES UserData(Userid),
+    FailCount   INT      NOT NULL,   -- 連続失敗回数（0〜2）。3回目でロックした時点で 0 に戻す
+    LockedUntil DATETIME NULL        -- この時刻まで秘密の質問の照合不可。NULL または過去ならロックなし
 );
 
 -- システム設定
@@ -145,25 +165,28 @@ INSERT INTO Genre (GenreCode, GenreName) VALUES
 -- 商品
 --   BuyerUserid が NULL     … 販売中
 --   BuyerUserid が入っている … 売り切れ（BuyerName には購入者の UserName）
-INSERT INTO Sales (ProductID, GenreCode, ProductName, Price, Userid, BuyerUserid, BuyerName, ShippingFlag, SoldDate, sucre, revwe) VALUES
+INSERT INTO Sales (
+    ProductID, GenreCode, ProductName, Price, ProductCondition, Description,
+    Userid, BuyerUserid, BuyerName, ShippingFlag, SoldDate, sucre, revwe
+) VALUES
     -- 販売中（出品者=1）… 花子(2)・次郎(3)で購入テストできる
-    (1,  1, N'PHP入門',                1500, 1, NULL, NULL, NULL, NULL, NULL, NULL),
-    (2,  2, N'ワイヤレスマウス',        2980, 1, NULL, NULL, NULL, NULL, NULL, NULL),
-    (3,  3, N'パーカー（黒・Mサイズ）', 3500, 1, NULL, NULL, NULL, NULL, NULL, NULL),
-    (4,  4, N'ボードゲーム',            4200, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+    (1,  1, N'PHP入門',                1500, N'目立った傷や汚れなし', N'PHPの基本を学べる入門書です。', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+    (2,  2, N'ワイヤレスマウス',        2980, N'新品・未使用',         N'未使用のワイヤレスマウスです。', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+    (3,  3, N'パーカー（黒・Mサイズ）', 3500, N'やや傷や汚れあり',       N'黒色のMサイズのパーカーです。', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+    (4,  4, N'ボードゲーム',            4200, N'目立った傷や汚れなし', N'家族や友人と遊べるボードゲームです。', 1, NULL, NULL, NULL, NULL, NULL, NULL),
     -- 販売中（出品者=2）… 花子でログインすると「自分の出品」になる
-    (5,  1, N'SQL入門',                 1800, 2, NULL, NULL, NULL, NULL, NULL, NULL),
+    (5,  1, N'SQL入門',                 1800, N'新品・未使用',         N'SQLの基礎を解説した入門書です。', 2, NULL, NULL, NULL, NULL, NULL, NULL),
     -- 売り切れ・未発送（購入者=2）
-    (6,  2, N'USBケーブル',              500, 1, 2, N'購入 花子',  0,    DATEADD(DAY, -1, GETDATE()), NULL, NULL),
+    (6,  2, N'USBケーブル',              500, N'やや傷や汚れあり',       N'使用済みですが、問題なく使えます。', 1, 2, N'購入 花子',  0,    DATEADD(DAY, -1, GETDATE()), NULL, NULL),
     -- 売り切れ・発送済・レビュー済（購入者=3）
-    (7,  5, N'マグカップ',               800, 1, 3, N'閲覧 次郎',  1,    DATEADD(DAY, -7, GETDATE()), 5, N'きれいな状態で届きました。'),
+    (7,  5, N'マグカップ',               800, N'目立った傷や汚れなし', N'普段使いしやすいマグカップです。', 1, 3, N'閲覧 次郎',  1,    DATEADD(DAY, -7, GETDATE()), 5, N'きれいな状態で届きました。'),
     -- レビュー確認用 ------------------------------------------------
     -- 発送済・未レビュー（購入者=2）… 花子で「受け取り完了・レビューを書く」が出る
-    (8,  1, N'JavaScript入門',          1200, 1, 2, N'購入 花子',  1,    DATEADD(DAY, -3, GETDATE()), NULL, NULL),
+    (8,  1, N'JavaScript入門',          1200, N'目立った傷や汚れなし', N'JavaScriptを学べる入門書です。', 1, 2, N'購入 花子',  1,    DATEADD(DAY, -3, GETDATE()), NULL, NULL),
     -- 花子の出品が売れて、次郎(3)がレビュー済 … 花子の「出品した商品」タブに出る
-    (9,  4, N'トランプ',                 300, 2, 3, N'閲覧 次郎',  1,    DATEADD(DAY, -5, GETDATE()), 4, N'少し箱に傷がありましたが、中身は問題なしです。'),
+    (9,  4, N'トランプ',                 300, N'やや傷や汚れあり',       N'箱に少し傷がありますが、遊ぶには問題ありません。', 2, 3, N'閲覧 次郎',  1,    DATEADD(DAY, -5, GETDATE()), 4, N'少し箱に傷がありましたが、中身は問題なしです。'),
     -- 花子の出品が売れて、まだ未発送（購入者=3）
-    (10, 3, N'マフラー',                1600, 2, 3, N'閲覧 次郎',  0,    DATEADD(HOUR, -5, GETDATE()), NULL, NULL);
+    (10, 3, N'マフラー',                1600, N'傷や汚れあり',           N'冬用のマフラーです。使用感があります。', 2, 3, N'閲覧 次郎',  0,    DATEADD(HOUR, -5, GETDATE()), NULL, NULL);
 
 -- システム設定
 INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment) VALUES
@@ -171,7 +194,8 @@ INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment) VALU
     (2, 'Session',  'SessionTimeout',       '30',      'int', N'セッションの有効時間（分）'),
     (3, 'Sales',    'PriceMin',             '300',     'int', N'出品価格の下限（円）'),
     (4, 'Sales',    'PriceMax',             '9999999', 'int', N'出品価格の上限（円）'),
-    (5, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）');
+    (5, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）'),
+    (6, 'Sales',    'DescriptionMaxLength', '500',     'int', N'商品の説明の最大文字数');
 GO
 
 -- ------------------------------------------------------------
