@@ -748,3 +748,7 @@ div.actions .inline-form {
 }
 
 
+/* システムメッセージ */
+.message{
+  margin: 30px 0 0 0;
+}
