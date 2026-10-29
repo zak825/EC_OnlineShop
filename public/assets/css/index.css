@@ -96,6 +96,7 @@ body {
 
 /* 1商品 = 横並び（左に画像・右に情報） */
 .product {
+  position: relative;
   display: flex;
   flex-direction: row;
   background: #fff;
@@ -157,6 +158,23 @@ div.product__image {
   word-break: break-all;
 }
 
+/* 商品名のリンクをカード全体に広げる */
+.product__detail {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product__detail::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.product__detail:focus-visible::after {
+  outline: 2px solid #8c52ff;
+  outline-offset: -2px;
+}
+
 .product__price {
   margin: 0;
   font-size: 1.2rem;
@@ -196,6 +214,8 @@ div.product__image {
 }
 
 .product__buy {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;

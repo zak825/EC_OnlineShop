@@ -20,19 +20,12 @@
 }
 
 .product-edit__image-list {
-  display: flex;
-  flex-direction: row-reverse;
-  flex-wrap: nowrap;
-  gap: 8px;
+  /* 並び順と左寄せは出品画面と共通の sell.css の .image-list を使う */
   min-height: 108px;
   margin: 8px 0 0;
   overflow-x: auto;
   padding: 8px 0;
   scrollbar-width: thin;
-}
-
-.product-edit__image-list > :first-child {
-  margin-right: auto;
 }
 
 .product-edit__image-list .image-list__cell {

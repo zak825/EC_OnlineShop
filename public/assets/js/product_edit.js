@@ -199,13 +199,14 @@ editPreview.addEventListener('dragend', function() {
 editImages.addEventListener('change', function() {
   var files = Array.from(editImages.files);
   var beforeCount = editItems.length;
-  var invalid = false;
+  var invalid = '';
   files.forEach(function(file) {
-    if (editImageTypes.indexOf(file.type) === -1) invalid = true;
-    if (file.size > 2 * 1024 * 1024) invalid = true;
+    if (invalid) return;
+    if (file.size > 2 * 1024 * 1024) invalid = '画像は1枚2MBまでです';
+    else if (editImageTypes.indexOf(file.type) === -1) invalid = 'JPEG・PNG・GIF・WebP の画像を選択してください';
   });
   if (invalid) {
-    setEditImageError('JPEG・PNG・GIF・WebP の画像、1枚2MBまでを選択してください');
+    setEditImageError(invalid);
   }
 
   var available = editImageMax - editItems.length;
@@ -246,7 +247,36 @@ new MutationObserver(function() {
   setTimeout(updateEditImageArrows, 300);
 }).observe(editPreview, { childList: true });
 
-editForm.addEventListener('submit', function() {
+// 出品画面と同じ入力チェック・表示・タイミングを使う。
+[productName, genreCode, price, condition, description].forEach(function(input) {
+  if (document.getElementById('error_' + input.id).textContent.trim() !== '') {
+    input.classList.add('is-invalid');
+  }
+});
+productName.addEventListener('input', validateProductName);
+productName.addEventListener('blur', validateProductName);
+genreCode.addEventListener('change', validateGenreCode);
+genreCode.addEventListener('blur', validateGenreCode);
+price.addEventListener('input', validatePrice);
+price.addEventListener('blur', validatePrice);
+condition.addEventListener('change', validateCondition);
+description.addEventListener('input', validateDescription);
+description.addEventListener('blur', validateDescription);
+
+editForm.addEventListener('submit', function(event) {
+  var checks = [validateProductName(), validateGenreCode(), validatePrice(),
+    validateCondition(), validateDescription()];
+  var imageMessage = editItems.length > editImageMax ? '画像は' + editImageMax + '枚までです' : '';
+  editItems.forEach(function(item) {
+    if (!item.file || imageMessage) return;
+    if (item.file.size > 2 * 1024 * 1024) imageMessage = '画像は1枚2MBまでです';
+    else if (editImageTypes.indexOf(item.file.type) === -1) imageMessage = 'JPEG・PNG・GIF・WebP の画像を選択してください';
+  });
+  setEditImageError(imageMessage);
+  if (checks.indexOf(false) !== -1 || imageMessage) {
+    event.preventDefault();
+    return;
+  }
   editPicked = new DataTransfer();
   var orderInputs = editForm.querySelectorAll('[data-image-order]');
   orderInputs.forEach(function(input) { input.remove(); });
