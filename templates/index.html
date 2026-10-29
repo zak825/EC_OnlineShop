@@ -143,7 +143,8 @@
                     <?= name_label($item['SellerName']) ?>
 
                     <?php if ($item['SellerAvgScore'] !== null): ?>
-                      <span class="product__seller-rating">
+                      <span class="product__seller-rating"
+                        title="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?> / 5">
                         <?= stars($item['SellerAvgScore']) ?>
                       </span>
                     <?php else: ?>
