@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-shop | 管理画面 設定確認</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/setting.css">
+    <link rel="icon" href="assets/icons/favicon.ico">
+</head>
+
+<body class="admin-page">
+    <div id="wrap">
+        <?php include TEMPLATE_DIR . '/setting_header.html'; ?>
+
+        <main>
+            <div class="auth-container">
+                <div id="setting-confirm-card" class="auth-card">
+                    <div class="auth-header">
+                        <h1 class="auth-title">設定変更の確認</h1>
+                    </div>
+
+                    <?php if (($errorMessage ?? '') !== ''): ?>
+                    <p class="message message--error">
+                        <?= h($errorMessage) ?>
+                    </p>
+                    <?php endif; ?>
+
+                    <p class="confirm-lead">以下の設定に変更します。よろしいですか？</p>
+
+                    <table class="setting-diff">
+                        <thead>
+                            <tr>
+                                <th scope="col">項目</th>
+                                <th scope="col">変更前</th>
+                                <th scope="col">変更後</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach (($items ?? []) as $item): ?>
+                            <tr class="<?= $item['changed'] ? 'is-changed' : '' ?>">
+                                <th scope="row"><?= h($item['label']) ?></th>
+                                <td><?= h($item['before']) ?></td>
+                                <td><?= h($item['after']) ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                    <?php if (!empty($notes)): ?>
+                    <div class="message message--warning setting-notes">
+                        <p class="setting-notes__title">変更による影響</p>
+                        <ul class="error-list">
+                            <?php foreach ($notes as $note): ?>
+                            <li><?= h($note) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+
+                    <form id="setting-confirm-form" action="system_setting_confirm.php" method="post">
+                        <input type="hidden" name="csrf_token" value="<?= h($token ?? admin_csrf_token()) ?>">
+                        <div class="btn-row">
+                            <button type="submit" id="execute-btn" class="btn-main">実行</button>
+                            <button type="button" id="back-btn" class="btn-sub"
+                                onclick="location.href='system_setting.php?action=back'">キャンセル</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <?php require __DIR__ . '/../public/footer.php'; ?>
+    </div>
+
+    <script src="assets/js/setting.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-shop | ユーザー管理</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/setting.css">
+    <link rel="icon" href="assets/icons/favicon.ico">
+</head>
+
+<body class="admin-page">
+    <div id="wrap">
+        <?php include TEMPLATE_DIR . '/setting_header.html'; ?>
+
+        <main>
+            <div class="auth-container">
+                <div id="admin-users-card" class="auth-card">
+                    <div class="auth-header">
+                        <h1 class="auth-title">ユーザー管理</h1>
+                    </div>
+
+                    <?php if (!empty($flash)): ?>
+                    <p class="message message--<?= h($flash['type']) ?>">
+                        <?= h($flash['message']) ?>
+                    </p>
+                    <?php endif; ?>
+
+                    <?php if (($errorMessage ?? '') !== ''): ?>
+                    <p class="message message--error">
+                        <?= h($errorMessage) ?>
+                    </p>
+                    <?php endif; ?>
+
+                    <?php if (($users ?? []) === []): ?>
+                    <p class="admin-users__empty">登録されているユーザーはいません。</p>
+                    <?php else: ?>
+                    <table class="admin-users">
+                        <thead>
+                            <tr>
+                                <th scope="col">ユーザーID</th>
+                                <th scope="col">氏名</th>
+                                <th scope="col">郵便番号</th>
+                                <th scope="col">住所</th>
+                                <th scope="col">電話番号</th>
+                                <th scope="col">再設定</th>
+                                <th scope="col">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td><?= h($user['Userid']) ?></td>
+                                <td><?= h($user['UserName']) ?></td>
+                                <td><?= h($user['ZipCode']) ?></td>
+                                <td><?= h($user['Address']) ?></td>
+                                <td><?= h($user['TEL']) ?></td>
+                                <td><?= (int)$user['PasswordResetRequired'] === 1 ? '要再設定' : '—' ?></td>
+                                <td>
+                                    <form action="admin_users.php" method="post"
+                                        data-confirm="<?= h('ユーザーID ' . (int)$user['Userid'] . ' を削除します。出品と購入者の紐づけも消えます。よろしいですか？') ?>"
+                                        onsubmit="return confirm(this.dataset.confirm);">
+                                        <input type="hidden" name="csrf_token" value="<?= h($token ?? admin_csrf_token()) ?>">
+                                        <input type="hidden" name="user_id" value="<?= (int)$user['Userid'] ?>">
+                                        <button type="submit" class="admin-users__delete">削除</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php endif; ?>
+
+                    <div class="link-row">
+                        <a href="setting.php" class="btn-link">管理メニューへ戻る</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <?php require __DIR__ . '/../public/footer.php'; ?>
+    </div>
+</body>
+
+</html>
