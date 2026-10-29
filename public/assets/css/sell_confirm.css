@@ -150,7 +150,7 @@ main>p:first-of-type {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  border-radius: 0;
+  border-radius: 8px;
   cursor: pointer;
   background: #fff;
   color: #475569;
