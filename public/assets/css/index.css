@@ -100,7 +100,7 @@ body {
   flex-direction: row;
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-radius: 2px;
+  border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
 }
@@ -206,6 +206,7 @@ div.product__image {
   background: #8c52ff;
   color: #fff;
   border: 1px solid #8c52ff;
+  border-radius: 8px;
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
@@ -495,7 +496,7 @@ div.product__image {
   width: 220px;
   position: sticky;
   top: calc(var(--header-height, 50px) + 12px);   /* ヘッダーの下に少し余白を空けて止まる */
-  padding: 20px 18px 8px;
+  padding: 12px 18px 12px;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 2px;
