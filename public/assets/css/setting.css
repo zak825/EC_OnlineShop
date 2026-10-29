@@ -38,6 +38,8 @@ body.admin-page {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    max-width: 520px;
     height: 48px;
     background-color: #8c52ff;
     color: #ffffff;
@@ -47,12 +49,12 @@ body.admin-page {
     font-weight: 600;
     letter-spacing: 0.04em;
     text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .admin-menu__btn:hover {
     background-color: #4f23a0;
     border-color: #4f23a0;
-    color: #ffffff;
 }
 
 /* --------------------------------------------------------------------------
@@ -170,8 +172,22 @@ body.admin-page {
     height: 36px;
     padding: 0 12px;
     white-space: nowrap;
+    background-color: #ffffff;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
+.admin-users__delete:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+}
 .admin-users__empty {
     margin: 0;
     color: #64748b;
