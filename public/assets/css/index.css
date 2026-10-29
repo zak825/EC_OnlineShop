@@ -330,11 +330,9 @@ div.product__image {
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
+  pointer-events: none;
 }
 
-.search-bar__btn:hover {
-  background: #4f23a0;
-}
 
 /* 検索結果の件数・クリア */
 .search-result {
