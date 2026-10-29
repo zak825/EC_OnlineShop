@@ -276,6 +276,7 @@
 /* アイコン変更ウィンドウ内ボタン */
 label.btn-btn--secondary.btn--small {
   display: inline-block;
+  margin-top: 10px;
   padding: 0.1em 0.5em;
   border: none;
   text-decoration: none;
@@ -542,8 +543,8 @@ label.btn-btn--secondary.btn--small:hover {
   margin: 0;
 }
 
-.item__action-btn {
-  margin-top: 10px;
+.inline-form.item__action-btn {
+  margin-top: 16px;
 }
 
 .item__shipping {
