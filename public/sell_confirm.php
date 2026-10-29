@@ -191,4 +191,5 @@ view('sell_confirm', [
   'error'      => $error,
   'image_urls' => $image_urls,
   'product_conditions' => [],
+  'seller_avg_score' => $seller_avg_score,
 ]);
