@@ -64,7 +64,7 @@ body {
 /* ---------- 項目一覧（ラベル：値） ---------- */
 .info-list {
   display: grid;
-  grid-template-columns: 7em 1fr;
+  grid-template-columns: 7em minmax(0, 1fr);
   gap: 10px 16px;
   margin: 0;
 }

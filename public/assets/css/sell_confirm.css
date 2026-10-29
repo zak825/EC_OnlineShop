@@ -123,6 +123,12 @@ main>p:first-of-type {
 
 /* メイン画面プレビューの商品カード。
    index.cssを読み込まない確認画面でも、元画像のサイズに影響されない固定枠にする。 */
+.product__condition {
+  margin: -4px 0 8px;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
 .product-list--preview {
   list-style: none;
   margin: 0;
