@@ -285,9 +285,12 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 24px;
+  width: 100%;
   max-width: 1040px;
   margin: 32px auto;
   padding: 0 16px;
+  box-sizing: border-box;
+  flex: 1;
 }
 
 /* common.css の main（幅80%・中央寄せ）と .container--grid の余白を、横並び用に上書きする */
