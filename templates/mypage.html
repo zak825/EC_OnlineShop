@@ -59,11 +59,11 @@
                           <?= h($userName) ?>
                       </p>
 
-                      <!-- ↓ 評価の表示（自分で直した版があればそれをここに入れる） -->
+                      <!-- ↓ 評価の表示 -->
                       <p class="profile__rating">
                           <?php if ($avgScore !== null): ?>
-                          <span class="profile__stars" aria-label="評価の平均 <?= h(number_format($avgScore, 1)) ?>">
-                              <?= stars((int)round($avgScore)) ?>
+                          <span class="profile__stars">
+                              <?= stars($avgScore) ?>
                           </span>
                           <span class="profile__score">
                               <?= h(number_format($avgScore, 1)) ?>

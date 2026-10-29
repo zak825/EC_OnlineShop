@@ -143,9 +143,8 @@
                     <?= name_label($item['SellerName']) ?>
 
                     <?php if ($item['SellerAvgScore'] !== null): ?>
-                      <span class="product__seller-rating"
-                        aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
-                        <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
+                      <span class="product__seller-rating">
+                        <?= stars($item['SellerAvgScore']) ?>
                       </span>
                     <?php else: ?>
                       <span class="product__seller-rating product__seller-rating--none">

@@ -13,10 +13,20 @@ function view(string $name, array $vars = []): void
 }
 
 /** 評価値（1〜5）を ★★★☆☆ の形にする */
+/**
+ * 評価値（0〜5・小数可）を、欠けた星つきで表示するHTMLにする
+ *   4.6 → ★4つと、5つ目が6割だけ塗られた星
+ * 見た目は CSS（common.css の .stars）で作る。金色の星を、評価の割合の幅だけ見せている
+ * 返す値はHTMLなので、テンプレートでは h() に通さずそのまま出す：<?= stars($score) ?>
+ */
 function stars($score): string
 {
-    $score = max(0, min(5, (int)$score));
-    return str_repeat('★', $score) . str_repeat('☆', 5 - $score);
+    $score   = max(0.0, min(5.0, (float)$score));
+    $percent = round($score / 5 * 100, 1);
+
+    return '<span class="stars" role="img" aria-label="評価 ' . h(number_format($score, 1)) . '">'
+         . '<span class="stars__fill" aria-hidden="true" style="width:' . $percent . '%">★★★★★</span>'
+         . '</span>';
 }
 
 /** 日時を「2026/10/15 13:30」の形にする（NULL なら空文字） */
