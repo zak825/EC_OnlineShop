@@ -63,7 +63,7 @@
                     <?php endif; ?>
 
                     <form id="setting-confirm-form" action="setting_confirm.php" method="post">
-                        <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
+                        <input type="hidden" name="csrf_token" value="<?= h($token ?? admin_csrf_token()) ?>">
                         <div class="btn-row">
                             <button type="submit" id="execute-btn" class="btn-main">実行</button>
                             <button type="button" id="back-btn" class="btn-sub"

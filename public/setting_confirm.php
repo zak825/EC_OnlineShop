@@ -11,7 +11,7 @@ require_admin('setting.php');
 
 // 変更したときに確認画面で出す注意書き（Key => 文言）
 const SETTING_CHANGE_NOTES = [
-    'PasswordMinLength'    => '登録済みのパスワードには影響しません。新規登録とパスワード再設定から適用されます。',
+    'PasswordMinLength'    => '登録済みの利用者は、次にログインしたときパスワードの再設定を求められます。再設定が終わるまでショップには入れません。',
     'PasswordMaxLength'    => '登録済みのパスワードには影響しません。新規登録とパスワード再設定から適用されます。',
     'SessionTimeout'       => '短くした場合、ログイン中の利用者（あなたを含む）が次の操作でログアウトされることがあります。',
     'PriceMin'             => '出品中の商品の価格は変わりません。これから出品する商品から適用されます。',
@@ -41,10 +41,10 @@ $values = array_intersect_key($edit['values'], $labels);
 
 // 【実行ボタンを押す】
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $rows !== []) {
-    if (!check_csrf_token()) {
+    if (!check_admin_csrf_token()) {
         $errorMessage = '不正なリクエストです（CSRFトークンエラー）。画面を開き直して再度お試しください。';
     } elseif (collect_setting_errors($values, $labels) !== []) {
-        set_flash('入力内容に誤りがあります。各項目のメッセージを確認してください。', 'error');
+        set_admin_flash('入力内容に誤りがあります。各項目のメッセージを確認してください。', 'error');
         redirect('setting.php?action=back');
     } else {
         $result = '';
@@ -60,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $rows !== []) {
             $lockedRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $updates  = [];
+            $minLengthChanged = false;
             $conflict = count($lockedRows) !== count($edit['original']);
             foreach ($lockedRows as $row) {
                 $key = (string)$row['Key'];
@@ -70,6 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $rows !== []) {
                 }
                 if (isset($values[$key]) && $values[$key] !== (string)$row['Value']) {
                     $updates[(int)$row['id']] = $values[$key];
+                    if ($key === 'PasswordMinLength') {
+                        $minLengthChanged = true;
+                    }
                 }
             }
 
@@ -88,6 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $rows !== []) {
                     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
                     $stmt->execute();
                 }
+                // 最小文字数を変えたら、登録済みの利用者は次のログインで再設定するまで入れない
+                if ($minLengthChanged) {
+                    $pdo->exec('UPDATE dbo.UserData SET PasswordResetRequired = 1');
+                }
                 $pdo->commit();
                 $result = 'done';
             }
@@ -102,12 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $rows !== []) {
         if ($result === 'conflict') {
             // 入力値は残し、変更前の値は入力画面で取り直す
             unset($_SESSION['setting_edit']['original']);
-            set_flash('他の管理者が設定を変更したため、実行を中止しました。最新の設定値を確認してから、もう一度お試しください。', 'error');
+            set_admin_flash('他の管理者が設定を変更したため、実行を中止しました。最新の設定値を確認してから、もう一度お試しください。', 'error');
             redirect('setting.php?action=back');
         }
         if ($result === 'done') {
             unset($_SESSION['setting_edit']);
-            set_flash('設定を変更しました。', 'success');
+            set_admin_flash('設定を変更しました。', 'success');
             redirect('setting.php');
         }
     }
@@ -133,7 +141,7 @@ foreach ($rows as $row) {
 }
 
 view('setting_confirm', [
-    'token'        => csrf_token(),
+    'token'        => admin_csrf_token(),
     'errorMessage' => $errorMessage,
     'items'        => $items,
     'notes'        => $notes,

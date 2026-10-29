@@ -94,37 +94,396 @@ function redirect_to_login(?string $returnTo = null): void {
     redirect($url);
 }
 
+// ============================================================
+// 管理者ログイン（利用者の UserData / UserSession とは別）
+//
+//   アカウントは AdminAccount。セッションは $_SESSION['admin'] にまとめる。
+//   利用者の logout_session() はこの配列を残す。
+//   CSRF とフラッシュもこの中に置き、利用者画面と取り違えない。
+// ============================================================
+
 /**
- * ログイン中のユーザーが管理者か（config.php の ADMIN_USER_IDS に含まれているか）
- * 定数が無い・空のときは誰も管理者にしない
+ * $_SESSION['admin'] を配列として用意する
+ */
+function ensure_admin_session(): void {
+    if (!isset($_SESSION['admin']) || !is_array($_SESSION['admin'])) {
+        $_SESSION['admin'] = [];
+    }
+}
+
+/**
+ * 管理者ログイン後の戻り先（自サイトの .php だけ。管理者ログイン画面自身は不可）
+ */
+function admin_return_url(string $url): string {
+    if (!preg_match('/^[a-zA-Z0-9_\-\.]+\.php(\?[a-zA-Z0-9_\-\.=&]+)?$/', $url)) {
+        return 'setting.php';
+    }
+    if (preg_match('/^admin_login\.php(\?|$)/', $url)) {
+        return 'setting.php';
+    }
+    return $url;
+}
+
+/**
+ * 管理者としてログイン中かつ有効期限内か
+ * 利用者のログイン状態は見ない
  *
  * @return bool
  */
 function is_admin(): bool {
-    if (!defined('ADMIN_USER_IDS') || !is_array(ADMIN_USER_IDS)) {
+    $admin = $_SESSION['admin'] ?? null;
+    if (!is_array($admin) || empty($admin['id']) || empty($admin['login_token']) || empty($admin['last_activity'])) {
         return false;
     }
-    $userId = current_user_id();
-    if ($userId === null) {
+
+    $timeout = get_session_timeout_seconds();
+    if ((time() - (int)$admin['last_activity']) > $timeout) {
+        logout_admin();
+        set_admin_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
         return false;
     }
-    return in_array($userId, array_map('intval', ADMIN_USER_IDS), true);
+
+    try {
+        if (!touch_admin_login_slot((int)$admin['id'], (string)$admin['login_token'])) {
+            logout_admin();
+            set_admin_flash('別の端末でログインされたため、ログアウトしました。', 'error');
+            return false;
+        }
+    } catch (PDOException $e) {
+        // DBエラー時は安全側（管理者ログイン扱いにしない）。セッションは残す
+        error_log('Admin login slot check error: ' . $e->getMessage());
+        return false;
+    }
+
+    $_SESSION['admin']['last_activity'] = time();
+    return true;
 }
 
 /**
  * 管理画面の先頭で呼ぶ
- * 未ログインならログイン画面へ（ログイン後は $returnTo に戻す）、管理者でなければ 403 で止める
+ * 管理者としてログインしていなければ管理者ログイン画面へ（ログイン後は $returnTo に戻す）
  *
  * @param string $returnTo ログイン成功後に戻す画面パス
  */
 function require_admin(string $returnTo): void {
-    if (!is_logged_in()) {
-        redirect_to_login($returnTo);
-    }
     if (!is_admin()) {
-        http_response_code(403);
-        exit('このページへのアクセス権限がありません。');
+        redirect_to_admin_login($returnTo);
     }
+}
+
+/**
+ * 未ログインの管理者を管理者ログイン画面へリダイレクトする
+ *
+ * @param string|null $returnTo ログイン成功後に戻したい画面パス
+ */
+function redirect_to_admin_login(?string $returnTo = null): void {
+    ensure_admin_session();
+    if ($returnTo !== null && $returnTo !== '') {
+        $_SESSION['admin']['redirect_after_login'] = admin_return_url($returnTo);
+    }
+    redirect('admin_login.php');
+}
+
+/**
+ * 管理者画面用のCSRFトークンを生成・取得する
+ */
+function admin_csrf_token(): string {
+    ensure_admin_session();
+    if (empty($_SESSION['admin']['csrf_token']) || !is_string($_SESSION['admin']['csrf_token'])) {
+        $_SESSION['admin']['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['admin']['csrf_token'];
+}
+
+/**
+ * 管理者画面のCSRFトークンを検証する（引数省略時は $_POST['csrf_token']）
+ * 一度検証したトークンは破棄する（二重送信防止）。利用者側のトークンは触らない
+ */
+function check_admin_csrf_token(?string $token = null): bool {
+    $token = $token ?? $_POST['csrf_token'] ?? null;
+    $saved = '';
+    if (isset($_SESSION['admin']) && is_array($_SESSION['admin'])) {
+        $saved = $_SESSION['admin']['csrf_token'] ?? '';
+        unset($_SESSION['admin']['csrf_token']);
+    }
+
+    if (!is_string($saved) || $saved === '' || !is_string($token) || !hash_equals($saved, $token)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * 管理者画面用のフラッシュメッセージをセットする
+ */
+function set_admin_flash(string $message, string $type = 'info'): void {
+    ensure_admin_session();
+    $_SESSION['admin']['flash'] = [
+        'message' => $message,
+        'type'    => $type,
+    ];
+}
+
+/**
+ * 管理者画面用のフラッシュメッセージを取得し、セッションから削除する
+ *
+ * @return array|null ['message' => string, 'type' => string]
+ */
+function get_admin_flash(): ?array {
+    if (!isset($_SESSION['admin']) || !is_array($_SESSION['admin'])) {
+        return null;
+    }
+    $flash = $_SESSION['admin']['flash'] ?? null;
+    unset($_SESSION['admin']['flash']);
+    return is_array($flash) ? $flash : null;
+}
+
+/**
+ * 管理者ログアウト（利用者のセッションは残す）
+ */
+function logout_admin(): void {
+    ensure_admin_session();
+    $adminId = isset($_SESSION['admin']['id']) ? (int)$_SESSION['admin']['id'] : 0;
+    $token   = $_SESSION['admin']['login_token'] ?? null;
+    if ($adminId > 0 && is_string($token) && $token !== '') {
+        release_admin_login_slot($adminId, $token);
+    }
+
+    unset(
+        $_SESSION['admin']['id'],
+        $_SESSION['admin']['login_id'],
+        $_SESSION['admin']['name'],
+        $_SESSION['admin']['login_token'],
+        $_SESSION['admin']['last_activity'],
+        $_SESSION['admin']['pending_id'],
+        $_SESSION['admin']['pending_at'],
+        $_SESSION['admin']['redirect_after_login']
+    );
+}
+
+/**
+ * 管理者のログイン枠を取得する（パスワード認証の成功後に呼ぶ）
+ *
+ * @param bool $force true なら、他の端末がログイン中でも新しいセッションで置き換える
+ * @return string|null 取得できたらセッショントークン。$force = false で他端末がログイン中なら null
+ * @throws PDOException DBエラー時
+ */
+function acquire_admin_login_slot(PDO $pdo, int $adminId, int $timeoutSec, bool $force = false): ?string {
+    $token = bin2hex(random_bytes(32));
+
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare(
+            'SELECT CASE WHEN DATEDIFF(SECOND, LastActivityTime, GETDATE()) <= :timeout
+                         THEN 1 ELSE 0 END AS IsActive
+             FROM dbo.AdminSession WITH (UPDLOCK, HOLDLOCK)
+             WHERE AdminId = :admin_id'
+        );
+        $stmt->bindValue(':timeout', $timeoutSec, PDO::PARAM_INT);
+        $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$force && $row !== false && (int)$row['IsActive'] === 1) {
+            $pdo->rollBack();
+            return null;
+        }
+
+        if ($row !== false) {
+            $stmt = $pdo->prepare(
+                'UPDATE dbo.AdminSession
+                 SET SessionToken = :token, LoginDateTime = GETDATE(), LastActivityTime = GETDATE()
+                 WHERE AdminId = :admin_id'
+            );
+        } else {
+            $stmt = $pdo->prepare(
+                'INSERT INTO dbo.AdminSession (AdminId, SessionToken, LoginDateTime, LastActivityTime)
+                 VALUES (:admin_id, :token, GETDATE(), GETDATE())'
+            );
+        }
+        $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+        $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $pdo->commit();
+        return $token;
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if ($e->getCode() === '23000' && !$force) {
+            return null;
+        }
+        throw $e;
+    }
+}
+
+/**
+ * このセッションが正規の管理者ログインか確認し、DB側の最終操作時刻を更新する
+ *
+ * @throws PDOException DBエラー時
+ */
+function touch_admin_login_slot(int $adminId, string $token): bool {
+    if ($token === '') {
+        return false;
+    }
+    $stmt = db()->prepare(
+        'UPDATE dbo.AdminSession
+         SET LastActivityTime = GETDATE()
+         WHERE AdminId = :admin_id AND SessionToken = :token'
+    );
+    $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->rowCount() === 1;
+}
+
+/**
+ * 管理者のログイン枠を解放する（失敗してもログアウト処理は止めない）
+ */
+function release_admin_login_slot(int $adminId, string $token): void {
+    try {
+        $stmt = db()->prepare(
+            'DELETE FROM dbo.AdminSession WHERE AdminId = :admin_id AND SessionToken = :token'
+        );
+        $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+        $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        error_log('Admin login slot release error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * 管理者ログインのロック解除時刻を警告文にする（パスワード再設定の導線は出さない）
+ */
+function format_admin_login_lock_message(string $lockedUntil): string {
+    $unlockAt = lock_until_hhmm($lockedUntil);
+
+    return "アカウントはロックされました。\n"
+        . "再度ログインを行うには、{$unlockAt}までお待ちください。";
+}
+
+/**
+ * いま管理者ログインをロック中なら警告文を返す。ロックなしなら null
+ *
+ * @throws PDOException DBエラー時
+ */
+function active_admin_login_lock_message(PDO $pdo, int $adminId): ?string {
+    $stmt = $pdo->prepare(
+        'SELECT CONVERT(VARCHAR(19), LockedUntil, 120) AS LockedUntil
+         FROM dbo.AdminLoginLock
+         WHERE AdminId = :admin_id
+           AND LockedUntil IS NOT NULL
+           AND LockedUntil > GETDATE()'
+    );
+    $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+    $stmt->execute();
+    $lockedUntil = $stmt->fetchColumn();
+    if ($lockedUntil === false || $lockedUntil === null || $lockedUntil === '') {
+        return null;
+    }
+
+    return format_admin_login_lock_message((string)$lockedUntil);
+}
+
+/**
+ * 管理者のパスワード不一致を1回記録する
+ * 3回目でロックし、ロック中（今回ロックした場合を含む）は警告文を返す。まだロックしないときは null
+ *
+ * @throws PDOException DBエラー時
+ */
+function register_admin_login_failure(PDO $pdo, int $adminId): ?string {
+    $minutes = (int)LOGIN_LOCK_MINUTES;
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare(
+            'SELECT FailCount,
+                    CONVERT(VARCHAR(19), LockedUntil, 120) AS LockedUntil,
+                    CASE WHEN LockedUntil IS NOT NULL AND LockedUntil > GETDATE()
+                         THEN 1 ELSE 0 END AS IsLocked
+             FROM dbo.AdminLoginLock WITH (UPDLOCK, HOLDLOCK)
+             WHERE AdminId = :admin_id'
+        );
+        $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row !== false && (int)$row['IsLocked'] === 1) {
+            $pdo->commit();
+            return format_admin_login_lock_message((string)$row['LockedUntil']);
+        }
+
+        $failCount = 0;
+        if ($row !== false && ($row['LockedUntil'] === null || $row['LockedUntil'] === '')) {
+            $failCount = (int)$row['FailCount'];
+        }
+        $failCount++;
+
+        if ($failCount >= LOGIN_FAIL_LIMIT) {
+            if ($row === false) {
+                $stmt = $pdo->prepare(
+                    "INSERT INTO dbo.AdminLoginLock (AdminId, FailCount, LockedUntil)
+                     VALUES (:admin_id, 0, DATEADD(MINUTE, {$minutes}, GETDATE()))"
+                );
+            } else {
+                $stmt = $pdo->prepare(
+                    "UPDATE dbo.AdminLoginLock
+                     SET FailCount = 0,
+                         LockedUntil = DATEADD(MINUTE, {$minutes}, GETDATE())
+                     WHERE AdminId = :admin_id"
+                );
+            }
+            $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $stmt = $pdo->prepare(
+                'SELECT CONVERT(VARCHAR(19), LockedUntil, 120) AS LockedUntil
+                 FROM dbo.AdminLoginLock
+                 WHERE AdminId = :admin_id'
+            );
+            $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+            $stmt->execute();
+            $lockedUntil = (string)$stmt->fetchColumn();
+            $pdo->commit();
+            return format_admin_login_lock_message($lockedUntil);
+        }
+
+        if ($row === false) {
+            $stmt = $pdo->prepare(
+                'INSERT INTO dbo.AdminLoginLock (AdminId, FailCount, LockedUntil)
+                 VALUES (:admin_id, :fail_count, NULL)'
+            );
+        } else {
+            $stmt = $pdo->prepare(
+                'UPDATE dbo.AdminLoginLock
+                 SET FailCount = :fail_count,
+                     LockedUntil = NULL
+                 WHERE AdminId = :admin_id'
+            );
+        }
+        $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+        $stmt->bindValue(':fail_count', $failCount, PDO::PARAM_INT);
+        $stmt->execute();
+        $pdo->commit();
+        return null;
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+}
+
+/**
+ * 管理者ログインの失敗回数とロックを消す
+ *
+ * @throws PDOException DBエラー時
+ */
+function clear_admin_login_lock(PDO $pdo, int $adminId): void {
+    $stmt = $pdo->prepare('DELETE FROM dbo.AdminLoginLock WHERE AdminId = :admin_id');
+    $stmt->bindValue(':admin_id', $adminId, PDO::PARAM_INT);
+    $stmt->execute();
 }
 
 /**
@@ -187,6 +546,9 @@ function buyer_value(int $userId): string {
  * ログアウト処理（セッション情報の初期化）
  */
 function logout_session(): void {
+    // 管理者ログインは、利用者のログアウトやタイムアウトでは消さない
+    $adminSession = (isset($_SESSION['admin']) && is_array($_SESSION['admin'])) ? $_SESSION['admin'] : null;
+
     // 同時ログイン禁止の枠を解放する（このセッションが持っている枠だけ。他の端末の枠は消さない）
     $userId = current_user_id();
     $token  = $_SESSION['login_token'] ?? null;
@@ -209,6 +571,10 @@ function logout_session(): void {
     }
     session_destroy();
     session_start();
+
+    if ($adminSession !== null) {
+        $_SESSION['admin'] = $adminSession;
+    }
 }
 
 /**
@@ -588,6 +954,31 @@ function register_login_failure(PDO $pdo, int $userId): ?string {
  */
 function clear_login_lock(PDO $pdo, int $userId): void {
     clear_lock($pdo, 'UserLoginLock', $userId);
+}
+
+/**
+ * パスワード最小文字数の変更後、まだ再設定していない利用者か
+ *
+ * @throws PDOException DBエラー時
+ */
+function user_must_reset_password(PDO $pdo, int $userId): bool {
+    $stmt = $pdo->prepare(
+        'SELECT PasswordResetRequired FROM dbo.UserData WHERE Userid = :user_id'
+    );
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    return (int)$stmt->fetchColumn() === 1;
+}
+
+/**
+ * パスワード規則の変更を知らせ、再設定画面へ送る（ショップのログインは成立させない）
+ */
+function redirect_to_password_reset_for_policy_change(): void {
+    set_flash(
+        'サービスのパスワード規則が変更されました。<br>お手数ですがパスワードの再設定をお願いします。',
+        'warning'
+    );
+    redirect('passreset.php');
 }
 
 /**

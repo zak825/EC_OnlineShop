@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $inputs[$key] = trim_input(is_array($posted) ? ($posted[$key] ?? '') : '');
     }
 
-    if (!check_csrf_token()) {
+    if (!check_admin_csrf_token()) {
         $errorMessage = '不正なリクエストです（CSRFトークンエラー）。画面を開き直して再度お試しください。';
     } elseif ($rows !== []) {
         $fieldErrors = collect_setting_errors($inputs, $labels);
@@ -100,8 +100,8 @@ foreach ($rows as $row) {
 }
 
 view('setting', [
-    'flash'        => get_flash(),
-    'token'        => csrf_token(),
+    'flash'        => get_admin_flash(),
+    'token'        => admin_csrf_token(),
     'errorMessage' => $errorMessage,
     'settings'     => $settings,
 ]);

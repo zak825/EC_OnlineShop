@@ -37,7 +37,7 @@
 
                     <?php if (!empty($settings)): ?>
                     <form id="setting-form" action="setting.php" method="post" novalidate>
-                        <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
+                        <input type="hidden" name="csrf_token" value="<?= h($token ?? admin_csrf_token()) ?>">
 
                         <?php foreach ($settings as $setting): ?>
                         <div class="form-group">

@@ -25,11 +25,6 @@ define('URL_STATUS', 'mypage.php');    // レビュー画面の戻り先
 define('URL_SHIPPING', 'ship_notice.php'); // 発送通知送信画面（マイページの「発送」ボタンの送信先）
 define('URL_MYPAGE', 'mypage.php');   // マイページ画面
 
-// ---- 管理者 ----
-// 管理画面（setting.php）に入れるユーザーID。空にすると誰も入れない。
-define('ADMIN_USER_IDS', [1]);
-
-
 // ---- 開発中はエラーを画面に出す（本番サーバでは false にする） ----
 define('APP_DEBUG', true);
 

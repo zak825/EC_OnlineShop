@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>e-shop | ログイン</title>
+    <title>e-shop | <?= h($pageTitle ?? 'ログイン') ?></title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/auth.css">
     <link rel="icon" href="assets/icons/favicon.ico">
@@ -20,7 +20,7 @@
                     </div>
                     <div class="auth-header">
                         <img src="assets/images/logo.png" alt="Logo" class="auth-logo">
-                        <h1 class="auth-title">ログイン</h1>
+                        <h1 class="auth-title"><?= h($pageTitle ?? 'ログイン') ?></h1>
                     </div>
 
                     <!-- サーバー側およびJS側のエラーメッセージ表示領域 -->
@@ -34,7 +34,7 @@
                         このまま続行すると、他の端末はログアウトされます。
                     </p>
 
-                    <form id="login-confirm-form" action="login.php" method="post">
+                    <form id="login-confirm-form" action="<?= h($formAction ?? 'login.php') ?>" method="post">
                         <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
 
                         <div class="btn-row">
@@ -43,13 +43,15 @@
                         </div>
                     </form>
                     <?php else: ?>
-                    <form id="login-form" action="login.php" method="post" novalidate>
+                    <form id="login-form" action="<?= h($formAction ?? 'login.php') ?>" method="post" novalidate
+                        data-login-kind="<?= h($loginKind ?? 'user') ?>">
                         <input type="hidden" name="csrf_token" value="<?= h($token ?? csrf_token()) ?>">
 
                         <div class="form-group">
-                            <label for="user_id">ユーザーID</label>
-                            <input type="text" id="user_id" name="user_id" maxlength="8" inputmode="numeric"
-                                placeholder="例: 1" value="<?= h($userIdInput ?? '') ?>" autofocus>
+                            <label for="user_id"><?= h($loginIdLabel ?? 'ユーザーID') ?></label>
+                            <input type="text" id="user_id" name="user_id" maxlength="<?= (int)($loginIdMaxLength ?? 8) ?>"
+                                <?php if (($loginKind ?? 'user') !== 'admin'): ?>inputmode="numeric"<?php endif; ?>
+                                placeholder="<?= h($loginIdPlaceholder ?? '例: 1') ?>" value="<?= h($userIdInput ?? '') ?>" autofocus>
                         </div>
 
                         <div class="form-group">
@@ -63,6 +65,7 @@
                         </div>
                     </form>
 
+                    <?php if (($loginKind ?? 'user') !== 'admin'): ?>
                     <!-- パスワード再設定画面への導線 -->
                     <div class="login-links">
                         <a href="passreset.php" class="btn-link">パスワードをお忘れの方はこちら</a>
@@ -78,6 +81,7 @@
                         <button type="button" id="register-btn" class="btn-register"
                             onclick="location.href='register.php'">新規ユーザー登録</button>
                     </div>
+                    <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>

@@ -11,8 +11,8 @@
 
     <nav>
         <div class="right">
-            <form action="logout.php" method="post" onsubmit="return confirm('ログアウトしますか？');">
-                <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
+            <form action="admin_logout.php" method="post" onsubmit="return confirm('ログアウトしますか？');">
+                <input type="hidden" name="csrf_token" value="<?= h(admin_csrf_token()) ?>">
                 <button type="submit" class="btn-header btn-header--secondary">ログアウト</button>
             </form>
         </div>
