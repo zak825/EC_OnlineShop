@@ -1,3 +1,14 @@
+/* マイページ内の幅には余白と枠線を含める */
+.container--wide,
+.container--wide * {
+  box-sizing: border-box;
+}
+
+.container--wide {
+  width: calc(100% - 32px);
+  max-width: 1100px;
+}
+
 /* ---------- 未ログイン(セッション切れ) ---------- */
 .card-login-prompt {
   margin: 0px auto;
@@ -48,6 +59,9 @@
 
 .profile__left {
   display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
 }
 
 /* アイコン編集を右に*/
@@ -167,11 +181,13 @@
   flex-direction: column;
   justify-content: center;
   margin-left: 16px;
+  min-width: 0;
   gap: 8px;
 }
 
 .profile__name {
   margin: 0;
+  overflow-wrap: anywhere;
   font-size: 1.7rem;
   font-weight: bold;
   color: #0f172a;
@@ -181,6 +197,7 @@
 .tabs {
   display: flex;
   width: 100%;
+  margin-top: 40px;
 }
 
 .tabs__item {
@@ -188,8 +205,8 @@
   text-align: center;
   text-decoration: none;
   justify-content: center;
-  padding: 15px;
-  margin: 80px 0px 20px 0px;
+  padding: 15px 8px;
+  margin: 0 0 20px;
   color: #808080;
 }
 
@@ -198,14 +215,6 @@
   font-weight: bold;
   border-bottom: 2px solid #8c52ff;
 }
-
-/* タイトルと丸アイコンを横並びにする */
-.item__title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 
 /* ---------- アイコン変更モーダル ---------- */
 .modal-overlay {
@@ -225,7 +234,8 @@
 .modal-content {
   background-color: #fff;
   padding: 24px;
-  height: 500px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
   border-radius: 8px;
   text-align: center;
   max-width: 400px;
@@ -273,24 +283,6 @@
   cursor: not-allowed;
 }
 
-/* アイコン変更ウィンドウ内ボタン */
-label.btn-btn--secondary.btn--small {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 0.1em 0.5em;
-  border: none;
-  text-decoration: none;
-  background: #fff;
-  color: #0f172a;
-  border: 2px solid;
-  border-radius: 10px;
-}
-
-label.btn-btn--secondary.btn--small:hover {
-  opacity: 0.7;
-  transition: 0.3s;
-}
-
 #iconSubmit {
   flex: 2;
   background: #8c52ff;
@@ -335,9 +327,9 @@ label.btn-btn--secondary.btn--small:hover {
 
 
 /* ============================================================
-   出品ステータス絞り込みバー
+   購入・出品ステータス絞り込みバー
    ============================================================ */
-.sold-filter {
+.status-filter {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -345,14 +337,14 @@ label.btn-btn--secondary.btn--small:hover {
   margin: 16px 0 24px;
 }
 
-.sold-filter__label {
+.status-filter__label {
   font-size: 0.95rem;
   font-weight: 700;
   color: #334155;
   letter-spacing: 0.02em;
 }
 
-.sold-filter__select {
+.status-filter__select {
   height: 40px;
   min-width: 180px;
   padding: 0 36px 0 14px;
@@ -372,11 +364,11 @@ label.btn-btn--secondary.btn--small:hover {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.sold-filter__select:hover {
+.status-filter__select:hover {
   border-color: #8c52ff;
 }
 
-.sold-filter__select:focus {
+.status-filter__select:focus {
   border-color: #8c52ff;
   box-shadow: 0 0 0 2px rgba(140, 82, 255, 0.2);
   outline: none;
@@ -536,16 +528,28 @@ label.btn-btn--secondary.btn--small:hover {
 .item__status-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px 10px;
+  flex-wrap: wrap;
 }
 
 .item__status-header .item__label {
   margin: 0;
 }
 
-.inline-form.item__action-btn {
-  margin-top: 16px;
+.item__status-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
 }
+
+.item__status-block > .item__action-btn {
+  margin: 0;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
 
 .item__shipping {
   font-size: 1.05rem;
@@ -586,6 +590,7 @@ label.btn-btn--secondary.btn--small:hover {
 
 /* 削除・編集ボタン */
 div.actions {
+    flex-wrap: wrap;
     display: flex;
     align-items: stretch;
     gap: 8px;
@@ -595,12 +600,12 @@ div.actions .inline-form {
     margin: 0;
 }
 
-button.btn--secondary {
+.btn--danger {
     background: #d32f2f;
     color: #fff;
     border-color: #d32f2f;
 }
-button.btn--secondary:hover {
+.btn--danger:hover {
     background: #b7282e;
     border-color: #b7282e;
 }
@@ -688,7 +693,7 @@ button.btn--secondary:hover {
 }
 
 /* ---------- スマホ対応 ---------- */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .card.item {
     padding: 20px 16px;
   }
@@ -716,11 +721,12 @@ button.btn--secondary:hover {
     height: 160px;
   }
 
-  .sold-filter {
+  .status-filter {
+    flex-wrap: wrap;
     justify-content: stretch;
   }
 
-  .sold-filter__select {
+  .status-filter__select {
     flex: 1;
     min-width: 0;
   }

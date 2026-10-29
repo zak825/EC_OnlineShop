@@ -109,16 +109,17 @@
 })();
 
 // ============================================================
-// マイページ：出品した商品をステータスで絞り込む
+// マイページ：購入・出品した商品をステータスで絞り込む
 //   プルダウンを選んだら、すぐにフォームを送信する（mypage.php?tab=sold&status=…）
 // ============================================================
 (function () {
-  var form   = document.getElementById('sold-filter');
-  var select = document.getElementById('sold-status');
-  if (!form || !select) return;
-
-  select.addEventListener('change', function () {
-    form.submit();
+  ['bought', 'sold'].forEach(function(tab) {
+    var form = document.getElementById(tab + '-filter');
+    var select = document.getElementById(tab + '-status');
+    if (!form || !select) return;
+    select.addEventListener('change', function () {
+      form.submit();
+    });
   });
 })();
 
