@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e shop | 出品確認</title>
   <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/product_card.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/product_card.css') ?>">
   <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
   <link rel="stylesheet" href="assets/css/sell_confirm.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell_confirm.css') ?>">
   <link rel="icon" href="assets/icons/favicon.ico">
@@ -134,7 +135,9 @@
         var DESIGN_WIDTH = 640;   // CSS の .preview-scale の width と同じ値にする
 
         function fit() {
-          box.style.zoom = Math.min(1, frame.clientWidth / DESIGN_WIDTH);
+          box.style.zoom = window.matchMedia('(max-width: 560px)').matches
+            ? 1
+            : Math.min(1, (frame.clientWidth - 8) / DESIGN_WIDTH);
         }
         fit();
         window.addEventListener('resize', fit);

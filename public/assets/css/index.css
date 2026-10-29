@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    メイン画面（商品一覧）
    ヘッダーは header.php / header.css、共通部品は common.css
    ============================================================ */
@@ -84,172 +84,10 @@ body {
   color: #1e40af;
 }
 
-/* ---------- 商品一覧（カードを並べる） ---------- */
-.product-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* 1商品 = 横並び（左に画像・右に情報） */
-.product {
-  display: flex;
-  flex-direction: row;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-}
-
-/* 商品画像の枠（4:3・左側の固定幅） */
-.product__image {
-  width: 200px;
-  flex: none;
-  aspect-ratio: 4 / 3;
-  background: #f8fafc;
-}
-
-.product__image--photo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-img.product__image--photo {
-  display: block;
-  width: 200px;
-  height: auto;
-  min-height: 100%;
-  align-self: stretch;
-  box-sizing: border-box;
-  object-fit: contain;
-  object-position: center center;
-  background: #f8fafc;
-}
-
-/* 画像が無いとき：ジャンル名を枠に出す */
-div.product__image {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #eef0ff;
-  color: #8c52ff;
-  font-weight: 700;
-  letter-spacing: 2px;
-}
-
-.product__body {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px 16px;
-  flex: 1;
-}
-
-.product__name {
-  font-size: 1rem;
-  margin: 0;
-  word-break: break-all;
-}
-
-.product__price {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #8c52ff;
-}
-
-.product__meta {
-  margin: 0 0 10px;
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.product__condition {
-  margin: -4px 0 8px;
-  color: #475569;
-  font-size: 0.85rem;
-}
-
-.product__seller-rating {
-  color: #d59b00;
-  white-space: nowrap;
-}
-
-.product__genre {
-  display: inline-block;
-  margin-right: 6px;
-  padding: 0 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-}
-
-/* ボタンをカード下にそろえる */
-.product__buy,
-.product__own {
-  margin-top: auto;
-}
-
-.product__buy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  min-width: 160px;
-  height: 40px;
-  padding: 0 24px;
-  background: #8c52ff;
-  color: #fff;
-  border: 1px solid #8c52ff;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.product__buy:hover {
-  background: #4f23a0;
-  border-color: #4f23a0;
-}
-
-.product__own {
-  align-self: flex-start;
-  padding: 9px 20px;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
 .empty {
   text-align: center;
   color: #64748b;
   padding: 48px 0;
-}
-
-/* ---------- スマホ ---------- */
-@media (max-width: 560px) {
-  .product {
-    flex-direction: column;
-  }
-
-  .product__image {
-    width: 100%;
-  }
-
-  img.product__image--photo {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3;
-  }
-
-  .product__buy,
-  .product__own { align-self: stretch; text-align: center; }
 }
 
 /* ---------- 検索＋ジャンル絞り込みバー（一体型） ---------- */
@@ -440,34 +278,6 @@ div.product__image {
   opacity: 0.5;
 }
 
-/* ---------- 商品カードの「ジャンル」と「出品者＋評価」の位置をそろえる ---------- */
-.product__meta {
-  display: grid;
-  grid-template-columns: 6em 1fr;   /* ジャンル | 出品者名と評価（つなげて表示） */
-  align-items: center;
-  column-gap: 8px;
-}
-
-.product__meta .product__genre {
-  justify-self: start;   /* 枠は文字の幅のまま、列の左端に置く */
-  margin-right: 0;
-}
-
-/* 名前と評価は1つのまとまり。幅が足りなければ評価が次の行に回る */
-.product__seller {
-  min-width: 0;
-}
-
-/* スマホは幅が足りないので、今までのように折り返して並べる */
-@media (max-width: 560px) {
-  .product__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 8px;
-  }
-}
-
 /* ============================================================
    ページ全体のレイアウト：左に絞り込みパネル、右にメイン
    ============================================================ */
@@ -592,50 +402,6 @@ div.product__image {
   margin-bottom: 0;
 }
 
-
-
-/* 出品者：[アイコン] 名前 ★★★★★ を、縦の中央でそろえて横に並べる */
-.product__seller {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 6px;
-}
-
-/* 星にカーソルを合わせると値が出ることが分かるようにする */
-.product__seller-rating[title] {
-  cursor: help;
-}
-
-
-/* ---------- 商品カードの「ジャンル」と「出品者」行：高さを24pxでそろえる ---------- */
-.product__meta {
-  align-items: center;
-}
-
-.product__meta .product__genre {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  line-height: 1;
-}
-
-.product__seller {
-  min-height: 24px;
-}
-
-/* アイコンは文字の行からはみ出さない大きさにする
-   （写真アイコンは PHP が style で 28px を指定しているので !important が必要） */
-.product__seller .initial-icon {
-  width: 22px !important;
-  height: 22px !important;
-  font-size: 0.7rem;
-}
-
-.product__seller-rating {
-  line-height: 1;
-}
 
 
 /* ---------- 絞り込みパネルの開閉 ---------- */
