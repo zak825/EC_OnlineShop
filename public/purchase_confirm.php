@@ -98,10 +98,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 画面を開いたとき
 // ============================================================
 
+$requestedProductId = filter_var($_GET['productId'] ?? null, FILTER_VALIDATE_INT);
+if (isset($_GET['productId'])) {
+    if (!$requestedProductId || $requestedProductId < 1) {
+        redirect(URL_MAIN);
+    }
+    $purchase = ['product_id' => $requestedProductId];
+}
+
 // 1. ログイン済みか確認する
 if (!is_logged_in()) {
     set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
-    redirect_to_login(); // ログイン後はメイン画面へ
+    redirect_to_login($requestedProductId ? 'purchase_confirm.php?productId=' . $requestedProductId : null);
 }
 
 // 2. 購入情報の有無を確認する
@@ -111,7 +119,7 @@ if ($purchase === null) {
 
 // 3. 購入情報を表示する
 $stmt = db()->prepare(
-    'SELECT ProductID, ProductName, Price FROM Sales WHERE ProductID = :productId'
+    'SELECT ProductID, ProductName, Price, Userid, BuyerUserid FROM Sales WHERE ProductID = :productId'
 );
 $stmt->execute([':productId' => $purchase['product_id']]);
 $product = $stmt->fetch();
@@ -121,6 +129,16 @@ if (!$product) {
     set_flash('商品が見つかりません。', 'error');
     redirect(URL_MAIN);
 }
+
+if ($product['BuyerUserid'] !== null || (int)$product['Userid'] === login_user_id()) {
+    unset($_SESSION['purchase']);
+    set_flash($product['BuyerUserid'] !== null
+        ? 'この商品は売り切れです。'
+        : '自分の出品した商品は購入できません。', 'warning');
+    redirect('purchase.php?productId=' . (int)$product['ProductID']);
+}
+
+$_SESSION['purchase'] = ['product_id' => (int)$product['ProductID']];
 
 $stmt = db()->prepare(
     'SELECT UserName, ZipCode, Address, TEL FROM UserData WHERE Userid = :userId'
