@@ -19,52 +19,58 @@
 
       <!-- ===== 左：絞り込み・並び替え（入力欄は form="search-form" で検索フォームにつなぐ） ===== -->
       <aside class="filter-panel" aria-label="絞り込みと並び替え">
-        <h2 class="filter-panel__title">絞り込み</h2>
+        <!-- 見出しを押すと開閉する（開閉は index.js） -->
+        <button type="button" class="filter-panel__toggle" id="filter_toggle"
+          aria-expanded="true" aria-controls="filter_body">
+          <span>絞り込み</span>
+          <span class="filter-panel__badge" id="filter_badge" hidden>0</span>
+        </button>
 
-        <div class="filter-panel__group">
-          <label class="filter-panel__label" for="filter_seller">出品者</label>
-          <input type="text" id="filter_seller" name="seller" form="search-form"
-            value="<?= h($seller) ?>" placeholder="出品者名" class="filter-panel__input">
-        </div>
+        <div class="filter-panel__body" id="filter_body">
+          <div class="filter-panel__group">
+            <label class="filter-panel__label" for="filter_seller">出品者</label>
+            <input type="text" id="filter_seller" name="seller" form="search-form"
+              value="<?= h($seller) ?>" placeholder="出品者名" class="filter-panel__input">
+          </div>
 
-        <div class="filter-panel__group">
-          <label class="filter-panel__label" for="filter_rating">出品者評価</label>
-          <select id="filter_rating" name="rating" form="search-form" class="filter-panel__select">
-            <option value="">指定なし</option>
-            <?php foreach ($ratingOptions as $value => $label): ?>
-            <option value="<?= h($value) ?>" <?= (string)$ratingFilter === (string)$value ? 'selected' : '' ?>>
-              <?= h($label) ?>
-            </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+          <div class="filter-panel__group">
+            <label class="filter-panel__label" for="filter_rating">出品者評価</label>
+            <select id="filter_rating" name="rating" form="search-form" class="filter-panel__select">
+              <option value="">指定なし</option>
+              <?php foreach ($ratingOptions as $value => $label): ?>
+              <option value="<?= h($value) ?>" <?= (string)$ratingFilter === (string)$value ? 'selected' : '' ?>>
+                <?= h($label) ?>
+              </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
 
-        <div class="filter-panel__group">
-          <label class="filter-panel__label" for="filter_condition">商品状態</label>
-          <select id="filter_condition" name="condition" form="search-form" class="filter-panel__select">
-            <option value="">指定なし</option>
-            <?php foreach ($conditionOptions as $value => $label): ?>
-            <option value="<?= h($value) ?>" <?= $conditionFilter === (string)$value ? 'selected' : '' ?>>
-              <?= h($label) ?>
-            </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+          <div class="filter-panel__group">
+            <label class="filter-panel__label" for="filter_condition">商品状態</label>
+            <select id="filter_condition" name="condition" form="search-form" class="filter-panel__select">
+              <option value="">指定なし</option>
+              <?php foreach ($conditionOptions as $value => $label): ?>
+              <option value="<?= h($value) ?>" <?= $conditionFilter === (string)$value ? 'selected' : '' ?>>
+                <?= h($label) ?>
+              </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
 
-        <h2 class="filter-panel__title filter-panel__title--sort">並び替え</h2>
+          <h2 class="filter-panel__title filter-panel__title--sort">並び替え</h2>
 
-        <div class="filter-panel__group">
-          <label class="filter-panel__label" for="filter_sort">並び順</label>
-          <select id="filter_sort" name="sort" form="search-form" class="filter-panel__select">
-            <?php foreach ($sortOptions as $value => $option): ?>
-            <option value="<?= h($value) ?>" <?= $sort === (string)$value ? 'selected' : '' ?>>
-              <?= h($option['label']) ?>
-            </option>
-            <?php endforeach; ?>
-          </select>
+          <div class="filter-panel__group">
+            <label class="filter-panel__label" for="filter_sort">並び順</label>
+            <select id="filter_sort" name="sort" form="search-form" class="filter-panel__select">
+              <?php foreach ($sortOptions as $value => $option): ?>
+              <option value="<?= h($value) ?>" <?= $sort === (string)$value ? 'selected' : '' ?>>
+                <?= h($option['label']) ?>
+              </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
         </div>
       </aside>
-
       <!-- ===== 右：メイン ===== -->
       <main class="container container--grid">
         <h1 class="page-title">商品一覧</h1>
@@ -87,7 +93,7 @@
               </option>
               <?php endforeach; ?>
             </select>
-            <button type="submit" class="search-bar__btn">検索</button>
+            <button type="submit" class="search-bar__btn" disabled>検索</button>
           </div>
         </form>
 
@@ -133,12 +139,13 @@
 
                   <span class="product__seller">
                     <span class="product__seller-label">出品者：</span>
+                    <?= product_icon($item['SellerName'], $item['SellerIconPath'] ?? null) ?>
                     <?= name_label($item['SellerName']) ?>
 
                     <?php if ($item['SellerAvgScore'] !== null): ?>
                       <span class="product__seller-rating"
-                        aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
-                        <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
+                        title="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?> / 5">
+                        <?= stars($item['SellerAvgScore']) ?>
                       </span>
                     <?php else: ?>
                       <span class="product__seller-rating product__seller-rating--none">
@@ -147,6 +154,10 @@
                     <?php endif; ?>
                   </span>
                 </p>
+
+                <?php if (!empty($item['ProductCondition'])): ?>
+                <p class="product__condition">商品の状態：<?= h($item['ProductCondition']) ?></p>
+                <?php endif; ?>
 
                 <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
                 <span class="product__own">自分の出品</span>

@@ -330,11 +330,9 @@ div.product__image {
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
+  pointer-events: none;
 }
 
-.search-bar__btn:hover {
-  background: #4f23a0;
-}
 
 /* 検索結果の件数・クリア */
 .search-result {
@@ -591,4 +589,129 @@ div.product__image {
 /* 検索窓の下の余白は、.search-form の余白に任せる */
 .search-form .search-bar {
   margin-bottom: 0;
+}
+
+
+
+/* 出品者：[アイコン] 名前 ★★★★★ を、縦の中央でそろえて横に並べる */
+.product__seller {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+/* 星にカーソルを合わせると値が出ることが分かるようにする */
+.product__seller-rating[title] {
+  cursor: help;
+}
+
+
+/* ---------- 商品カードの「ジャンル」と「出品者」行：高さを24pxでそろえる ---------- */
+.product__meta {
+  align-items: center;
+}
+
+.product__meta .product__genre {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  line-height: 1;
+}
+
+.product__seller {
+  min-height: 24px;
+}
+
+/* アイコンは文字の行からはみ出さない大きさにする
+   （写真アイコンは PHP が style で 28px を指定しているので !important が必要） */
+.product__seller .initial-icon {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 0.7rem;
+}
+
+.product__seller-rating {
+  line-height: 1;
+}
+
+
+/* ---------- 絞り込みパネルの開閉 ---------- */
+.filter-panel__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 0 0 10px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #0f172a;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+}
+
+/* 右端の矢印（開いているとき下向き、閉じているとき右向き） */
+.filter-panel__toggle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 3px auto;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.filter-panel__toggle[aria-expanded="false"]::after {
+  margin-bottom: 0;
+  transform: rotate(-45deg);
+}
+
+.filter-panel__toggle:hover {
+  color: #8c52ff;
+}
+
+.filter-panel__toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #8c52ff;
+}
+
+/* 指定中の条件の数 */
+.filter-panel__badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  color: #fff;
+  background: #8c52ff;
+  border-radius: 999px;
+}
+
+.filter-panel__badge[hidden] {
+  display: none;
+}
+
+.filter-panel__body[hidden] {
+  display: none;
+}
+
+/* 閉じているときは、見出しだけの小さなパネルにする */
+.filter-panel.is-collapsed {
+  padding-bottom: 14px;
+}
+
+.filter-panel.is-collapsed .filter-panel__toggle {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }

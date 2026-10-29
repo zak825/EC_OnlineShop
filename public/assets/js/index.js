@@ -135,3 +135,66 @@ if (logoutForm) {
   window.addEventListener('resize', updateHeaderHeight);
   window.addEventListener('load', updateHeaderHeight);   // ロゴ画像が読み込まれたあとの高さにも合わせる
 })();
+
+
+// ---------- ⑤ 絞り込みパネルの開閉 ----------
+// 幅が狭いとき（縦積みのとき）は最初は閉じておく。見出しを押すと開け閉めできる。
+// 閉じていても入力欄はフォームに含まれるので、絞り込みは有効なまま
+(function () {
+  const panel  = document.querySelector('.filter-panel');
+  const toggle = document.getElementById('filter_toggle');
+  const body   = document.getElementById('filter_body');
+  const badge  = document.getElementById('filter_badge');
+  const form   = document.getElementById('search-form');
+
+  if (!panel || !toggle || !body || !form) {
+    return;
+  }
+
+  const narrow = window.matchMedia('(max-width: 900px)');
+
+  function setOpen(open) {
+    body.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    panel.classList.toggle('is-collapsed', !open);
+  }
+
+  // 閉じていても分かるように、指定中の条件の数をバッジに出す
+  function updateBadge() {
+    const value = (name) => {
+      const field = form.elements.namedItem(name);
+      return field ? String(field.value).trim() : '';
+    };
+    let count = 0;
+    ['seller', 'rating', 'condition'].forEach((name) => {
+      if (value(name) !== '') {
+        count++;
+      }
+    });
+    if (value('sort') !== 'new' && value('sort') !== '') {
+      count++;
+    }
+    badge.textContent = count;
+    badge.hidden = count === 0;
+  }
+
+  setOpen(!narrow.matches);   // 狭いときは閉じた状態で始める
+  updateBadge();
+
+  toggle.addEventListener('click', () => {
+    setOpen(body.hidden);
+  });
+
+  // 画面の幅が変わって、狭い／広いが切り替わったとき、初期状態に合わせ直す
+  narrow.addEventListener('change', (event) => {
+    setOpen(!event.matches);
+  });
+
+  ['seller', 'rating', 'condition', 'sort'].forEach((name) => {
+    const field = form.elements.namedItem(name);
+    if (field) {
+      field.addEventListener('input', updateBadge);
+      field.addEventListener('change', updateBadge);
+    }
+  });
+})();

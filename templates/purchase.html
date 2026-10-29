@@ -70,7 +70,7 @@
             <?= h($product['ProductCondition'] ?? '') ?>
           </dd>
           <dt>説明</dt>
-          <dd class="description-content"><?= nl2br(h($product['Description'] ?? '')) ?></dd>
+          <dd class="description-content" tabindex="0" role="region" aria-label="商品の説明（スクロールで全文表示）"><?= nl2br(h($product['Description'] ?? '')) ?></dd>
         </dl>
       </section>
 
