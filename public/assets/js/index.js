@@ -19,7 +19,7 @@ if (logoutForm) {
 
 // ---------- ② リアルタイム検索 ----------
 (function () {
-  const form    = document.querySelector('.search-form');
+  const form    = document.getElementById('search-form');
   const results = document.getElementById('search-results');
   const keyword = form ? form.querySelector('[name="q"]') : null;
 
@@ -27,10 +27,15 @@ if (logoutForm) {
     return;
   }
 
-  const DELAY_MS = 20;   // 入力が止まってから検索するまでの待ち時間
+  const DELAY_MS = 200;   // 入力が止まってから検索するまでの待ち時間
 
   let timer      = null;
   let controller = null;    // 前の検索を取り消すためのもの
+
+  // フォームにつながっている入力欄すべて（左の絞り込みパネルの欄も含む）
+  const fields  = Array.from(form.elements);
+  const inputs  = fields.filter((el) => el.tagName === 'INPUT' && el.type === 'text');
+  const selects = fields.filter((el) => el.tagName === 'SELECT');
 
   // 今のフォームの内容から URL を作る（空の項目は付けない）
   function buildUrl() {
@@ -86,15 +91,14 @@ if (logoutForm) {
     timer = setTimeout(search, DELAY_MS);
   }
 
-  // 商品名・出品者名：入力のたびに（変換中は除く）
   // 商品名・出品者名：入力のたびに検索する（日本語の変換中も含む）
-  form.querySelectorAll('input[type="text"]').forEach((input) => {
+  inputs.forEach((input) => {
     input.addEventListener('input', schedule);
     input.addEventListener('compositionend', schedule);   // 変換を確定したときにも念のため
   });
 
-  // ジャンル・出品者評価・並び順：選んだらすぐ
-  form.querySelectorAll('select').forEach((select) => {
+  // ジャンル・出品者評価・商品状態・並び順：選んだらすぐ
+  selects.forEach((select) => {
     select.addEventListener('change', search);
   });
 
@@ -111,4 +115,86 @@ if (logoutForm) {
     const end = keyword.value.length;
     keyword.setSelectionRange(end, end);   // すでに文字があるときは末尾にカーソルを置く
   }
+})();
+
+
+
+// ---------- ④ ヘッダーの高さを CSS に伝える ----------
+// 検索窓・絞り込みパネルが「ヘッダーのすぐ下」に貼り付くように、ヘッダーの実際の高さを測る
+(function () {
+  const header = document.querySelector('header');
+  if (!header) {
+    return;
+  }
+
+  function updateHeaderHeight() {
+    document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+  }
+
+  updateHeaderHeight();
+  window.addEventListener('resize', updateHeaderHeight);
+  window.addEventListener('load', updateHeaderHeight);   // ロゴ画像が読み込まれたあとの高さにも合わせる
+})();
+
+
+// ---------- ⑤ 絞り込みパネルの開閉 ----------
+// 幅が狭いとき（縦積みのとき）は最初は閉じておく。見出しを押すと開け閉めできる。
+// 閉じていても入力欄はフォームに含まれるので、絞り込みは有効なまま
+(function () {
+  const panel  = document.querySelector('.filter-panel');
+  const toggle = document.getElementById('filter_toggle');
+  const body   = document.getElementById('filter_body');
+  const badge  = document.getElementById('filter_badge');
+  const form   = document.getElementById('search-form');
+
+  if (!panel || !toggle || !body || !form) {
+    return;
+  }
+
+  const narrow = window.matchMedia('(max-width: 900px)');
+
+  function setOpen(open) {
+    body.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    panel.classList.toggle('is-collapsed', !open);
+  }
+
+  // 閉じていても分かるように、指定中の条件の数をバッジに出す
+  function updateBadge() {
+    const value = (name) => {
+      const field = form.elements.namedItem(name);
+      return field ? String(field.value).trim() : '';
+    };
+    let count = 0;
+    ['seller', 'rating', 'condition'].forEach((name) => {
+      if (value(name) !== '') {
+        count++;
+      }
+    });
+    if (value('sort') !== 'new' && value('sort') !== '') {
+      count++;
+    }
+    badge.textContent = count;
+    badge.hidden = count === 0;
+  }
+
+  setOpen(!narrow.matches);   // 狭いときは閉じた状態で始める
+  updateBadge();
+
+  toggle.addEventListener('click', () => {
+    setOpen(body.hidden);
+  });
+
+  // 画面の幅が変わって、狭い／広いが切り替わったとき、初期状態に合わせ直す
+  narrow.addEventListener('change', (event) => {
+    setOpen(!event.matches);
+  });
+
+  ['seller', 'rating', 'condition', 'sort'].forEach((name) => {
+    const field = form.elements.namedItem(name);
+    if (field) {
+      field.addEventListener('input', updateBadge);
+      field.addEventListener('change', updateBadge);
+    }
+  });
 })();

@@ -13,6 +13,15 @@ if (!defined('URL_SELL')) {
     define('URL_SELL', 'sell.php');
 }
 
+// 商品状態（sell.php の PRODUCT_CONDITIONS と同じ内容。Sales.ProductCondition にこの文字列が入っている）
+const PRODUCT_CONDITIONS = [
+    '新品・未使用'         => '新品・未使用',
+    '目立った傷や汚れなし' => '目立った傷や汚れなし',
+    'やや傷や汚れあり'     => 'やや傷や汚れあり',
+    '傷や汚れあり'         => '傷や汚れあり',
+];
+
+
 // 出品者評価の絞り込み（キーは URL の rating の値）
 const RATING_OPTIONS = [
     '5'    => '★5',
@@ -67,6 +76,11 @@ if (!isset(RATING_OPTIONS[$ratingFilter])) {
     $ratingFilter = '';
 }
 
+$conditionFilter = get_text('condition');
+if (!isset(PRODUCT_CONDITIONS[$conditionFilter])) {
+    $conditionFilter = '';   // 一覧にない値は「指定なし」にする
+}
+
 $sort = get_text('sort');
 if (!isset(SORT_OPTIONS[$sort])) {
     $sort = 'new';
@@ -83,6 +97,7 @@ $sql =
     'SELECT s.ProductID, s.ProductName, s.Price, ' . $productDetailSelect . ' s.Userid,
             g.GenreName,
             u.UserName AS SellerName,
+            u.IconPath AS SellerIconPath,
             seller_rating.AvgScore AS SellerAvgScore
      FROM Sales s
      JOIN Genre    g ON s.GenreCode = g.GenreCode
@@ -127,6 +142,11 @@ if ($ratingFilter === 'none') {
     $params[':rating'] = (int)$ratingFilter;
 }
 
+if ($conditionFilter !== '') {
+    $sql .= ' AND s.ProductCondition = :condition';   // 商品状態で絞り込む
+    $params[':condition'] = $conditionFilter;
+}
+
 // 並び順（SORT_OPTIONS の中に無い値は上で 'new' にしてあるので、SQL に入るのは決まった文字列だけ）
 $sql .= ' ORDER BY ' . SORT_OPTIONS[$sort]['order'];
 
@@ -159,6 +179,11 @@ if ($genreFilter !== null) {
 if ($ratingFilter !== '') {
     $conditions[] = '出品者評価 ' . RATING_OPTIONS[$ratingFilter];
 }
+if ($conditionFilter !== '') {
+    $conditions[] = '商品状態「' . PRODUCT_CONDITIONS[$conditionFilter] . '」';
+}
+
+// ---- 3. 情報表示 ---------------------------------------------------
 
 // ---- 3. 情報表示 ---------------------------------------------------
 view('index', [
@@ -175,4 +200,7 @@ view('index', [
     'sort'          => $sort,
     'sortOptions'   => SORT_OPTIONS,
     'conditions'    => $conditions,
+    'conditionFilter'  => $conditionFilter,
+    'conditionOptions' => PRODUCT_CONDITIONS,
+    'sort'          => $sort,
 ]);

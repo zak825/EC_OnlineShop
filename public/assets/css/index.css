@@ -468,3 +468,247 @@ div.product__image {
     gap: 4px 8px;
   }
 }
+
+/* ============================================================
+   ページ全体のレイアウト：左に絞り込みパネル、右にメイン
+   ============================================================ */
+.page-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 1040px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+/* common.css の main（幅80%・中央寄せ）と .container--grid の余白を、横並び用に上書きする */
+.page-layout .container--grid {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  max-width: 760px;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- 左の絞り込みパネル ---------- */
+.filter-panel {
+  flex: none;
+  width: 220px;
+  position: sticky;
+  top: calc(var(--header-height, 50px) + 12px);   /* ヘッダーの下に少し余白を空けて止まる */
+  padding: 20px 18px 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+}
+
+.filter-panel__title {
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.filter-panel__title--sort {
+  margin-top: 8px;
+}
+
+.filter-panel__group {
+  margin: 0 0 16px;
+}
+
+.filter-panel__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.filter-panel__input,
+.filter-panel__select {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filter-panel__select {
+  cursor: pointer;
+}
+
+.filter-panel__input:focus,
+.filter-panel__select:focus {
+  border-color: #8c52ff;
+  box-shadow: 0 0 0 3px rgba(140, 82, 255, 0.15);
+}
+
+/* 幅が狭いときは、メインの上に縦積みにする */
+@media (max-width: 900px) {
+  .page-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-panel {
+    position: static;
+    width: auto;
+  }
+
+  .page-layout .container--grid {
+    max-width: none;
+  }
+}
+
+
+/* ---------- 絞り込みパネルの入力欄を枠に収める ---------- */
+.filter-panel,
+.filter-panel * {
+  box-sizing: border-box;
+}
+
+/* ---------- 検索窓も、スクロールしたときにヘッダーの下に貼り付く ---------- */
+.search-form {
+  position: sticky;
+  top: 50px;                 /* ヘッダーの高さ */
+  z-index: 50;               /* 商品カードより前、ヘッダー（100）より後ろ */
+  padding: 12px 0;
+  margin: 0 0 8px;
+  background: #fff;          /* 後ろを商品カードが通っても透けないようにする */
+}
+
+/* 検索窓の下の余白は、.search-form の余白に任せる */
+.search-form .search-bar {
+  margin-bottom: 0;
+}
+
+
+
+/* 出品者：[アイコン] 名前 ★★★★★ を、縦の中央でそろえて横に並べる */
+.product__seller {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+
+/* ---------- 商品カードの「ジャンル」と「出品者」行：高さを24pxでそろえる ---------- */
+.product__meta {
+  align-items: center;
+}
+
+.product__meta .product__genre {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  line-height: 1;
+}
+
+.product__seller {
+  min-height: 24px;
+}
+
+/* アイコンは文字の行からはみ出さない大きさにする
+   （写真アイコンは PHP が style で 28px を指定しているので !important が必要） */
+.product__seller .initial-icon {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 0.7rem;
+}
+
+.product__seller-rating {
+  line-height: 1;
+}
+
+
+/* ---------- 絞り込みパネルの開閉 ---------- */
+.filter-panel__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 0 0 10px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #0f172a;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+}
+
+/* 右端の矢印（開いているとき下向き、閉じているとき右向き） */
+.filter-panel__toggle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 3px auto;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.filter-panel__toggle[aria-expanded="false"]::after {
+  margin-bottom: 0;
+  transform: rotate(-45deg);
+}
+
+.filter-panel__toggle:hover {
+  color: #8c52ff;
+}
+
+.filter-panel__toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #8c52ff;
+}
+
+/* 指定中の条件の数 */
+.filter-panel__badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  color: #fff;
+  background: #8c52ff;
+  border-radius: 999px;
+}
+
+.filter-panel__badge[hidden] {
+  display: none;
+}
+
+.filter-panel__body[hidden] {
+  display: none;
+}
+
+/* 閉じているときは、見出しだけの小さなパネルにする */
+.filter-panel.is-collapsed {
+  padding-bottom: 14px;
+}
+
+.filter-panel.is-collapsed .filter-panel__toggle {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+} 
