@@ -89,7 +89,7 @@ CREATE TABLE Sales (
     ProductCondition NVARCHAR(30) NOT NULL CONSTRAINT DF_Sales_ProductCondition DEFAULT (N'中古'),
     Description  NVARCHAR(1000) NOT NULL CONSTRAINT DF_Sales_Description DEFAULT (N''),
     Userid       INT           NOT NULL REFERENCES UserData(Userid),
-    BuyerUserid  INT           REFERENCES UserData(Userid),  -- 購入者のユーザーID（NULL = 販売中）
+    BuyerUserid  INT,                                         -- 購入者のユーザーID（NULL = 販売中）。購入者アカウントを削除しても値は残し、売り切れのままにする
     BuyerName    NVARCHAR(50),                                -- 購入者の名前（表示用）
     ShippingFlag BIT,
     SoldDate     DATETIME,
