@@ -341,21 +341,21 @@
       </p>
       <?php endif; ?>
 
-      <?php foreach ($sold as $item): ?>
-      <article class="card item">
-        <div class="item__row">
-          <!-- 左：商品画像 -->
-          <div class="item__col item__col--image">
-            <div class="item__image">
-              <?php if (!empty($item['image_url'])): ?>
-              <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
-              <?php else: ?>
-              <div class="item__image--noimage" aria-hidden="true">
-                <?= h($item['GenreName']) ?>
-              </div>
-              <?php endif; ?>
-            </div>
-          </div>
+          <?php foreach ($sold as $item): ?>
+          <article class="card item">
+              <div class="item__row">
+                  <!-- 左：商品画像 -->
+                  <div class="item__col item__col--image">
+                      <div class="item__image">
+                          <?php if (!empty($item['image_url'])): ?>
+                          <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
+                          <?php else: ?>
+                          <div class="item__image--noimage" aria-hidden="true">
+                              <?= h($item['GenreName']) ?>
+                          </div>
+                          <?php endif; ?>
+                      </div>
+                  </div>
 
           <!-- 中央：商品名・価格・購入者・購入日時 -->
           <div class="item__col item__col--center">
