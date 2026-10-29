@@ -723,5 +723,10 @@ div.actions .inline-form {
     flex: 1;
     min-width: 0;
   }
+}
 
 
+/* システムメッセージ */
+.message{
+  margin: 30px 0 0 0;
+}
