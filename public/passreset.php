@@ -176,7 +176,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->beginTransaction();
 
                     $sql = "UPDATE dbo.UserData
-                                SET LoginPassword = :new_password
+                                SET LoginPassword = :new_password,
+                                    PasswordResetRequired = 0
                                 WHERE UserId = :user_id";
                     $stmt = $pdo->prepare($sql);
                     $stmt->bindValue(':new_password', $passwordHash, PDO::PARAM_STR);
@@ -225,6 +226,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     // 3. 初期表示時は照合用セッションを初期化する
     $clearVerifiedSession();
+}
+
+$flash = get_flash();
+if ($errorMessage === '' && !empty($flash['message'])) {
+    $errorMessage = $flash['message'];
+    if (($flash['type'] ?? '') === 'warning') {
+        $messageType = 'warning';
+    }
 }
 
 view('passreset', [

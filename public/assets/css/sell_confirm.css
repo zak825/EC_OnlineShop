@@ -121,56 +121,6 @@ main>p:first-of-type {
   color: #991b1b;
 }
 
-/* メイン画面プレビューの商品カード。
-   index.cssを読み込まない確認画面でも、元画像のサイズに影響されない固定枠にする。 */
-.product-list--preview {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.product-list--preview .product {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 2px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06),
-    0 2px 6px -1px rgba(15, 23, 42, 0.04);
-}
-
-.product-list--preview .product__image {
-  width: 200px;
-  height: 150px;
-  max-width: 200px;
-  flex: 0 0 200px;
-  background: #f8fafc;
-}
-
-.product-list--preview img.product__image {
-  display: block;
-  object-fit: contain;
-}
-
-.product-list--preview .product__body {
-  min-width: 0;
-  padding: 14px 16px 16px;
-  flex: 1 1 auto;
-}
-
-.product-list--preview .product__name {
-  margin: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.product-list--preview .product__price,
-.product-list--preview .product__meta {
-  margin: 0;
-}
-
 /* 商品画像のサムネイル（出品画面と同じ 100×100） */
 .image-list {
   display: flex;
@@ -292,4 +242,148 @@ main>p:first-of-type {
 
 #main_link:hover {
   text-decoration: underline;
+}
+
+
+/* ---------- プレビューの「出品者」行（アイコン・名前・評価） ---------- */
+.product__seller {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+  min-height: 24px;
+}
+
+/* アイコンは文字の行からはみ出さない大きさにする（写真アイコンは style で 28px が付くので !important） */
+.product__seller .initial-icon {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 0.7rem;
+}
+
+.product__seller-rating {
+  color: #d59b00;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.product__seller-rating[title] {
+  cursor: help;
+}
+
+
+/* ============================================================
+   メイン画面プレビューの商品カード
+   index.css と同じ作りで 640px 幅に組み、全体を zoom で縮めて枠に収める
+   （縮尺は sell_confirm.html の script が決める）
+   ============================================================ */
+.preview-frame {
+  width: 100%;
+  overflow: hidden;
+}
+
+.preview-scale {
+  width: 640px;   /* script の DESIGN_WIDTH と同じ値 */
+}
+
+.product-list--preview {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.product-list--preview .product {
+  display: flex;
+  flex-direction: row;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+}
+
+/* 画像の枠（4:3・左側の固定幅）。メイン画面と同じ 200px */
+.product-list--preview .product__image {
+  width: 200px;
+  flex: none;
+  aspect-ratio: 4 / 3;
+  background: #f8fafc;
+}
+
+.product-list--preview img.product__image {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 画像が無いとき：ジャンル名を枠に出す */
+.product-list--preview div.product__image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef0ff;
+  color: #8c52ff;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.product-list--preview .product__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+  padding: 14px 16px 16px;
+}
+
+.product-list--preview .product__name {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.product-list--preview .product__price {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #8c52ff;
+}
+
+/* ジャンル | 出品者＋評価（メイン画面と同じ列にそろえる） */
+.product-list--preview .product__meta {
+  display: grid;
+  grid-template-columns: 6em 1fr;
+  align-items: center;
+  column-gap: 8px;
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.product-list--preview .product__genre {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  line-height: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+}
+
+.product-list--preview .product__condition {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.product-list--preview .product__own {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 9px 20px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.9rem;
 }

@@ -167,6 +167,23 @@ if ($done) {
   $image_urls = [];
 }
 
+// プレビュー用：自分（出品者）の評価の平均（メイン画面と同じ計算）
+$seller_avg_score = null;
+try {
+    $stmt = db()->prepare(
+        'SELECT AVG(CAST(sucre AS FLOAT)) AS AvgScore
+         FROM Sales
+         WHERE Userid = :userid AND sucre IS NOT NULL'
+    );
+    $stmt->execute([':userid' => login_user_id()]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row && $row['AvgScore'] !== null) {
+        $seller_avg_score = (float)$row['AvgScore'];
+    }
+} catch (PDOException $e) {
+    error_log($e->getMessage());   // 評価が出せないだけなので、画面はそのまま表示する
+}
+
 view('sell_confirm', [
   'token'      => csrf_token(),
   'sell'       => $sell,

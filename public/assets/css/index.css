@@ -331,11 +331,9 @@ div.product__image {
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
+  pointer-events: none;
 }
 
-.search-bar__btn:hover {
-  background: #4f23a0;
-}
 
 /* 検索結果の件数・クリア */
 .search-result {
@@ -604,6 +602,11 @@ div.product__image {
   gap: 4px 6px;
 }
 
+/* 星にカーソルを合わせると値が出ることが分かるようにする */
+.product__seller-rating[title] {
+  cursor: help;
+}
+
 
 /* ---------- 商品カードの「ジャンル」と「出品者」行：高さを24pxでそろえる ---------- */
 .product__meta {
@@ -712,4 +715,4 @@ div.product__image {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;
-} 
+}

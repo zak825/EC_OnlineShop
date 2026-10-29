@@ -59,11 +59,11 @@
                           <?= h($userName) ?>
                       </p>
 
-                      <!-- ↓ 評価の表示（自分で直した版があればそれをここに入れる） -->
+                      <!-- ↓ 評価の表示 -->
                       <p class="profile__rating">
                           <?php if ($avgScore !== null): ?>
-                          <span class="profile__stars" aria-label="評価の平均 <?= h(number_format($avgScore, 1)) ?>">
-                              <?= stars((int)round($avgScore)) ?>
+                          <span class="profile__stars">
+                              <?= stars($avgScore) ?>
                           </span>
                           <span class="profile__score">
                               <?= h(number_format($avgScore, 1)) ?>
@@ -101,12 +101,12 @@
                       <!-- プレビュー（選択前は今のアイコン、選択後は選んだ画像） -->
                       <div class="modal-preview">
                           <?php if ($iconPath !== null && $iconPath !== ''): ?>
-                          <img src="<?= h($iconPath) ?>" alt="" class="profile__icon__md" id="iconPreviewImg">
-                          <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" hidden
+                          <img src="<?= h($iconPath) ?>" alt="" class="profile__icon profile__icon--large" id="iconPreviewImg">
+                          <span class="profile__icon profile__icon--initial profile__icon--large" id="iconPreviewInitial" hidden
                                 aria-hidden="true"></span>
                           <?php else: ?>
-                          <img src="" alt="" class="profile__icon" id="iconPreviewImg" hidden>
-                          <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" aria-hidden="true">
+                          <img src="" alt="" class="profile__icon profile__icon--large" id="iconPreviewImg" hidden>
+                          <span class="profile__icon profile__icon--initial profile__icon--large" id="iconPreviewInitial" aria-hidden="true">
                               <?= h(mb_substr($userName, 0, 1)) ?>
                           </span>
                           <?php endif; ?>
@@ -254,7 +254,7 @@
                       </div>
                   </div>
 
-                  <!-- 中央：商品名・価格・出品者・購入日時 -->
+                  <!-- 中央：商品名・価格・状態・説明・出品者・購入日時 -->
                   <div class="item__col item__col--center">
                       <h2 class="item__name">
                           <?= h($item['ProductName']) ?>
@@ -263,7 +263,14 @@
                           &yen;
                           <?= number_format((int)$item['Price']) ?>
                       </p>
+                      <?php if (!empty($item['ProductCondition'])): ?>
+                      <p class="item__condition">商品の状態：<?= h($item['ProductCondition']) ?></p>
+                      <?php endif; ?>
                       <dl class="item__meta">
+                          <?php if (trim((string)($item['Description'] ?? '')) !== ''): ?>
+                          <dt>商品の説明：</dt>
+                          <dd class="item__description" tabindex="0" role="region" aria-label="商品の説明（スクロールで全文表示）"><?= nl2br(h($item['Description'])) ?></dd>
+                          <?php endif; ?>
                           <dt>出品者：</dt>
                           <dd>
                               <?= h($item['SellerName']) ?>
@@ -303,7 +310,7 @@
                       <?= stars($item['sucre']) ?>
                   </p>
                   <?php if ($item['revwe'] !== null): ?>
-                  <p class="review-body__text">
+                  <p class="review-body__text" tabindex="0" role="region" aria-label="レビュー（スクロールで全文表示）">
                       <?= nl2br(h($item['revwe'])) ?>
                   </p>
                   <?php endif; ?>
@@ -448,7 +455,7 @@
             <?= stars($item['sucre']) ?>
           </p>
           <?php if ($item['revwe'] !== null): ?>
-          <p class="review-body__text">
+          <p class="review-body__text" tabindex="0" role="region" aria-label="レビュー（スクロールで全文表示）">
             <?= nl2br(h($item['revwe'])) ?>
           </p>
           <?php endif; ?>
