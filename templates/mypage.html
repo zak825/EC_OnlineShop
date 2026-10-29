@@ -59,11 +59,11 @@
                           <?= h($userName) ?>
                       </p>
 
-                      <!-- ↓ 評価の表示（自分で直した版があればそれをここに入れる） -->
+                      <!-- ↓ 評価の表示 -->
                       <p class="profile__rating">
                           <?php if ($avgScore !== null): ?>
-                          <span class="profile__stars" aria-label="評価の平均 <?= h(number_format($avgScore, 1)) ?>">
-                              <?= stars((int)round($avgScore)) ?>
+                          <span class="profile__stars">
+                              <?= stars($avgScore) ?>
                           </span>
                           <span class="profile__score">
                               <?= h(number_format($avgScore, 1)) ?>
@@ -254,7 +254,7 @@
                       </div>
                   </div>
 
-                  <!-- 中央：商品名・価格・出品者・購入日時 -->
+                  <!-- 中央：商品名・価格・状態・説明・出品者・購入日時 -->
                   <div class="item__col item__col--center">
                       <h2 class="item__name">
                           <?= h($item['ProductName']) ?>
@@ -263,7 +263,14 @@
                           &yen;
                           <?= number_format((int)$item['Price']) ?>
                       </p>
+                      <?php if (!empty($item['ProductCondition'])): ?>
+                      <p class="item__condition">商品の状態：<?= h($item['ProductCondition']) ?></p>
+                      <?php endif; ?>
                       <dl class="item__meta">
+                          <?php if (trim((string)($item['Description'] ?? '')) !== ''): ?>
+                          <dt>商品の説明：</dt>
+                          <dd class="item__description" tabindex="0" role="region" aria-label="商品の説明（スクロールで全文表示）"><?= nl2br(h($item['Description'])) ?></dd>
+                          <?php endif; ?>
                           <dt>出品者：</dt>
                           <dd>
                               <?= h($item['SellerName']) ?>
@@ -303,7 +310,7 @@
                       <?= stars($item['sucre']) ?>
                   </p>
                   <?php if ($item['revwe'] !== null): ?>
-                  <p class="review-body__text">
+                  <p class="review-body__text" tabindex="0" role="region" aria-label="レビュー（スクロールで全文表示）">
                       <?= nl2br(h($item['revwe'])) ?>
                   </p>
                   <?php endif; ?>
@@ -341,21 +348,21 @@
       </p>
       <?php endif; ?>
 
-      <?php foreach ($sold as $item): ?>
-      <article class="card item">
-        <div class="item__row">
-          <!-- 左：商品画像 -->
-          <div class="item__col item__col--image">
-            <div class="item__image">
-              <?php if (!empty($item['image_url'])): ?>
-              <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
-              <?php else: ?>
-              <div class="item__image--noimage" aria-hidden="true">
-                <?= h($item['GenreName']) ?>
-              </div>
-              <?php endif; ?>
-            </div>
-          </div>
+          <?php foreach ($sold as $item): ?>
+          <article class="card item">
+              <div class="item__row">
+                  <!-- 左：商品画像 -->
+                  <div class="item__col item__col--image">
+                      <div class="item__image">
+                          <?php if (!empty($item['image_url'])): ?>
+                          <img src="<?= h($item['image_url']) ?>" alt="<?= h($item['ProductName']) ?>">
+                          <?php else: ?>
+                          <div class="item__image--noimage" aria-hidden="true">
+                              <?= h($item['GenreName']) ?>
+                          </div>
+                          <?php endif; ?>
+                      </div>
+                  </div>
 
           <!-- 中央：商品名・価格・購入者・購入日時 -->
           <div class="item__col item__col--center">
@@ -448,7 +455,7 @@
             <?= stars($item['sucre']) ?>
           </p>
           <?php if ($item['revwe'] !== null): ?>
-          <p class="review-body__text">
+          <p class="review-body__text" tabindex="0" role="region" aria-label="レビュー（スクロールで全文表示）">
             <?= nl2br(h($item['revwe'])) ?>
           </p>
           <?php endif; ?>

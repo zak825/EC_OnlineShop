@@ -144,8 +144,8 @@
 
                     <?php if ($item['SellerAvgScore'] !== null): ?>
                       <span class="product__seller-rating"
-                        aria-label="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?>">
-                        <?= stars((int)round((float)$item['SellerAvgScore'])) ?>
+                        title="出品者評価 <?= h(number_format((float)$item['SellerAvgScore'], 1)) ?> / 5">
+                        <?= stars($item['SellerAvgScore']) ?>
                       </span>
                     <?php else: ?>
                       <span class="product__seller-rating product__seller-rating--none">
@@ -154,6 +154,10 @@
                     <?php endif; ?>
                   </span>
                 </p>
+
+                <?php if (!empty($item['ProductCondition'])): ?>
+                <p class="product__condition">商品の状態：<?= h($item['ProductCondition']) ?></p>
+                <?php endif; ?>
 
                 <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
                 <span class="product__own">自分の出品</span>

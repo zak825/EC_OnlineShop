@@ -147,4 +147,26 @@ main {
 
 :root {
   --color-border: #d9c8ff;   /* 薄い紫。アイコンなどの枠に使う */
+/* ---------- 評価の星（view.php の stars()）。欠けた分は灰色になる ---------- */
+.stars {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+  color: #cbd5e1;                       /* 塗られていない部分の星の色 */
+}
+
+/* 下の段：灰色の★5つ */
+.stars::before {
+  content: '★★★★★';
+}
+
+/* 上の段：金色の★5つを、評価の割合の幅で切る */
+.stars__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--star-color, #d59b00);    /* 色を変えたい画面は --star-color を指定する */
 }

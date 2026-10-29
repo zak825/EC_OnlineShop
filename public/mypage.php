@@ -286,8 +286,16 @@ $reviewCount = (int)$rating['ReviewCount'];
 $avgScore    = $reviewCount > 0 ? round((float)$rating['AvgScore'], 1) : null;  // 小数第1位まで
 
 // ---- 2. 購入情報参照（購入者が自分の商品） ------------------------
+$hasProductCondition = db_has_column('Sales', 'ProductCondition');
+$productConditionSelect = $hasProductCondition
+    ? 's.ProductCondition,'
+    : 'CAST(NULL AS NVARCHAR(30)) AS ProductCondition,';
+$hasDescription = db_has_column('Sales', 'Description');
+$descriptionSelect = $hasDescription
+    ? 's.Description,'
+    : 'CAST(NULL AS NVARCHAR(1000)) AS Description,';
 $stmt = db()->prepare(
-    'SELECT s.ProductID, s.ProductName, s.Price, s.SoldDate, s.ShippingFlag,
+    'SELECT s.ProductID, s.ProductName, s.Price, ' . $productConditionSelect . ' ' . $descriptionSelect . ' s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
             g.GenreName,
             seller.UserName AS SellerName
@@ -309,10 +317,6 @@ unset($item);
 
 // ---- 3. 出品情報参照（出品者が自分の商品） ------------------------
 // 購入者名・配送先は、BuyerUserid で UserData と結合して取る
-$hasProductCondition = db_has_column('Sales', 'ProductCondition');
-$productConditionSelect = $hasProductCondition
-    ? 's.ProductCondition,'
-    : 'CAST(NULL AS NVARCHAR(30)) AS ProductCondition,';
 $stmt = db()->prepare(
     'SELECT s.ProductID, s.ProductName, s.Price, ' . $productConditionSelect . ' s.BuyerUserid, s.SoldDate, s.ShippingFlag,
             s.sucre, s.revwe,
