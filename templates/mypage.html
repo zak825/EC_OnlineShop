@@ -101,12 +101,12 @@
                       <!-- プレビュー（選択前は今のアイコン、選択後は選んだ画像） -->
                       <div class="modal-preview">
                           <?php if ($iconPath !== null && $iconPath !== ''): ?>
-                          <img src="<?= h($iconPath) ?>" alt="" class="profile__icon__md" id="iconPreviewImg">
-                          <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" hidden
+                          <img src="<?= h($iconPath) ?>" alt="" class="profile__icon profile__icon--large" id="iconPreviewImg">
+                          <span class="profile__icon profile__icon--initial profile__icon--large" id="iconPreviewInitial" hidden
                                 aria-hidden="true"></span>
                           <?php else: ?>
-                          <img src="" alt="" class="profile__icon" id="iconPreviewImg" hidden>
-                          <span class="profile__icon profile__icon--initial" id="iconPreviewInitial" aria-hidden="true">
+                          <img src="" alt="" class="profile__icon profile__icon--large" id="iconPreviewImg" hidden>
+                          <span class="profile__icon profile__icon--initial profile__icon--large" id="iconPreviewInitial" aria-hidden="true">
                               <?= h(mb_substr($userName, 0, 1)) ?>
                           </span>
                           <?php endif; ?>

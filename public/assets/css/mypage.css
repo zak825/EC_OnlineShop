@@ -177,28 +177,6 @@
   color: #0f172a;
 }
 
-.profile__icon {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid var(--color-border);
-}
-
-/* アイコン未設定のとき：名前の頭文字を丸の中に表示 */
-.profile__icon--initial {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-info-bg);
-  color: var(--color-info);
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-
-
 /* 購入・出品商品タブ横並び */
 .tabs {
   display: flex;
@@ -293,16 +271,6 @@
 .modal-actions button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.profile__icon__md {
-  width: 200px;
-  margin-bottom: 20px;
-  height: 200px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid var(--color-border);
 }
 
 /* アイコン変更ウィンドウ内ボタン */
