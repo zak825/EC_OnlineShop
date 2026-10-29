@@ -148,6 +148,10 @@
                   </span>
                 </p>
 
+                <?php if (!empty($item['ProductCondition'])): ?>
+                <p class="product__condition">商品の状態：<?= h($item['ProductCondition']) ?></p>
+                <?php endif; ?>
+
                 <?php if ($loggedIn && (int)$item['Userid'] === $userId): ?>
                 <span class="product__own">自分の出品</span>
                 <?php else: ?>

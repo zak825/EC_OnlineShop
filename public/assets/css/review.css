@@ -65,7 +65,7 @@ body {
 /* ---------- 項目一覧（ラベル：値） ---------- */
 .info-list {
   display: grid;
-  grid-template-columns: 7em 1fr;
+  grid-template-columns: 7em minmax(0, 1fr);
   gap: 10px 16px;
   margin: 0;
 }
@@ -355,6 +355,10 @@ body {
   margin: 6px 0 0;
   color: #0f172a;
   word-break: break-all;
+  max-height: 10rem;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  scrollbar-width: thin;
 }
 
 .review-body__text--empty {
