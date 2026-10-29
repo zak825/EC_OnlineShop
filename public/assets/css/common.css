@@ -143,3 +143,8 @@ main {
   border-left-color: #3b82f6;
   color: #1e40af;
 }
+
+
+:root {
+  --color-border: #d9c8ff;   /* 薄い紫。アイコンなどの枠に使う */
+}
