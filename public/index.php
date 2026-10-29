@@ -97,6 +97,7 @@ $sql =
     'SELECT s.ProductID, s.ProductName, s.Price, ' . $productDetailSelect . ' s.Userid,
             g.GenreName,
             u.UserName AS SellerName,
+            u.IconPath AS SellerIconPath,
             seller_rating.AvgScore AS SellerAvgScore
      FROM Sales s
      JOIN Genre    g ON s.GenreCode = g.GenreCode
