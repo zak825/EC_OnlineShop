@@ -27,10 +27,10 @@ if ($headerLoggedIn) {
             <div class="right">
                 <a href="mypage.php" class="icon">
                     <?php if ($headerIconPath !== ''): ?>
-                        <img src="<?= h($headerIconPath) ?>" alt="" class="profile__icon__hd">
+                        <img src="<?= h($headerIconPath) ?>" alt="" class="profile__icon profile__icon--header">
                     <?php else: ?>
                         <!-- アイコン未設定のときは名前の頭文字を表示 -->
-                        <span class="profile__icon__hd profile__icon__hd--initial" aria-hidden="true">
+                        <span class="profile__icon profile__icon--initial profile__icon--header" aria-hidden="true">
                             <?= h(mb_substr($headerUserName, 0, 1)) ?>
                         </span>
                     <?php endif; ?>

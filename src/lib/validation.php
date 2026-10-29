@@ -164,3 +164,108 @@ function password_forbidden_char_error(): string
 {
     return 'パスワードに半角スペース、全角スペース、および次の記号は使用できません。-!"#$%&()*,./:;?[]^_`{}~+<=>';
 }
+
+// ============================================================
+// システム設定（SystemConfiguration）の読み込みと値チェック
+//   使っている画面：setting.php（入力） / setting_confirm.php（確認・実行）
+//   画面側の setting.js は、setting.html の data 属性に出したこの上限・下限でチェックする。
+//   エラー文言を変えるときは setting.js も一緒に直すこと。
+// ============================================================
+
+// 設定ごとの [下限, 上限]。ここに無い Key は半角数字かどうかだけチェックする
+const SETTING_LIMITS = [
+    'PasswordMinLength'    => [1, 72],          // password_hash（bcrypt）は 72 バイトを超えた部分を無視する
+    'PasswordMaxLength'    => [1, 72],
+    'SessionTimeout'       => [1, 1440],        // 分（最長1日）
+    'PriceMin'             => [1, 2147483647],  // Sales.Price は INT
+    'PriceMax'             => [1, 2147483647],
+    'ProductNameMaxLength' => [1, 50],          // Sales.ProductName は NVARCHAR(50)
+    'DescriptionMaxLength' => [1, 1000],        // Sales.Description は NVARCHAR(1000)
+];
+
+// 大小関係がある設定（下限側の Key => 上限側の Key）。同じ値は許可し、衝突したときは下限側にエラーを出す
+const SETTING_RANGE_PAIRS = [
+    'PasswordMinLength' => 'PasswordMaxLength',
+    'PriceMin'          => 'PriceMax',
+];
+
+/**
+ * SystemConfiguration の全行を id 順で取得する
+ * Label には Comment（未設定なら Key）を入れる
+ *
+ * @return array<int, array{id:int, Key:string, Value:string, Label:string}>
+ * @throws PDOException DBエラー時
+ */
+function fetch_system_settings(PDO $pdo): array
+{
+    $stmt = $pdo->prepare(
+        'SELECT id, [Key], [Value], Comment
+         FROM dbo.SystemConfiguration
+         ORDER BY id'
+    );
+    $stmt->execute();
+
+    $settings = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $comment = trim((string)($row['Comment'] ?? ''));
+        $settings[] = [
+            'id'    => (int)$row['id'],
+            'Key'   => (string)$row['Key'],
+            'Value' => (string)$row['Value'],
+            'Label' => $comment !== '' ? $comment : (string)$row['Key'],
+        ];
+    }
+    return $settings;
+}
+
+/**
+ * 設定値の未入力・文字種・上限下限・大小関係のチェック（すべてのエラーを返す）
+ * trim_input() を通した値を渡すこと。
+ *
+ * @param array<string, string> $values Key => 入力値
+ * @param array<string, string> $labels Key => 表示名（大小関係のエラー文言に使う）
+ * @return array<string, string> Key => エラーメッセージ（問題なければ空配列）
+ */
+function collect_setting_errors(array $values, array $labels): array
+{
+    $errors = [];
+
+    foreach ($values as $key => $value) {
+        if ($value === '') {
+            $errors[$key] = '入力してください。';
+            continue;
+        }
+        if (!preg_match('/^[0-9]+$/D', $value)) {
+            $errors[$key] = '半角数字で入力してください。';
+            continue;
+        }
+        if (isset(SETTING_LIMITS[$key])) {
+            [$min, $max] = SETTING_LIMITS[$key];
+            $number = normalize_setting_value($value);
+            // 桁数で先に判定する（INT の上限を超える桁数を (int) にするとあふれるため）
+            if (strlen($number) > strlen((string)$max) || (int)$number < $min || (int)$number > $max) {
+                $errors[$key] = $min . '〜' . $max . 'の範囲で入力してください。';
+            }
+        }
+    }
+
+    foreach (SETTING_RANGE_PAIRS as $minKey => $maxKey) {
+        if (!isset($values[$minKey], $values[$maxKey]) || isset($errors[$minKey]) || isset($errors[$maxKey])) {
+            continue;
+        }
+        if ((int)$values[$minKey] > (int)$values[$maxKey]) {
+            $errors[$minKey] = '「' . ($labels[$maxKey] ?? $maxKey) . '」以下の値を入力してください。';
+        }
+    }
+
+    return $errors;
+}
+
+/**
+ * 半角数字の設定値を保存する形にそろえる（先頭の 0 を取る。「0008」→「8」）
+ */
+function normalize_setting_value(string $value): string
+{
+    $trimmed = ltrim($value, '0');
+    return $trimmed === '' ? '0' : $trimmed;
+}

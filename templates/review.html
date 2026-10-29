@@ -126,7 +126,7 @@
             <?= stars($product['sucre']) ?>
           </p>
           <?php if ($product['revwe'] !== null): ?>
-          <p class="review-body__text">
+          <p class="review-body__text" tabindex="0" role="region" aria-label="レビュー（スクロールで全文表示）">
             <?= nl2br(h($product['revwe'])) ?>
           </p>
           <?php else: ?>

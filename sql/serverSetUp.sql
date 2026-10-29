@@ -16,6 +16,9 @@
 --   Userid 2 : 購入 花子 … 購入テスト・レビューテスト用（商品8をレビューできる）
 --   Userid 3 : 閲覧 次郎 … 同時購入テスト用
 --
+-- 管理者（利用者の UserData とは別。パスワードは password）
+--   LoginId admin … 管理画面（setting.php）用
+--
 -- 秘密の質問（パスワード再設定用。質問IDは src/lib/auth.php の get_secret_questions() を参照）
 --   Userid 1 : 質問1（出身小学校の名前は？）       … 回答「千代田小学校」
 --   Userid 2 : 質問2（初めて飼ったペットの名前は？） … 回答「ポチ」
@@ -36,6 +39,9 @@ GO
 -- ------------------------------------------------------------
 -- 既存テーブルの削除（外部キーで参照している側から消す）
 -- ------------------------------------------------------------
+DROP TABLE IF EXISTS AdminSession;
+DROP TABLE IF EXISTS AdminLoginLock;
+DROP TABLE IF EXISTS AdminAccount;
 DROP TABLE IF EXISTS UserSession;
 DROP TABLE IF EXISTS UserLoginLock;
 DROP TABLE IF EXISTS UserResetLock;
@@ -64,7 +70,8 @@ CREATE TABLE UserData (
     LoginPassword VARCHAR(255)  NOT NULL,
     IconPath      NVARCHAR(256),           -- プロフィールアイコンの画像パス（NULL = 未設定）
     SecretQuestionId INT           NOT NULL CONSTRAINT DF_UserData_SecretQuestionId DEFAULT (1),          -- 秘密の質問ID（1〜5）
-    SecretAnswer     VARCHAR(255)  NOT NULL CONSTRAINT DF_UserData_SecretAnswer     DEFAULT ('$2y$10$wCYGp7jFrtgpfosV6EY.Re8PAVgU8mVKpnIQ4W8GyudYVu3ds8gh6') -- 秘密の質問の回答（password_hash のハッシュ値）
+    SecretAnswer     VARCHAR(255)  NOT NULL CONSTRAINT DF_UserData_SecretAnswer     DEFAULT ('$2y$10$wCYGp7jFrtgpfosV6EY.Re8PAVgU8mVKpnIQ4W8GyudYVu3ds8gh6'), -- 秘密の質問の回答（password_hash のハッシュ値）
+    PasswordResetRequired BIT      NOT NULL CONSTRAINT DF_UserData_PasswordResetRequired DEFAULT (0)     -- 1 = パスワード最小文字数の変更後、再設定が終わるまでログインさせない
 );
 
 -- 商品ジャンル
@@ -123,6 +130,30 @@ CREATE TABLE UserResetLock (
     LockedUntil DATETIME NULL        -- この時刻まで秘密の質問の照合不可。NULL または過去ならロックなし
 );
 
+-- 管理者アカウント（利用者の UserData とは別。管理画面のログインに使う）
+CREATE TABLE AdminAccount (
+    AdminId      INT           NOT NULL IDENTITY(1,1) PRIMARY KEY,
+    LoginId      VARCHAR(32)   NOT NULL,   -- ログインID（半角英数字）
+    PasswordHash VARCHAR(255)  NOT NULL,   -- password_hash のハッシュ値
+    DisplayName  NVARCHAR(50)  NOT NULL,
+    CONSTRAINT UQ_AdminAccount_LoginId UNIQUE (LoginId)
+);
+
+-- 管理者のログイン中セッション（同時ログイン禁止用。1管理者1行）
+CREATE TABLE AdminSession (
+    AdminId          INT       NOT NULL PRIMARY KEY REFERENCES AdminAccount(AdminId),
+    SessionToken     CHAR(64)  NOT NULL,
+    LoginDateTime    DATETIME  NOT NULL,
+    LastActivityTime DATETIME  NOT NULL
+);
+
+-- 管理者ログイン失敗の回数とロック期限（1管理者1行）
+CREATE TABLE AdminLoginLock (
+    AdminId     INT      NOT NULL PRIMARY KEY REFERENCES AdminAccount(AdminId),
+    FailCount   INT      NOT NULL,
+    LockedUntil DATETIME NULL
+);
+
 -- システム設定
 CREATE TABLE SystemConfiguration (
     id       INT           NOT NULL PRIMARY KEY,
@@ -153,6 +184,10 @@ INSERT INTO UserData (Userid, UserName, ZipCode, Address, TEL, LoginPassword, Se
     (2, N'購入 花子', '5300001', N'大阪府大阪市北区梅田1-1',  '0612345678', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 2, '$2y$10$.IcB6WLODnzHxy1zBN0Yh.n3eqKd8ZcpEbFnoNJlFjNnr6qqsZbW.'),  -- 回答: ポチ
     (3, N'閲覧 次郎', '4600001', N'愛知県名古屋市中区三の丸1-1', '0521234567', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', 4, '$2y$10$bVgjw0C3TpWOE7PWOpFgguxRxVLBHfivgxyQoYIsymTesZ4oL3PJO');  -- 回答: カレー
 SET IDENTITY_INSERT UserData OFF;
+
+-- 管理者（パスワードは password。ハッシュは利用者テストユーザーと同じ）
+INSERT INTO AdminAccount (LoginId, PasswordHash, DisplayName) VALUES
+    ('admin', '$2y$10$VwpD.iCpfuJ41BwquwZte.Co/fKmd/JT2zEn/HHvaGN1N.JQDuRSW', N'管理者');
 
 -- ジャンル
 INSERT INTO Genre (GenreCode, GenreName) VALUES
@@ -191,11 +226,12 @@ INSERT INTO Sales (
 -- システム設定
 INSERT INTO SystemConfiguration (id, Category, [Key], Value, Type, Comment) VALUES
     (1, 'Password', 'PasswordMinLength',    '8',       'int', N'パスワードの最小文字数'),
-    (2, 'Session',  'SessionTimeout',       '30',      'int', N'セッションの有効時間（分）'),
-    (3, 'Sales',    'PriceMin',             '300',     'int', N'出品価格の下限（円）'),
-    (4, 'Sales',    'PriceMax',             '9999999', 'int', N'出品価格の上限（円）'),
-    (5, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）'),
-    (6, 'Sales',    'DescriptionMaxLength', '500',     'int', N'商品の説明の最大文字数');
+    (2, 'Password', 'PasswordMaxLength',    '50',      'int', N'パスワードの最大文字数'),
+    (3, 'Session',  'SessionTimeout',       '30',      'int', N'セッションの有効時間（分）'),
+    (4, 'Sales',    'PriceMin',             '300',     'int', N'出品価格の下限（円）'),
+    (5, 'Sales',    'PriceMax',             '9999999', 'int', N'出品価格の上限（円）'),
+    (6, 'Sales',    'ProductNameMaxLength', '50',      'int', N'商品名の最大文字数（Sales.ProductName の NVARCHAR(50) 以下にする）'),
+    (7, 'Sales',    'DescriptionMaxLength', '500',     'int', N'商品の説明の最大文字数');
 GO
 
 -- ------------------------------------------------------------
@@ -205,5 +241,6 @@ SELECT 'UserData' AS TableName, COUNT(*) AS RecordCount FROM UserData
 UNION ALL SELECT 'Genre',               COUNT(*) FROM Genre
 UNION ALL SELECT 'Sales',               COUNT(*) FROM Sales
 UNION ALL SELECT 'SystemConfiguration', COUNT(*) FROM SystemConfiguration
-UNION ALL SELECT 'SalesDraft',          COUNT(*) FROM SalesDraft;
+UNION ALL SELECT 'SalesDraft',          COUNT(*) FROM SalesDraft
+UNION ALL SELECT 'AdminAccount',        COUNT(*) FROM AdminAccount;
 GO
