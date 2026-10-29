@@ -144,6 +144,49 @@ main {
   color: #1e40af;
 }
 
+
+:root {
+  --color-border: #d9c8ff;   /* 薄い紫。アイコンなどの枠に使う */
+}
+
+/* ---------- プロフィールアイコン（写真・未設定時の頭文字） ---------- */
+.profile__icon {
+  display: block;
+  width: 100px;
+  height: 100px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  box-sizing: border-box;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.profile__icon--initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef0ff;
+  color: #8c52ff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.profile__icon--header {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  align-self: center;
+}
+
+
+.profile__icon--large {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 20px;
+}
+
 /* ---------- 評価の星（view.php の stars()）。欠けた分は灰色になる ---------- */
 .stars {
   position: relative;

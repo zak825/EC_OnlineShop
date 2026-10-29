@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 
 /* ==========================================================================
    認証・会員管理 共通スタイルシート (auth.css)
@@ -140,7 +140,7 @@
     padding: 0 14px;
     font-size: 15px;
     border: 1px solid #cbd5e1;
-    border-radius: 10px;
+    border-radius:4px;
     background-color: #ffffff;
     color: #0f172a;
     box-sizing: border-box;
@@ -196,7 +196,7 @@
     background-color: #8c52ff;
     color: #ffffff;
     border: 1px solid #8c52ff;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -229,7 +229,7 @@
     background-color: #ffffff;
     color: #737373;
     border: 1px solid #cbd5e1;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -322,7 +322,7 @@
     background-color: transparent;
     color: #8c52ff;
     border: 1px solid #8c52ff;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;

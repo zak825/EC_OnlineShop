@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e shop | 出品確認</title>
   <link rel="stylesheet" href="assets/css/common.css">
+  <link rel="stylesheet" href="assets/css/product_card.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/product_card.css') ?>">
   <!-- ?v= に更新日時を付けて、CSS を変えたときにブラウザが古いキャッシュを使わないようにする -->
   <link rel="stylesheet" href="assets/css/sell_confirm.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/sell_confirm.css') ?>">
   <link rel="icon" href="assets/icons/favicon.ico">
@@ -46,38 +47,59 @@
 
 
         <!-- ===== メイン画面での見え方プレビュー ===== -->
+        <!-- メイン画面と同じ 640px 幅で組んで、枠の幅に合わせて縮める（縮尺は下の script が決める） -->
         <p class="preview-label">メイン画面ではこのように表示されます</p>
-        <ul class="product-list product-list--preview">
-            <li class="product">
-                <?php if ($image_urls): ?>
-                <img src="<?= h($image_urls[0]) ?>" alt="商品画像" class="product__image product__image--photo">
-                <?php else: ?>
-                <!-- 画像が無いときは、メイン画面と同じくジャンル名の枠を出す -->
-                <div class="product__image" aria-hidden="true">
-                    <?= h($sell['genre_name']) ?>
-                </div>
-                <?php endif; ?>
+        <div class="preview-frame" id="preview_frame">
+          <div class="preview-scale" id="preview_scale">
+            <ul class="product-list product-list--preview">
+                <li class="product">
+                    <?php if ($image_urls): ?>
+                    <img src="<?= h($image_urls[0]) ?>" alt="商品画像" class="product__image product__image--photo">
+                    <?php else: ?>
+                    <!-- 画像が無いときは、メイン画面と同じくジャンル名の枠を出す -->
+                    <div class="product__image" aria-hidden="true">
+                        <?= h($sell['genre_name']) ?>
+                    </div>
+                    <?php endif; ?>
 
-                <div class="product__body">
-                    <h2 class="product__name">
-                        <?= h($sell['product_name']) ?>
-                    </h2>
-                    <p class="product__price">
-                        &yen;
-                        <?= number_format((int)$sell['price']) ?>
-                    </p>
-                    <p class="product__meta">
-                        <span class="product__genre">
-                            <?= h($sell['genre_name']) ?>
-                        </span>
-                        出品者：あなた
-                    </p>
-                    <p class="product__condition">商品の状態：<?= h($sell['condition']) ?></p>
-                    <!-- 自分の出品なので、メイン画面では購入ボタンの代わりにこの表示になる -->
-                    <span class="product__own">自分の出品</span>
-                </div>
-            </li>
-        </ul>
+                    <div class="product__body">
+                        <h2 class="product__name">
+                            <?= h($sell['product_name']) ?>
+                        </h2>
+                        <p class="product__price">
+                            &yen;
+                            <?= number_format((int)$sell['price']) ?>
+                        </p>
+                        <p class="product__meta">
+                            <span class="product__genre">
+                                <?= h($sell['genre_name']) ?>
+                            </span>
+
+                            <span class="product__seller">
+                                <span class="product__seller-label">出品者：</span>
+                                <?= product_icon($headerUserName, $headerIconPath) ?>
+                                <?= name_label($headerUserName) ?>
+
+                                <?php if (($seller_avg_score ?? null) !== null): ?>
+                                  <span class="product__seller-rating"
+                                    title="出品者評価 <?= h(number_format((float)$seller_avg_score, 1)) ?> / 5">
+                                    <?= stars($seller_avg_score) ?>
+                                  </span>
+                                <?php else: ?>
+                                  <span class="product__seller-rating product__seller-rating--none">
+                                    [評価無し]
+                                  </span>
+                                <?php endif; ?>
+                            </span>
+                        </p>
+                        <p class="product__condition">商品の状態：<?= h($sell['condition']) ?></p>
+                        <!-- 自分の出品なので、メイン画面では購入ボタンの代わりにこの表示になる -->
+                        <span class="product__own">自分の出品</span>
+                    </div>
+                </li>
+            </ul>
+          </div>
+        </div>
 
 
 
@@ -101,6 +123,26 @@
     </main>
 
     <script src="assets/js/sell_confirm.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/sell_confirm.js') ?>"></script>
+
+    <script>
+      // プレビューを、カードの幅（640px）から枠の幅に合わせて縮める
+      (function () {
+        var frame = document.getElementById('preview_frame');
+        var box   = document.getElementById('preview_scale');
+        if (!frame || !box) {
+          return;
+        }
+        var DESIGN_WIDTH = 640;   // CSS の .preview-scale の width と同じ値にする
+
+        function fit() {
+          box.style.zoom = window.matchMedia('(max-width: 560px)').matches
+            ? 1
+            : Math.min(1, (frame.clientWidth - 8) / DESIGN_WIDTH);
+        }
+        fit();
+        window.addEventListener('resize', fit);
+      })();
+    </script>
 
     <!-- フッター読み込み -->
     <?php require __DIR__ . '/../public/footer.php'; ?>

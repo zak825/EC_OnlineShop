@@ -2,12 +2,7 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once SRC_DIR . '/lib/product_image.php';
 
-const PRODUCT_EDIT_CONDITIONS = [
-    '新品・未使用' => '新品・未使用',
-    '目立った傷や汚れなし' => '目立った傷や汚れなし',
-    'やや傷や汚れあり' => 'やや傷や汚れあり',
-    '傷や汚れあり' => '傷や汚れあり',
-];
+require_once SRC_DIR . '/lib/product_validation.php';
 
 if (!is_logged_in()) {
     redirect_to_login('mypage.php?tab=sold');
@@ -37,16 +32,9 @@ if (!$product || $product['BuyerUserid'] !== null) {
 }
 
 $genres = db()->query('SELECT GenreCode, GenreName FROM Genre ORDER BY GenreCode')->fetchAll(PDO::FETCH_KEY_PAIR);
-$descriptionMax = 500;
-$setting = db()->prepare(
-    'SELECT Value FROM SystemConfiguration
-     WHERE Category = :category AND [Key] = :setting_key'
-);
-$setting->execute([':category' => 'Sales', ':setting_key' => 'DescriptionMaxLength']);
-$configuredDescriptionMax = trim((string)$setting->fetchColumn());
-if (preg_match('/^[0-9]+$/', $configuredDescriptionMax) && (int)$configuredDescriptionMax > 0) {
-    $descriptionMax = min((int)$configuredDescriptionMax, 1000);
-}
+$limits = product_form_limits(db());
+extract($limits);
+$fieldErrors = array_fill_keys(['product_name', 'genre_code', 'price', 'condition', 'description', 'images'], '');
 $errors = [];
 $imageError = '';
 $tmpImages = null;
@@ -55,9 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!check_csrf_token($_POST['csrf_token'] ?? null)) {
         $errors[] = '不正な操作です。もう一度やり直してください。';
     } else {
-        $name = trim((string)($_POST['product_name'] ?? ''));
-        $condition = trim((string)($_POST['condition'] ?? ''));
-        $description = trim((string)($_POST['description'] ?? ''));
+        extract(validate_product_form($_POST, $genres, $limits));
+        $name = $form_product_name;
+        $condition = $form_condition;
+        $description = $form_description;
+        $genreCode = $form_genre_code;
+        foreach ($fieldErrors as $field => $_) {
+            if ($field !== 'images') $fieldErrors[$field] = ${'error_' . $field};
+        }
         $removeImages = array_values(array_filter(
             (array)($_POST['remove_images'] ?? []),
             static fn($file): bool => is_string($file)
@@ -66,15 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             (array)($_POST['image_order'] ?? []),
             static fn($file): bool => is_string($file)
         ));
-        $price = filter_var($_POST['price'] ?? null, FILTER_VALIDATE_INT);
-        $genreCode = filter_var($_POST['genre_code'] ?? null, FILTER_VALIDATE_INT);
-        if ($name === '' || mb_strlen($name, 'UTF-8') > 50) $errors[] = '商品名は1〜50文字で入力してください。';
-        if (!$genreCode || !isset($genres[$genreCode])) $errors[] = 'ジャンルを選択してください。';
-        if ($price === false || $price < 1) $errors[] = '値段は正の整数で入力してください。';
-        if (!isset(PRODUCT_EDIT_CONDITIONS[$condition])) $errors[] = '商品の状態を選択してください。';
-        if ($description === '' || mb_strlen($description, 'UTF-8') > $descriptionMax) {
-            $errors[] = '商品の説明は1〜' . $descriptionMax . '文字で入力してください。';
-        }
         $files = $_FILES['images'] ?? null;
         if ($files !== null && ($files['error'][0] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
             $imageError = check_product_images($files);
@@ -82,10 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tmpImages = save_product_images_tmp($files);
             }
         }
-        if ($imageError !== '') {
-            $errors[] = $imageError;
+        $existingNames = array_map(static fn($url) => basename(parse_url($url, PHP_URL_PATH)), product_image_urls($productId));
+        $remainingCount = count(array_diff($existingNames, $removeImages));
+        $newCount = $files !== null && ($files['error'][0] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE ? count($files['name']) : 0;
+        if ($remainingCount + $newCount > PRODUCT_IMAGE_MAX) {
+            $imageError = '画像は' . PRODUCT_IMAGE_MAX . '枚までです';
         }
-        if (!$errors) {
+        $fieldErrors['images'] = $imageError;
+        if (!$errors && !array_filter($fieldErrors)) {
             try {
                 $pdo = db();
                 $pdo->beginTransaction();
@@ -136,20 +124,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             delete_product_images_tmp($tmpImages);
             $tmpImages = null;
         }
-        if (!$errors) {
+        if (!$errors && !array_filter($fieldErrors)) {
             set_flash('商品情報を更新しました。', 'success');
             redirect('mypage.php?tab=sold');
         }
         $product = array_merge($product, [
-            'GenreCode' => $genreCode, 'ProductName' => $name, 'Price' => $price,
+            'GenreCode' => $genreCode, 'ProductName' => $name, 'Price' => $form_price,
             'ProductCondition' => $condition, 'Description' => $description,
         ]);
     }
 }
 
 view('product_edit', [
-    'product' => $product, 'genres' => $genres, 'conditions' => PRODUCT_EDIT_CONDITIONS,
+    'product' => $product, 'genres' => $genres, 'conditions' => PRODUCT_CONDITIONS,
     'errors' => $errors, 'token' => csrf_token(),
-    'description_max' => $descriptionMax,
+    'description_max' => $description_max,
+    'name_max' => $name_max, 'price_min' => $price_min, 'price_max' => $price_max,
+    'fieldErrors' => $fieldErrors,
     'image_urls' => product_image_urls($productId),
 ]);
