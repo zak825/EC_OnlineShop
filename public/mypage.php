@@ -306,7 +306,27 @@ $stmt = db()->prepare(
      ORDER BY s.SoldDate DESC'
 );
 $stmt->execute([':buyer' => $userId]);
-$bought = $stmt->fetchAll();
+$boughtAll = $stmt->fetchAll();
+
+const BOUGHT_STATUSES = [
+    'unshipped' => '未発送',
+    'shipped'   => '発送済み',
+    'done'      => '取引完了',
+];
+
+$boughtFilter = $_GET['status'] ?? '';
+if ($tab !== 'bought' || !is_string($boughtFilter) || !isset(BOUGHT_STATUSES[$boughtFilter])) {
+    $boughtFilter = '';
+}
+$boughtCounts = array_fill_keys(array_keys(BOUGHT_STATUSES), 0);
+$bought = [];
+foreach ($boughtAll as $item) {
+    $status = transaction_status($item);
+    $boughtCounts[$status]++;
+    if ($boughtFilter === '' || $status === $boughtFilter) {
+        $bought[] = $item;
+    }
+}
 
 // 各商品の1枚目の画像を取る（無ければ null）
 foreach ($bought as &$item) {
@@ -345,6 +365,12 @@ function sold_status(array $item): string
     if ($item['BuyerUserid'] === null) {
         return 'selling';     // まだ売れていない
     }
+    return transaction_status($item);
+}
+
+/** 購入済み商品の取引状態。購入・出品の両方で同じ基準を使う。 */
+function transaction_status(array $item): string
+{
     if ($item['sucre'] !== null) {
         return 'done';        // 購入者がレビューした
     }
@@ -356,7 +382,7 @@ function sold_status(array $item): string
 
 // プルダウンで選ばれたステータス（'' = すべて）
 $soldFilter = $_GET['status'] ?? '';
-if (!isset(SOLD_STATUSES[$soldFilter])) {
+if ($tab !== 'sold' || !is_string($soldFilter) || !isset(SOLD_STATUSES[$soldFilter])) {
     $soldFilter = '';
 }
 
@@ -387,6 +413,10 @@ view('mypage', [
     'reviewCount' => $reviewCount,     // 評価の件数
     'tab'         => $tab,             // 表示中のタブ（bought / sold）
     'bought'      => $bought,          // 購入した商品
+    'boughtTotal' => count($boughtAll),
+    'boughtFilter' => $boughtFilter,
+    'boughtCounts' => $boughtCounts,
+    'boughtStatuses' => BOUGHT_STATUSES,
     'sold'        => $sold,            // 出品した商品（プルダウンで絞り込んだあと）
     'soldTotal'   => count($soldAll),  // 出品した商品の件数（絞り込む前）
     'soldFilter'  => $soldFilter,      // 選ばれたステータス（'' = すべて）

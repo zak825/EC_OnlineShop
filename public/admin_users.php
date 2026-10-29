@@ -63,12 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
         }
 
-        // この利用者が買った商品は、出品者の商品として残し、購入者だけ外す
-        $stmt = $pdo->prepare(
-            'UPDATE dbo.Sales SET BuyerUserid = NULL WHERE BuyerUserid = :user_id'
-        );
-        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->execute();
+        // この利用者が買った商品は BuyerUserid を残す。NULL にすると販売中に戻って一覧へ再表示される。
+        // BuyerUserid の外部キーは外してある（sql/drop_sales_buyer_fk.sql）。BuyerName などの取引情報もそのまま。
 
         $stmt = $pdo->prepare('DELETE FROM dbo.Common WHERE InsertUserId = :user_id');
         $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);

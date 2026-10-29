@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e-shop | マイページ</title>
   <link rel="stylesheet" href="assets/css/common.css">
-  <link rel="stylesheet" href="assets/css/mypage.css">
   <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="assets/css/mypage.css?v=<?= filemtime(ROOT_DIR . '/public/assets/css/mypage.css') ?>">
   <link rel="icon" href="assets/icons/favicon.ico">
 
 </head>
@@ -41,7 +41,6 @@
               <span class="btn_question">商品を探す？</span>
           </a>
 
-          <!-- ===== プロフィール（アイコン・名前・評価） ===== -->
           <!-- ===== プロフィール（名前・アイコン・評価） ===== -->
           <section class="profile">
               <div class="profile__left">
@@ -113,7 +112,7 @@
                       </div>
 
                       <!-- ファイル選択（input本体は隠して、ラベルをボタンとして使う） -->
-                      <label for="iconFile" class="btn-btn--secondary btn--small">ファイルを選択</label>
+                      <label for="iconFile" class="btn btn--secondary btn--small">ファイルを選択</label>
                       <input type="file" id="iconFile" name="icon" class="visually-hidden"
                              accept="image/jpeg,image/png,image/gif,image/webp" required>
                       <p class="modal-filename" id="iconFileName">ファイルが選択されていません</p>
@@ -223,7 +222,7 @@
           <nav class="tabs">
               <a href="mypage.php" class="tabs__item<?= $tab === 'bought' ? ' is-active' : '' ?>">
                   購入した商品（
-                  <?= count($bought) ?>）
+                  <?= (int)$boughtTotal ?>）
               </a>
               <a href="mypage.php?tab=sold" class="tabs__item<?= $tab === 'sold' ? ' is-active' : '' ?>">
                   出品した商品（
@@ -232,10 +231,32 @@
           </nav>
 
 
+          <?php
+          $filterTotal = $tab === 'bought' ? $boughtTotal : $soldTotal;
+          $filterStatuses = $tab === 'bought' ? $boughtStatuses : $soldStatuses;
+          $filterCounts = $tab === 'bought' ? $boughtCounts : $soldCounts;
+          $selectedStatus = $tab === 'bought' ? $boughtFilter : $soldFilter;
+          ?>
+          <?php if ($filterTotal > 0): ?>
+          <form method="get" action="mypage.php" class="status-filter" id="<?= h($tab) ?>-filter">
+              <input type="hidden" name="tab" value="<?= h($tab) ?>">
+              <label for="<?= h($tab) ?>-status" class="status-filter__label">ステータス</label>
+              <select name="status" id="<?= h($tab) ?>-status" class="status-filter__select">
+                  <option value="">すべて（<?= (int)$filterTotal ?>）</option>
+                  <?php foreach ($filterStatuses as $key => $label): ?>
+                  <option value="<?= h($key) ?>"<?= $selectedStatus === $key ? ' selected' : '' ?>>
+                      <?= h($label) ?>（<?= (int)$filterCounts[$key] ?>）
+                  </option>
+                  <?php endforeach; ?>
+              </select>
+              <noscript><button type="submit" class="btn btn--secondary btn--small">表示</button></noscript>
+          </form>
+          <?php endif; ?>
+
           <?php if ($tab === 'bought'): ?>
           <!-- ===== 購入した商品 ===== -->
           <?php if (!$bought): ?>
-          <p class="empty">履歴なし</p>
+          <p class="empty"><?= $boughtTotal > 0 ? '該当する商品はありません' : '履歴なし' ?></p>
           <?php endif; ?>
 
           <?php foreach ($bought as $item): ?>
@@ -321,27 +342,6 @@
 
           <?php else: ?>
           <!-- ===== 出品した商品 ===== -->
-          <?php if ($soldTotal > 0): ?>
-          <!-- ステータスで絞り込むプルダウン（選ぶと mypage.js が送信する。JS が無くても「表示」で送れる） -->
-          <form method="get" action="mypage.php" class="sold-filter" id="sold-filter">
-              <input type="hidden" name="tab" value="sold">
-              <label for="sold-status" class="sold-filter__label">ステータス</label>
-              <select name="status" id="sold-status" class="sold-filter__select">
-                  <option value="">
-                      すべて（
-                      <?= (int)$soldTotal ?>）
-                  </option>
-                  <?php foreach ($soldStatuses as $key => $label): ?>
-                  <option value="<?= h($key) ?>" <?=$soldFilter===$key ? ' selected' : '' ?>>
-            <?= h($label) ?>（
-            <?= (int)$soldCounts[$key] ?>）
-          </option>
-                  <?php endforeach; ?>
-              </select>
-              <noscript><button type="submit" class="btn btn--secondary btn--small">表示</button></noscript>
-          </form>
-          <?php endif; ?>
-
       <?php if (!$sold): ?>
       <p class="empty">
         <?= $soldTotal > 0 ? '該当する商品はありません' : '履歴なし' ?>
@@ -399,7 +399,7 @@
                 <input type="hidden" name="action" value="delete_product">
                 <input type="hidden" name="product_id" value="<?= (int)$item['ProductID'] ?>">
                 <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-                <button type="submit" class="btn btn--secondary btn--small">削除</button>
+                <button type="submit" class="btn btn--danger btn--small">削除</button>
               </form>
             </div>
             <?php endif; ?>
@@ -423,7 +423,7 @@
                 <input type="hidden" name="action" value="open">
                 <input type="hidden" name="product_id" value="<?= (int)$item['ProductID'] ?>">
                 <input type="hidden" name="csrf_token" value="<?= h($token) ?>">
-                <button type="submit" class="btn btn--primary btn--small">発送</button>
+                <button type="submit" class="btn btn--primary btn--small">発送通知を送る</button>
               </form>
               <?php endif; ?>
             </div>
@@ -473,7 +473,7 @@
 
     <script src="assets/js/common.js"></script>
     <script src="assets/js/profile_validation.js"></script>
-    <script src="assets/js/mypage.js"></script>
+    <script src="assets/js/mypage.js?v=<?= filemtime(ROOT_DIR . '/public/assets/js/mypage.js') ?>"></script>
   </div>
 </body>
 
