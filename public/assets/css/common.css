@@ -144,6 +144,10 @@ main {
   color: #1e40af;
 }
 
+
+:root {
+  --color-border: #d9c8ff;   /* 薄い紫。アイコンなどの枠に使う */
+}
 /* ---------- 評価の星（view.php の stars()）。欠けた分は灰色になる ---------- */
 .stars {
   position: relative;
