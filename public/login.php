@@ -85,6 +85,9 @@
                     if (!$user) {
                         $clearLoginPending();
                         $errorMessage = 'ログインできませんでした。もう一度お試しください。';
+                    } elseif (user_must_reset_password($pdo, (int)$user['UserId'])) {
+                        $clearLoginPending();
+                        redirect_to_password_reset_for_policy_change();
                     } else {
                         // $force = true：他の端末のトークンを無効にして置き換える
                         $loginToken = acquire_login_slot(
@@ -133,6 +136,9 @@
                         $messageType = 'warning';
                     } elseif ($user && password_verify($password, $user['LoginPassword'])) {
                         clear_login_lock($pdo, $loginUserId);
+                        if (user_must_reset_password($pdo, $loginUserId)) {
+                            redirect_to_password_reset_for_policy_change();
+                        }
                         // 3.5 同時ログイン禁止：同じアカウントが他の端末でログイン中なら、確認画面を出す
                         //     （パスワード認証が通った人にだけ、ログイン中かどうかを伝える）
                         $loginToken = acquire_login_slot(
