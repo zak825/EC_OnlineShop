@@ -54,6 +54,18 @@ var previewUrls       = [];   // 前のプレビューのURL（作り直すと�
 var savedPreviewHtml  = imagePreview.innerHTML;   // サーバーに保存済みの画像（販売確認画面から戻ったとき）
 var picked            = new DataTransfer();   // 選んだ画像をためておく入れ物
 
+// ↓ 追加：input に入れる順番を、画面の左から順にそろえる
+//   プレビューは row-reverse なので、picked の先頭は画面の一番右に見える。
+//   画面の左から 1枚目・2枚目… として保存されるよう、逆順にして input に入れる
+function syncInputFiles() {
+  var list = Array.from(picked.files).reverse();
+  var dt   = new DataTransfer();
+  list.forEach(function(file) {
+    dt.items.add(file);
+  });
+  images.files = dt.files;
+}
+
 // ためている画像でプレビューを作り直す（DOM で後の img ほど CSS で左に来る）
 function renderImagePreview() {
   previewUrls.forEach(function(url) {
@@ -120,7 +132,7 @@ imagePreview.addEventListener('click', function(event) {
   var index = Number(button.parentNode.dataset.index);
 
   picked.items.remove(index);     // ためている画像から1枚外す
-  images.files = picked.files;    // 送信される内容も合わせる
+  syncInputFiles();               // 送信される内容も合わせる
 
   validateImages();               // 「10枚まで」などのエラー表示を更新
   renderImagePreview();           // 0枚になったら保存済み画像の表示に戻る
@@ -150,7 +162,7 @@ function movePicked(from, to) {
   list.forEach(function(file) {
     picked.items.add(file);
   });
-  images.files = picked.files;   // 送信される順番も合わせる
+  syncInputFiles();   // 送信される順番も合わせる
   renderImagePreview();
 }
 
@@ -238,6 +250,8 @@ images.addEventListener('change', function() {
 
   // input 自体のファイルを、ためた全部に差し替える（送信もこの全部になる）
   images.files = picked.files;
+
+  syncInputFiles();
 
   validateImages();
   if (over) {

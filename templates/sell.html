@@ -105,7 +105,7 @@
                     <button type="button" class="image-slider__arrow image-slider__arrow--prev" id="image_prev"
                         aria-label="前の画像を表示" hidden>&lsaquo;</button>
                     <div class="image-list" id="image_preview">
-                        <?php foreach ($image_urls as $url): ?>
+                        <?php foreach (array_reverse($image_urls) as $url): ?>
                         <img src="<?= h($url) ?>" alt="商品画像" class="image-list__item" width="100" height="100">
                         <?php endforeach; ?>
                     </div>
