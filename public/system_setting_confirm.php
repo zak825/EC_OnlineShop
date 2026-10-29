@@ -1,13 +1,13 @@
 <?php
 // ============================================================
 // 管理画面：システム設定の変更（確認・実行）
-//   GET  setting_confirm.php  … setting.php で入力した内容を、変更前と並べて表示する
-//   POST setting_confirm.php  … 再チェックしてから UPDATE する（完了後は setting.php へ）
-//   キャンセルは setting.php?action=back（入力値を残して入力画面へ戻る）
+//   GET  system_setting_confirm.php  … system_setting.php で入力した内容を、変更前と並べて表示する
+//   POST system_setting_confirm.php  … 再チェックしてから UPDATE する（完了後は system_setting.php へ）
+//   キャンセルは system_setting.php?action=back（入力値を残して入力画面へ戻る）
 // ============================================================
 require_once __DIR__ . '/../src/bootstrap.php';
 
-require_admin('setting.php');
+require_admin('system_setting.php');
 
 // 変更したときに確認画面で出す注意書き（Key => 文言）
 const SETTING_CHANGE_NOTES = [
@@ -22,7 +22,7 @@ const SETTING_CHANGE_NOTES = [
 
 $edit = $_SESSION['setting_edit'] ?? [];
 if (empty($edit['values']) || !isset($edit['original'])) {
-    redirect('setting.php');
+    redirect('system_setting.php');
 }
 
 $pdo = db();
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $rows !== []) {
         $errorMessage = '不正なリクエストです（CSRFトークンエラー）。画面を開き直して再度お試しください。';
     } elseif (collect_setting_errors($values, $labels) !== []) {
         set_admin_flash('入力内容に誤りがあります。各項目のメッセージを確認してください。', 'error');
-        redirect('setting.php?action=back');
+        redirect('system_setting.php?action=back');
     } else {
         $result = '';
         try {
@@ -111,12 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $rows !== []) {
             // 入力値は残し、変更前の値は入力画面で取り直す
             unset($_SESSION['setting_edit']['original']);
             set_admin_flash('他の管理者が設定を変更したため、実行を中止しました。最新の設定値を確認してから、もう一度お試しください。', 'error');
-            redirect('setting.php?action=back');
+            redirect('system_setting.php?action=back');
         }
         if ($result === 'done') {
             unset($_SESSION['setting_edit']);
             set_admin_flash('設定を変更しました。', 'success');
-            redirect('setting.php');
+            redirect('system_setting.php');
         }
     }
 }
@@ -140,7 +140,7 @@ foreach ($rows as $row) {
     }
 }
 
-view('setting_confirm', [
+view('system_setting_confirm', [
     'token'        => admin_csrf_token(),
     'errorMessage' => $errorMessage,
     'items'        => $items,

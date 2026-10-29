@@ -13,7 +13,6 @@
 
 <body class="admin-page">
     <div id="wrap">
-        <!-- ヘッダー読み込み -->
         <?php include TEMPLATE_DIR . '/setting_header.html'; ?>
 
         <main>
@@ -31,7 +30,6 @@
 
                     <p class="confirm-lead">以下の設定に変更します。よろしいですか？</p>
 
-                    <!-- 変更前と変更後を並べて表示（変更した行は強調する） -->
                     <table class="setting-diff">
                         <thead>
                             <tr>
@@ -62,19 +60,18 @@
                     </div>
                     <?php endif; ?>
 
-                    <form id="setting-confirm-form" action="setting_confirm.php" method="post">
+                    <form id="setting-confirm-form" action="system_setting_confirm.php" method="post">
                         <input type="hidden" name="csrf_token" value="<?= h($token ?? admin_csrf_token()) ?>">
                         <div class="btn-row">
                             <button type="submit" id="execute-btn" class="btn-main">実行</button>
                             <button type="button" id="back-btn" class="btn-sub"
-                                onclick="location.href='setting.php?action=back'">キャンセル</button>
+                                onclick="location.href='system_setting.php?action=back'">キャンセル</button>
                         </div>
                     </form>
                 </div>
             </div>
         </main>
 
-        <!-- フッター読み込み -->
         <?php require __DIR__ . '/../public/footer.php'; ?>
     </div>
 

@@ -167,8 +167,8 @@ function password_forbidden_char_error(): string
 
 // ============================================================
 // システム設定（SystemConfiguration）の読み込みと値チェック
-//   使っている画面：setting.php（入力） / setting_confirm.php（確認・実行）
-//   画面側の setting.js は、setting.html の data 属性に出したこの上限・下限でチェックする。
+//   使っている画面：system_setting.php（入力） / system_setting_confirm.php（確認・実行）
+//   画面側の setting.js は、system_setting.html の data 属性に出したこの上限・下限でチェックする。
 //   エラー文言を変えるときは setting.js も一緒に直すこと。
 // ============================================================
 

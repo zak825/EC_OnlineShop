@@ -2,7 +2,8 @@
 
 /* ==========================================================================
    管理画面 スタイルシート (setting.css)
-   対象: setting.html / setting_confirm.html
+   対象: setting.html（管理メニュー） / system_setting.html / system_setting_confirm.html
+   / admin_users.html / admin_password.html
    ヘッダーは header.css、カード・フォーム・ボタンは auth.css をそのまま使い、ここでは差分だけ書く
    ========================================================================== */
 
@@ -17,8 +18,41 @@ body.admin-page {
     max-width: 520px;
 }
 
-#setting-confirm-card {
-    max-width: 600px;
+#setting-confirm-card,
+#admin-users-card {
+    max-width: 960px;
+}
+
+#admin-menu-card,
+#admin-password-card {
+    max-width: 520px;
+}
+
+.admin-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-menu__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    background-color: #8c52ff;
+    color: #ffffff;
+    border: 1px solid #8c52ff;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+}
+
+.admin-menu__btn:hover {
+    background-color: #4f23a0;
+    border-color: #4f23a0;
+    color: #ffffff;
 }
 
 /* --------------------------------------------------------------------------
@@ -105,3 +139,41 @@ body.admin-page {
     margin: 0 0 6px;
     font-weight: 600;
 }
+
+/* --------------------------------------------------------------------------
+   5. ユーザー管理
+   -------------------------------------------------------------------------- */
+.admin-users {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.admin-users th,
+.admin-users td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: left;
+    vertical-align: middle;
+    word-break: break-word;
+}
+
+.admin-users thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+}
+
+.admin-users__delete {
+    height: 36px;
+    padding: 0 12px;
+    white-space: nowrap;
+}
+
+.admin-users__empty {
+    margin: 0;
+    color: #64748b;
+}
+

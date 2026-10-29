@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-shop | 管理画面</title>
+    <title>e-shop | 管理メニュー</title>
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/auth.css">
     <link rel="stylesheet" href="assets/css/setting.css">
@@ -13,14 +13,13 @@
 
 <body class="admin-page">
     <div id="wrap">
-        <!-- ヘッダー読み込み -->
         <?php include TEMPLATE_DIR . '/setting_header.html'; ?>
 
         <main>
             <div class="auth-container">
-                <div id="setting-card" class="auth-card">
+                <div id="admin-menu-card" class="auth-card">
                     <div class="auth-header">
-                        <h1 class="auth-title">システム設定</h1>
+                        <h1 class="auth-title">管理メニュー</h1>
                     </div>
 
                     <?php if (!empty($flash)): ?>
@@ -29,53 +28,17 @@
                     </p>
                     <?php endif; ?>
 
-                    <?php if (($errorMessage ?? '') !== ''): ?>
-                    <p class="message message--error">
-                        <?= h($errorMessage) ?>
-                    </p>
-                    <?php endif; ?>
-
-                    <?php if (!empty($settings)): ?>
-                    <form id="setting-form" action="setting.php" method="post" novalidate>
-                        <input type="hidden" name="csrf_token" value="<?= h($token ?? admin_csrf_token()) ?>">
-
-                        <?php foreach ($settings as $setting): ?>
-                        <div class="form-group">
-                            <label for="setting_<?= h($setting['key']) ?>"><?= h($setting['label']) ?></label>
-                            <!-- data-* は setting.js のチェック用（上限・下限、大小関係の相手、リセット時に戻す値） -->
-                            <input type="text" id="setting_<?= h($setting['key']) ?>"
-                                name="settings[<?= h($setting['key']) ?>]" class="setting-input"
-                                value="<?= h($setting['input']) ?>" maxlength="256" inputmode="numeric"
-                                data-key="<?= h($setting['key']) ?>"
-                                data-label="<?= h($setting['label']) ?>"
-                                data-initial="<?= h($setting['initial']) ?>"
-                                <?php if ($setting['min'] !== null): ?>
-                                data-min="<?= h($setting['min']) ?>" data-max="<?= h($setting['max']) ?>"
-                                <?php endif; ?>
-                                <?php if ($setting['pairMax'] !== ''): ?>
-                                data-pair-max="<?= h($setting['pairMax']) ?>"
-                                <?php endif; ?>>
-                            <p class="field-error" id="error_<?= h($setting['key']) ?>"><?= h($setting['error']) ?></p>
-                        </div>
-                        <?php endforeach; ?>
-
-                        <div class="btn-row">
-                            <button type="submit" id="confirm-btn" class="btn-main">変更内容を確認</button>
-                            <button type="button" id="reset-btn" class="btn-sub">リセット</button>
-                            <button type="button" id="cancel-btn" class="btn-sub"
-                                onclick="location.href='setting.php?action=cancel'">キャンセル</button>
-                        </div>
-                    </form>
-                    <?php endif; ?>
+                    <nav class="admin-menu" aria-label="管理機能">
+                        <a href="system_setting.php" class="admin-menu__btn">システム設定</a>
+                        <a href="admin_users.php" class="admin-menu__btn">ユーザー管理</a>
+                        <a href="admin_password.php" class="admin-menu__btn">管理パスワード変更</a>
+                    </nav>
                 </div>
             </div>
         </main>
 
-        <!-- フッター読み込み -->
         <?php require __DIR__ . '/../public/footer.php'; ?>
     </div>
-
-    <script src="assets/js/setting.js"></script>
 </body>
 
 </html>
