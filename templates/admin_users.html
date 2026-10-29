@@ -60,7 +60,7 @@
                                 <td><?= (int)$user['PasswordResetRequired'] === 1 ? '要再設定' : '—' ?></td>
                                 <td>
                                     <form action="admin_users.php" method="post"
-                                        data-confirm="<?= h('ユーザーID ' . (int)$user['Userid'] . ' を削除します。出品と購入者の紐づけも消えます。よろしいですか？') ?>"
+                                        data-confirm="<?= h('ユーザーID ' . (int)$user['Userid'] . ' を削除します。出品した商品は削除されます。購入した商品の取引状態は残ります。よろしいですか？') ?>"
                                         onsubmit="return confirm(this.dataset.confirm);">
                                         <input type="hidden" name="csrf_token" value="<?= h($token ?? admin_csrf_token()) ?>">
                                         <input type="hidden" name="user_id" value="<?= (int)$user['Userid'] ?>">
