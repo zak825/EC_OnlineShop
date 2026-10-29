@@ -112,17 +112,16 @@
   align-items: center;
   min-height: 40px;
   padding: 0 16px;
-  color: #fff;
-  background: #8c52ff;
-  border: 1px solid #8c52ff;
+  color: #475569;
+  background: #fff;
+  border: 1.5px solid #475569;
   border-radius: 2px;
   font-size: 13px;
   font-weight: 600;
 }
 
 .file-picker:hover .file-picker__button {
-  background: #4f23a0;
-  border-color: #4f23a0;
+  opacity: 0.7;
 }
 
 .file-picker__count {
@@ -147,7 +146,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: 2px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -177,7 +176,6 @@
 .product-edit__form .btn--primary {
   background: #8c52ff;
   color: #fff;
-  border-color: #8c52ff;
 }
 
 .product-edit__form .btn--primary:hover {
