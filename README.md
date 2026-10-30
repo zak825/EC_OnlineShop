@@ -1,11 +1,11 @@
-# CSE_EC
+# EC_OnlineShop
 
-インターン課題のフリマ形式オンラインショッピングサイト（PHP + Microsoft SQL Server / XAMPP）
+DEMO版フリマ形式オンラインショッピングサイト（PHP + Microsoft SQL Server / XAMPP）
 
 ## ディレクトリ構成
 
 ```
-CSE_EC/
+EC_OnlineShop/
 ├─ public/                  ブラウザから見える場所（XAMPPはここを公開する）
 │   ├─ index.php            各画面の入口（1画面 = 1ファイル）
 │   ├─ assets/
@@ -40,12 +40,12 @@ CSE_EC/
 
 1. **リポジトリを clone**
    ```powershell
-   git clone https://github.com/zak825/CSE_EC.git C:\git\intern\CSE_EC
+   git clone https://github.com/zak825/EC_OnlineShop.git C:\git\intern\
    ```
 
 2. **public を htdocs にリンク**（PowerShell を管理者で実行）
    ```powershell
-   cmd /c mklink /J C:\xampp\htdocs\CSE_EC C:\git\intern\CSE_EC\public
+   cmd /c mklink /J C:\xampp\htdocs\ C:\git\intern\EC_OnlineShop\public
    ```
 
 3. **設定ファイルを作成**
@@ -55,8 +55,8 @@ CSE_EC/
    `config.php` の `DB_DSN`（サーバー名・DB名）、`DB_USER`、`DB_PASS` を自分の SQL Server の接続情報に書き換える。
 
 5. **DB構築**
-   SSMS上で`serverSetUp.sql`を実行し、動作用のDB[CSE_EC]とテーブル、テストデータを作成する。
-   既存DBを更新する場合は、続けて **CSE_EC データベースを選択したSSMSのクエリ**で
+   SSMS上で`serverSetUp.sql`を実行し、動作用のDB[EC_OnlineShop]とテーブル、テストデータを作成する。
+   既存DBを更新する場合は、続けて **EC_OnlineShop データベースを選択したSSMSのクエリ**で
    `sql\add_product_details.sql` を実行する（この移行で商品の状態・説明列が追加される）。
    `ProductCondition` が無効というエラーが出る場合は、この移行が未実行、または別のデータベースに実行されています。
    実行後に `Sales` と `SalesDraft` の列が各2行（計4行）表示されることを確認してください。
@@ -64,19 +64,19 @@ CSE_EC/
 出品者はマイページの「出品した商品」から、販売中の商品情報を編集または削除できる。購入済みの商品は変更できない。
 出品画面で商品名・ジャンル・価格・状態・説明がすべて正しい状態でロゴから移動すると、入力内容は自動的に下書き保存される。
 
-6. **動作確認**：`http://localhost/CSE_EC/index.php`
+6. **動作確認**：`http://localhost/EC_OnlineShop/index.php`
 
 ### テンプレート画面・JS・PHPをブラウザで開く
 
 テンプレートはPHP変数を使うため、ファイル自体を静的HTMLとして開くのではなく、対応するPHP画面から表示します。次のテンプレートURLを開くと、対応する画面へ転送されます。
 
-- 購入テンプレート：`http://localhost/CSE_EC/templates/purchase.html?productId=1`
-- 購入確認テンプレート：`http://localhost/CSE_EC/templates/purchase_confirm.html`（購入画面から進んだ後に開く）
+- 購入テンプレート：`http://localhost/EC_OnlineShop/templates/purchase.html?productId=1`
+- 購入確認テンプレート：`http://localhost/EC_OnlineShop/templates/purchase_confirm.html`（購入画面から進んだ後に開く）
 
 画面で使用しているリソースは公開フォルダから直接確認できます。
 
-- JavaScript：`http://localhost/CSE_EC/assets/js/common.js`、`http://localhost/CSE_EC/assets/js/purchase_confirm.js`
-- PHP画面：`http://localhost/CSE_EC/purchase.php?productId=1`、`http://localhost/CSE_EC/purchase_confirm.php`
+- JavaScript：`http://localhost/EC_OnlineShop/assets/js/common.js`、`http://localhost/EC_OnlineShop/assets/js/purchase_confirm.js`
+- PHP画面：`http://localhost/EC_OnlineShop/purchase.php?productId=1`、`http://localhost/EC_OnlineShop/purchase_confirm.php`
 
 リポジトリ直下を `htdocs` から公開している場合も、ルートの `.htaccess` が画面・JSのURLを `public/` 配下へ転送し、`src/`・`sql/`・`docs/` は公開しません。`public/` 自体を公開ルートにしている場合は `public/.htaccess` がテンプレートURLを処理します。どちらの構成でも Apache の `mod_rewrite` と `.htaccess` を有効にしてください（XAMPP 標準設定では通常 `AllowOverride All` です）。
 
