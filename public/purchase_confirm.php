@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. セッションが有効か確認する
     if (!is_logged_in()) {
         // セッション無効時：購入は確定させず、ログイン後は購入画面からやり直し
-        set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
+        set_flash('購入にはログイン、またはアカウント登録が必要です。', 'warning');
         redirect_to_login($hiddenProductId ? 'purchase.php?productId=' . $hiddenProductId : null);
     }
     if ($purchase === null) {
