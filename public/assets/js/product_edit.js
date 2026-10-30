@@ -281,7 +281,9 @@ editForm.addEventListener('submit', function(event) {
   var orderInputs = editForm.querySelectorAll('[data-image-order]');
   orderInputs.forEach(function(input) { input.remove(); });
   var newIndex = 0;
-  editItems.forEach(function(item) {
+  // row-reverse の見た目に合わせ、画面の左から右へ保存する。
+  // 新規ファイルと image_order の番号も同じ順序で組み立てる。
+  editItems.slice().reverse().forEach(function(item) {
     var input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'image_order[]';
