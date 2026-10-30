@@ -108,7 +108,7 @@ if (isset($_GET['productId'])) {
 
 // 1. ログイン済みか確認する
 if (!is_logged_in()) {
-    set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
+    set_flash('購入にはログイン、またはアカウント登録が必要です。', 'warning');
     redirect_to_login($requestedProductId ? 'purchase_confirm.php?productId=' . $requestedProductId : null);
 }
 
