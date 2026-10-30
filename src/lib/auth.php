@@ -44,8 +44,14 @@ function is_logged_in(): bool {
 
     // 3. 最終操作時刻から設定秒数以上経過していたらログイン切れ（セッション破棄）
     if ((time() - (int)$_SESSION['last_activity']) > $timeout) {
+        $existingFlash = $_SESSION['flash'] ?? null;
         logout_session();
-        set_flash('セッションの有効期限が切れました。再度ログインしてください。', 'error');
+        // ログイン画面は is_logged_in() をもう一度呼ぶ。
+        // 購入画面がすでに案内を入れているときは、期限切れメッセージで上書きしない。
+        keep_or_set_flash(
+            is_array($existingFlash) ? $existingFlash : null,
+            'セッションの有効期限が切れました。再度ログインしてください。'
+        );
         return false;
     }
 
@@ -55,8 +61,12 @@ function is_logged_in(): bool {
         try {
             if (!touch_login_slot((int)$_SESSION['user_id'], (string)($_SESSION['login_token'] ?? ''))) {
                 // 行が無い・トークンが違う（別の端末でログインされ、このセッションが引き継がれた等）
+                $existingFlash = $_SESSION['flash'] ?? null;
                 logout_session();
-                set_flash('別の端末でログインされたため、ログアウトしました。', 'error');
+                keep_or_set_flash(
+                    is_array($existingFlash) ? $existingFlash : null,
+                    '別の端末でログインされたため、ログアウトしました。'
+                );
                 return false;
             }
         } catch (PDOException $e) {
@@ -556,24 +566,19 @@ function logout_session(): void {
         release_login_slot($userId, $token);
     }
 
+    // ログイン情報だけ消す。セッション自体とクッキーは残す。
+    // session_destroy() してクッキーを消すと、このあとセットするフラッシュ
+    // （購入にはログインが必要、など）がブラウザに届かない。
+    // 届かないとき、ログイン画面は空のセッションで is_logged_in() を再度呼び、
+    // 期限切れのメッセージだけが出るか、案内自体が消える。
     $_SESSION = [];
-    if (ini_get('session.use_cookies')) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params['path'],
-            $params['domain'],
-            $params['secure'],
-            $params['httponly']
-        );
-    }
-    session_destroy();
-    session_start();
-
     if ($adminSession !== null) {
         $_SESSION['admin'] = $adminSession;
+    }
+
+    // 古いセッションIDは捨てる（ログイン情報を消したあとなので、新しいIDには引き継がない）
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
     }
 }
 
@@ -1080,6 +1085,23 @@ function check_csrf_token(?string $token = null): bool {
         return false;
     }
     return true;
+}
+
+/**
+ * すでにフラッシュがあればそれを残し、無ければ $message を入れる
+ * ログアウトでセッションを空にしたあとも、呼び出し前の案内を戻すために使う
+ *
+ * @param array<string, mixed>|null $existing ログアウト前の $_SESSION['flash']
+ */
+function keep_or_set_flash(?array $existing, string $message, string $type = 'error'): void {
+    if (is_array($existing) && isset($existing['message']) && $existing['message'] !== '') {
+        $_SESSION['flash'] = [
+            'message' => (string)$existing['message'],
+            'type'    => (string)($existing['type'] ?? 'info'),
+        ];
+        return;
+    }
+    set_flash($message, $type);
 }
 
 /**
