@@ -433,7 +433,7 @@ main>.error {
   color: #475569;
   background: #fff;
   border: 1px solid #cbd5e1;
-  border-radius: 0;
+  border-radius: 8px;
   cursor: pointer;
 }
 
